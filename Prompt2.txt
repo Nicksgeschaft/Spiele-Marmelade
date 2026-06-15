@@ -1,0 +1,546 @@
+GameJam Universe – Entwicklungsprotokoll (Living Design Document)
+
+Version: 0.1.0
+
+Status: Phase 1 abgeschlossen ✅
+
+Engine: Unity
+
+Projektart: Modulare GameJam-Plattform
+
+Projektziel: Eine langfristig wachsende Sammlung von Minigames mit gemeinsamer visueller Identität und gemeinsamem Framework.
+
+Projektvision
+
+GameJam Universe ist keine Spielesammlung im klassischen Sinne.
+
+Es ist eine eigenständige Plattform.
+
+Alle zukünftigen GameJam-Projekte werden hier integriert.
+
+Jedes Minigame:
+
+nutzt dieselben Assets
+besitzt eigene Spielregeln
+bleibt vollständig modular
+kann unabhängig entwickelt werden
+kann jederzeit hinzugefügt oder entfernt werden
+
+Die Plattform soll langfristig 100+ Minigames unterstützen.
+
+Technologischer Grundsatz
+
+Prioritäten:
+
+Skalierbarkeit
+Modularität
+Wiederverwendbarkeit
+Erweiterbarkeit
+Wartbarkeit
+Konsistenz
+Performance
+Asset-System
+
+Verwendetes Asset-Pack:
+
+Kenney Bricks
+
+Eigenschaften:
+
+monochrom
+modular
+LEGO-Prinzip
+universell
+wiederverwendbar
+
+Farben werden niemals in Texturen gespeichert.
+
+Farben entstehen ausschließlich über Materialien.
+
+Material-System
+
+Aktuell implementierte Kategorien:
+
+Neutral
+Stone
+Plastic
+Metal
+Wood
+Ice
+Lava
+Gold
+Silver
+Bronze
+Neon
+Hologram
+Grass
+Sand
+Dark
+Pastel
+Candy
+Retro
+SciFi
+Industrial
+Fantasy
+Future
+CelShading
+
+Aktueller Status:
+
+✅ 20 Preset-Materialien erstellt
+
+⚠️ Echter Cel-Shading-Shader noch offen
+
+Architektur
+Assemblies
+Core
+
+Pfad:
+
+Shared/Scripts/Core
+
+Enthält:
+
+StateMachine
+SaveSystem
+Progression
+MinigameFramework
+Managers
+Material-System
+Shared
+
+Pfad:
+
+Shared/Scripts
+
+Enthält:
+
+HubUIController
+GameCardView
+Minigames.Template
+
+Pfad:
+
+Minigames/_Template/Scripts
+
+Enthält:
+
+TemplateMinigameController
+DevTools.Runtime
+
+Pfad:
+
+DeveloperTools/DebugTools/Runtime
+
+Enthält:
+
+DebugOverlay
+DevTools.Editor
+
+Pfad:
+
+DeveloperTools/DebugTools/Editor
+
+Enthält:
+
+Editor Tools
+Globaler Game State
+
+Implementiert:
+
+Boot
+Loading
+Hub
+EnteringGame
+Playing
+Paused
+GameOver
+Victory
+ReturningToHub
+Saving
+Settings
+
+Verwendet:
+
+GameStateMachine<T>
+
+Regel:
+
+Keine Spiellogik außerhalb der State Machine.
+
+Save-System
+
+Datei:
+
+save.json
+
+Speicherort:
+
+Application.persistentDataPath
+
+Gespeicherte Daten:
+
+PlayerProfile
+
+Settings
+
+Statistics
+
+UnlockedGames
+
+Achievements
+
+Favorites
+
+Highscores
+
+BestTimes
+
+Challenges
+
+PlayerPreferences
+
+Migration:
+
+SaveMigrator
+
+implementiert.
+
+Minigame Framework
+
+Implementiert:
+
+IMinigame
+
+MinigameBase
+
+MinigameMetadata
+
+MinigameRegistry
+
+MinigameContext
+
+Genre
+
+Difficulty
+
+Pflichtmethoden:
+
+Initialize()
+
+StartGame()
+
+PauseGame()
+
+ResumeGame()
+
+RestartGame()
+
+QuitGame()
+
+SaveProgress()
+
+LoadProgress()
+
+UnloadGame()
+Progressionssystem
+Achievements
+
+Aktuell:
+
+Play First Game
+
+Play 10 Games
+
+Play 50 Games
+
+Win Without Dying
+
+Score 1000
+
+Score 10000
+
+Speedrunner
+
+Completionist
+
+Collector
+
+Explorer
+
+Manager:
+
+AchievementManager
+Statistiken
+
+Manager:
+
+StatisticsManager
+
+Erfasst:
+
+GamesPlayed
+
+GamesCompleted
+
+Wins
+
+Losses
+
+TotalScore
+
+Deaths
+
+TotalPlaytime
+
+FavoriteGenre
+Challenges
+
+Manager:
+
+ChallengeManager
+
+Aktuell:
+
+Daily: Play a Game
+Audio-System
+
+Manager:
+
+AudioManager
+
+Datenbank:
+
+AudioLibrary
+
+Bereiche:
+
+Music
+
+SFX
+
+UI
+
+Ambient
+Hub-System
+
+Implementiert:
+
+Play
+
+New
+
+Favorites
+
+Recent
+
+Challenges
+
+Achievements
+
+Statistics
+
+Collection
+
+Settings
+
+Credits
+
+Status:
+
+Bereich	Status
+Play	✅
+Statistics	✅
+New	⏳
+Favorites	⏳
+Recent	⏳
+Challenges	⏳
+Achievements	⏳
+Collection	⏳
+Settings	⏳
+Credits	⏳
+Szenen
+Boot.unity
+
+Enthält:
+
+Main Camera
+
+Directional Light
+
+GameManager
+
+SceneFlowManager
+
+AudioManager
+
+DebugOverlay
+
+Persistiert über:
+
+DontDestroyOnLoad()
+Hub.unity
+
+Enthält:
+
+Canvas
+
+HubUIController
+
+10 Tabs
+
+GameCardView
+Template.unity
+
+Enthält:
+
+TemplateMinigameController
+
+Win Button
+
+Lose Button
+Prefabs
+
+Aktuell:
+
+GameCardView.prefab
+
+Bestandteile:
+
+Thumbnail
+
+Title
+
+Description
+
+Difficulty
+
+Play Button
+Entwicklerwerkzeuge
+
+Implementiert:
+
+Runtime
+DebugOverlay
+
+Funktionen:
+
+FPS
+
+Memory Usage
+
+F1 Toggle
+Editor
+Game Registry
+Tools/GameJam/Game Registry
+
+Synchronisiert:
+
+MinigameMetadata
+Save Inspector
+Refresh
+
+Open Folder
+
+Delete Save
+Minigame Creator
+Tools/GameJam/Create New Minigame
+
+Dupliziert:
+
+_Template
+Material Generator
+Generate Material Presets
+
+Erzeugt:
+
+20 Material Presets
+Verifizierter Spielablauf
+Boot
+↓
+Loading
+↓
+Hub
+↓
+EnteringGame
+↓
+Playing
+↓
+Victory
+↓
+Saving
+↓
+ReturningToHub
+↓
+Hub
+
+Status:
+
+✅ Vollständig funktional
+
+Bekannte Hinweise
+
+Audio:
+
+1 einmalige Warnung:
+
+"No Audio Listener"
+
+Dauer:
+
+~1 Frame beim Boot-Vorgang
+
+Status:
+
+Harmlos
+Phase 2 Roadmap
+Hub
+ Alle 8 verbleibenden Tabs vollständig ausbauen
+ Controller-Navigation
+ Keyboard-Navigation
+ Suchfunktion
+ Sortierung
+ Filter
+Developer Tools
+ Achievement Debugger
+ Challenge Debugger
+ Asset Browser
+ Performance Overlay
+Grafik
+ Echter Toon Shader
+ Cel Shading
+ Material-Varianten
+ Dynamische Themes
+Minigames
+
+Erste Ziele:
+
+ Platformer
+ Puzzle
+ Endless Runner
+ Roguelite
+ Tower Defense
+Langfristiges Ziel (Version 1.0)
+100+ Minigames
+
+Komplette Hub-Welt
+
+Controller Support
+
+Cross-Save
+
+Achievements
+
+Challenges
+
+Seasons
+
+Events
+
+Leaderboards
+
+Freischaltungen
+
+Mod Support
+
+Theme-System

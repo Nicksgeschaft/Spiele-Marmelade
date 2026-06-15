@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4c48d3c31053c24ba7714bef3f89fe7, type: 3}
+  m_Name: MaterialPresetDatabase
+  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Materials.MaterialPresetDatabase
+  presets:
+  - category: 0
+    material: {fileID: 2100000, guid: e5bc640254fbc5743aad34e7399cf6f7, type: 2}
+  - category: 1
+    material: {fileID: 2100000, guid: 2e102fabb309c854f9b92e76c9bb8b71, type: 2}
+  - category: 2
+    material: {fileID: 2100000, guid: 459a662ae94d4f4469a193d1b1c0ccc8, type: 2}
+  - category: 3
+    material: {fileID: 2100000, guid: 9561bca679c903a4e81a267bd9c986d5, type: 2}
+  - category: 4
+    material: {fileID: 2100000, guid: 05d282c9fa517014588a9b075451de14, type: 2}
+  - category: 5
+    material: {fileID: 2100000, guid: 0813e2289f191144cb3c46e9796e5a23, type: 2}
+  - category: 6
+    material: {fileID: 2100000, guid: e1c54ff05f495ab41be86d0ac07eaf79, type: 2}
+  - category: 9
+    material: {fileID: 2100000, guid: 016aaf5043abf7740a6c66e973626cb4, type: 2}
+  - category: 10
+    material: {fileID: 2100000, guid: 664c083bb273ff0498df272c378831dd, type: 2}
+  - category: 11
+    material: {fileID: 2100000, guid: 2b807e60f57519d4eb5feddda538c68b, type: 2}
+  - category: 12
+    material: {fileID: 2100000, guid: d7555ce4b0fe42d4ca57a9631981ad87, type: 2}
+  - category: 13
+    material: {fileID: 2100000, guid: 407c990efe7c4d243afb3349e1fc648f, type: 2}
+  - category: 14
+    material: {fileID: 2100000, guid: d7cd382ae4ca6cb4184246fbec23d0ec, type: 2}
+  - category: 15
+    material: {fileID: 2100000, guid: dd48d7a682d0ca44d899ed7de0402aec, type: 2}
+  - category: 16
+    material: {fileID: 2100000, guid: bd82c2a0410b68741b982a1e169bed54, type: 2}
+  - category: 17
+    material: {fileID: 2100000, guid: 644141dbe11f3d74baad866fec0a8d1e, type: 2}
+  - category: 18
+    material: {fileID: 2100000, guid: b236967cafbe1b540815a2df883542a2, type: 2}
+  - category: 19
+    material: {fileID: 2100000, guid: e0795861d6527424995883a1fed43831, type: 2}
+  - category: 20
+    material: {fileID: 2100000, guid: 19df0b5c2742b5441b33b9725627db3e, type: 2}
+  - category: 21
+    material: {fileID: 2100000, guid: 2c4fcb23087b0fb4bbcf6e9c1ea47d69, type: 2}
+  - category: 22
+    material: {fileID: 2100000, guid: 68cb6c588f0b78d49b3ab0224f1beec7, type: 2}
+  - category: 7
+    material: {fileID: 2100000, guid: 3069ba90fe3538547a07d258d02372fe, type: 2}
+  - category: 8
+    material: {fileID: 2100000, guid: d88c452be68e2344e830486115bf42a5, type: 2}

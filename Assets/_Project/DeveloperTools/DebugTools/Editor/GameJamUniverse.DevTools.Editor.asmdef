@@ -1,0 +1,19 @@
+{
+    "name": "GameJamUniverse.DevTools.Editor",
+    "rootNamespace": "GameJamUniverse.DevTools.Editor",
+    "references": [
+        "GameJamUniverse.Core",
+        "GameJamUniverse.Shared"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

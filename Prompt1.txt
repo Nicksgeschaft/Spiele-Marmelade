@@ -1,0 +1,672 @@
+Claude Code Prompt – GameJam Collection Framework (Living GDD)
+
+Du bist ein Senior Game Director, Principal Game Designer, Technical Lead und Systems Architect.
+
+Deine Aufgabe ist es, ein langfristiges Projekt zu entwerfen und als robuste Codebasis aufzubauen.
+
+PROJEKTNAME
+
+GameJam Universe (Arbeitstitel)
+
+Alternative interne Namen:
+
+BrickVerse
+JamHub
+Infinite Jam Collection
+Brick Arcade
+GameJam Factory
+
+Dieses Projekt ist KEIN einzelnes Spiel.
+
+Es ist eine Plattform, eine Sammlung und ein Framework, in dem zukünftig dutzende bis hunderte GameJam-Spiele entstehen können.
+
+PROJEKTVISION
+
+Das Projekt ist ein zentraler Hub, von dem aus der Spieler verschiedene Minigames betreten kann.
+
+Jedes Minigame wird während zukünftiger Game Jams entwickelt.
+
+Alle Spiele müssen dieselben Assets verwenden.
+
+Dadurch entsteht eine kohärente visuelle Identität.
+
+Die Plattform wächst über Jahre hinweg.
+
+Neue Spiele können jederzeit hinzugefügt werden, ohne bestehende Systeme zu verändern.
+
+Das Projekt muss daher extrem modular aufgebaut werden.
+
+CORE PHILOSOPHY
+
+Folgende Prinzipien gelten IMMER:
+
+Modularität über alles.
+Kein Minigame darf hart in das Hauptsystem eingebaut werden.
+Jedes Minigame ist ein eigenständiges Modul.
+Das Hauptmenü entdeckt neue Spiele automatisch.
+Neue Spiele können hinzugefügt oder entfernt werden.
+Assets werden zentral verwaltet.
+Wiederverwendbarkeit hat höchste Priorität.
+Saubere Architektur ist wichtiger als schnelle Lösungen.
+Systeme müssen skalierbar sein.
+Niemals Duplikate erzeugen.
+ASSET PHILOSOPHY
+
+Es wird ausschließlich das Kenney Bricks Asset Pack verwendet.
+
+Diese Assets funktionieren wie LEGO-Steine.
+
+Eigenschaften:
+
+monochrom
+neutral
+keine Farben
+zeitlos
+universell einsetzbar
+
+Aus denselben Bausteinen sollen völlig unterschiedliche Spiele entstehen.
+
+Beispiele:
+
+Tower Defense
+Roguelite
+Platformer
+Puzzle
+Racing
+Shooter
+Idle Game
+Survival
+Farming
+Party Game
+Dungeon Crawler
+Rhythm Game
+
+Alle nutzen dieselben Bausteine.
+
+MATERIAL SYSTEM
+
+Die Grundassets bleiben farblos.
+
+Farben werden niemals direkt in Texturen gespeichert.
+
+Stattdessen werden Materialien verwendet.
+
+Jedes Objekt besitzt:
+
+Base Mesh
+
+Material Preset
+
+Material Beispiele:
+
+Neutral
+
+Stone
+
+Plastic
+
+Metal
+
+Wood
+
+Ice
+
+Lava
+
+Gold
+
+Silver
+
+Bronze
+
+Neon
+
+Hologram
+
+Grass
+
+Sand
+
+Dark
+
+Pastel
+
+Candy
+
+Retro
+
+SciFi
+
+Industrial
+
+Fantasy
+
+Future
+
+Cel Shading
+
+Jedes Material muss zentral definiert werden.
+
+Neue Materialien können später ergänzt werden.
+
+PROJEKTSTRUKTUR
+
+Die Architektur muss folgender Struktur folgen:
+
+Project
+
+MainMenu
+
+HubWorld
+
+Systems
+
+UI
+
+Managers
+
+Audio
+
+Data
+
+SaveSystem
+
+Assets
+
+Materials
+
+MiniGames
+
+MiniGame_001
+
+MiniGame_002
+
+MiniGame_003
+
+MiniGame_Template
+
+DeveloperTools
+
+DebugTools
+HUB KONZEPT
+
+Das Hauptmenü ist das Herzstück.
+
+Der Spieler startet immer hier.
+
+Der Hub dient als Spielesammlung.
+
+Funktionen:
+
+Spiele auswählen
+Fortschritt anzeigen
+Erfolge anzeigen
+Statistiken anzeigen
+Einstellungen öffnen
+Freischaltungen anzeigen
+Neues Spiel starten
+
+Das Menü soll ruhig und angenehm wirken.
+
+Inspirationsquellen:
+
+Nintendo Switch
+Mario Party
+Roblox Hub
+Astro Bot
+Fall Guys
+Game Pass
+MAIN MENU SECTIONS
+
+Das Hauptmenü besteht aus:
+
+Play
+
+Zeigt alle verfügbaren Minigames.
+
+New
+
+Zeigt neue Spiele.
+
+Favorites
+
+Favorisierte Spiele.
+
+Recent
+
+Zuletzt gespielt.
+
+Challenges
+
+Tägliche Herausforderungen.
+
+Achievements
+
+Erfolge.
+
+Statistics
+
+Spielerstatistiken.
+
+Collection
+
+Freigeschaltete Inhalte.
+
+Settings
+
+Einstellungen.
+
+Credits
+
+Mitwirkende.
+
+GAME CARDS
+
+Jedes Spiel wird als Karte dargestellt.
+
+Jede Karte besitzt:
+
+ID
+
+Name
+
+Description
+
+Thumbnail
+
+Difficulty
+
+Genre
+
+Estimated Playtime
+
+Release Date
+
+Jam Theme
+
+Highscore
+
+Best Time
+
+Favorite
+
+Unlocked
+
+New
+MINI GAME INTERFACE
+
+Jedes Spiel implementiert dieselbe Schnittstelle.
+
+Pflichtfelder:
+
+Game ID
+
+Game Name
+
+Game Description
+
+Author
+
+Genre
+
+Version
+
+Thumbnail
+
+Difficulty
+
+Estimated Playtime
+
+Supports Multiplayer
+
+Supports Controller
+
+Pflichtmethoden:
+
+Initialize()
+
+StartGame()
+
+PauseGame()
+
+ResumeGame()
+
+RestartGame()
+
+QuitGame()
+
+SaveProgress()
+
+LoadProgress()
+
+UnloadGame()
+GAME STATES
+
+Globale States:
+
+Boot
+
+Loading
+
+Hub
+
+EnteringGame
+
+Playing
+
+Paused
+
+GameOver
+
+Victory
+
+ReturningToHub
+
+Saving
+
+Settings
+
+State Machine verwenden.
+
+Keine Logik außerhalb der State Machine.
+
+SAVE SYSTEM
+
+Globale Speicherung:
+
+Unlocked Games
+
+Achievements
+
+Statistics
+
+Favorites
+
+Playtime
+
+Settings
+
+Highscores
+
+Best Times
+
+Completed Challenges
+
+Player Preferences
+
+Automatisches Speichern.
+
+Versionierung unterstützen.
+
+PLAYER PROFILE
+
+Speichern:
+
+Username
+
+Avatar
+
+Level
+
+XP
+
+Coins
+
+Stars
+
+Achievements
+
+Favorite Games
+
+Total Playtime
+
+Games Played
+
+Games Completed
+ACHIEVEMENT SYSTEM
+
+Globales System.
+
+Beispiele:
+
+Play First Game
+
+Play 10 Games
+
+Play 50 Games
+
+Win Without Dying
+
+1000 Points
+
+10000 Points
+
+Speedrunner
+
+Completionist
+
+Collector
+
+Explorer
+STATISTICS SYSTEM
+
+Erfassen:
+
+Total Sessions
+
+Games Played
+
+Games Completed
+
+Favorite Genre
+
+Average Session Time
+
+Total Playtime
+
+Total Score
+
+Deaths
+
+Wins
+
+Losses
+
+Achievements Unlocked
+CHALLENGE SYSTEM
+
+Unterstützen:
+
+Daily
+
+Weekly
+
+Monthly
+
+Event
+
+Seasonal
+
+Beispiele:
+
+Play 3 Games
+
+Reach 1000 Points
+
+Win 5 Times
+
+Play 20 Minutes
+AUDIO SYSTEM
+
+Zentral verwalten.
+
+Bereiche:
+
+Music
+
+SFX
+
+UI Sounds
+
+Ambient Sounds
+
+Jedes Minigame kann eigene Sounds besitzen.
+
+UI STYLE GUIDE
+
+Stil:
+
+Minimalistisch.
+
+Sauber.
+
+Modern.
+
+Freundlich.
+
+Weiche Animationen.
+
+Abgerundete Ecken.
+
+Hohe Lesbarkeit.
+
+Keine überladenen Interfaces.
+
+ANIMATIONEN
+
+Verwenden:
+
+Hover
+
+Scale
+
+Fade
+
+Slide
+
+Bounce
+
+Glow
+
+Kurze Dauer:
+
+150–300 ms
+
+PERFORMANCE ZIELE
+
+60 FPS Minimum.
+
+120 FPS bevorzugt.
+
+Schnelle Ladezeiten.
+
+Keine unnötigen Allocations.
+
+Object Pooling verwenden.
+
+Asynchrones Laden unterstützen.
+
+DEVELOPER TOOLS
+
+Implementieren:
+
+Game Registry
+
+Game Creator Wizard
+
+Material Browser
+
+Asset Browser
+
+Debug Console
+
+Performance Overlay
+
+FPS Counter
+
+Memory Usage
+
+Save Inspector
+
+Achievement Debugger
+
+Challenge Debugger
+
+MINI GAME TEMPLATE
+
+Jedes neue Game entsteht aus einer Vorlage.
+
+Ordner:
+
+MiniGame_Template
+
+Enthält:
+
+Config
+
+Scenes
+
+Scripts
+
+UI
+
+Audio
+
+Materials
+
+Neues Spiel erzeugen:
+
+CreateMiniGame("Name")
+
+Automatisch:
+
+Registrieren
+Im Menü anzeigen
+Speicherstand anlegen
+Statistiken anlegen
+Achievements verbinden
+ZUKUNFTSSICHERHEIT
+
+Die Architektur muss 100+ Minigames unterstützen.
+
+Neue Spiele dürfen niemals bestehende Spiele verändern.
+
+Das Projekt muss langfristig wartbar bleiben.
+
+Technische Schulden vermeiden.
+
+Sauberen Code bevorzugen.
+
+Dokumentation erzeugen.
+
+Kommentare nur dort verwenden, wo sie echten Mehrwert bieten.
+
+WICHTIGE REGEL FÜR CLAUDE CODE
+
+Arbeite niemals nur als Programmierer.
+
+Arbeite gleichzeitig als:
+
+Senior Game Designer
+Systems Designer
+UX Designer
+Technical Architect
+Gameplay Programmer
+Tool Developer
+
+Treffe proaktiv Entscheidungen.
+
+Wenn Informationen fehlen, entscheide anhand der langfristigen Projektvision.
+
+Priorisiere immer:
+
+Skalierbarkeit
+Modularität
+Wiederverwendbarkeit
+Erweiterbarkeit
+Wartbarkeit
+Benutzerfreundlichkeit
+Performance
+Konsistenz
+
+Erzeuge eine professionelle Projektbasis, die über viele Jahre hinweg erweitert werden kann und als zentrale Heimat für sämtliche zukünftigen GameJam-Projekte dient.
