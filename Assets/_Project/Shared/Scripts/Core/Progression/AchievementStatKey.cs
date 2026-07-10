@@ -21,6 +21,11 @@ namespace GameJamUniverse.Core.Progression
         AllGamesUnlocked,
 
         /// <summary>Number of distinct genres played at least once.</summary>
-        DistinctGenresPlayed
+        DistinctGenresPlayed,
+
+        /// <summary>Generic, code-free hook: compares against a named counter reported via
+        /// <see cref="AchievementManager.ReportEvent"/> and <see cref="AchievementDefinition.eventKey"/>.
+        /// Lets new achievements be authored for arbitrary gameplay events without new C# code.</summary>
+        CustomEvent
     }
 }

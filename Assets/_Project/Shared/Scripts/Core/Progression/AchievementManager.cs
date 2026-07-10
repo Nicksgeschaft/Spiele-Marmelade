@@ -56,6 +56,7 @@ namespace GameJamUniverse.Core.Progression
                     AchievementStatKey.AllGamesCompleted => stats.gamesCompleted,
                     AchievementStatKey.AllGamesUnlocked => save.unlockedGameIds.Count,
                     AchievementStatKey.DistinctGenresPlayed => save.playedGenres.Count,
+                    AchievementStatKey.CustomEvent => save.GetEventCounter(def.eventKey),
                     _ => 0f
                 };
                 progress.currentValue = current;
@@ -79,6 +80,22 @@ namespace GameJamUniverse.Core.Progression
                     AchievementUnlocked?.Invoke(def);
                 }
             }
+        }
+
+        /// <summary>
+        /// Reports that a named gameplay event occurred (e.g. "EnemyKilled"), adding
+        /// <paramref name="amount"/> to its running counter and re-evaluating achievements.
+        /// This is the generic hook: any <see cref="AchievementDefinition"/> with
+        /// <c>statKey == CustomEvent</c> and a matching <c>eventKey</c> reacts to it without
+        /// needing new C# code. Typically called via <see cref="AchievementEventHook"/> wired to
+        /// a UnityEvent (e.g. Health.OnDeath) in the Inspector.
+        /// </summary>
+        public void ReportEvent(string eventKey, float amount = 1f)
+        {
+            if (string.IsNullOrEmpty(eventKey)) return;
+
+            _saveSystem.Current.AddEventCounter(eventKey, amount);
+            EvaluateAll();
         }
     }
 }

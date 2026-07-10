@@ -32,7 +32,9 @@ namespace GameJamUniverse.DevTools.Editor
             EditorGUILayout.HelpBox(
                 "Duplicates the _Template minigame into Minigames/<Name>, renaming the controller " +
                 "script, asmdef, scene and metadata asset. Run Tools/GameJam/Game Registry afterwards " +
-                "to add it to the Hub.", MessageType.Info);
+                "to add it to the Hub.\n\n" +
+                "Tip: use Tools/GameJam/New Game... instead if you want Player + Camera + a starter " +
+                "level already set up and ready to Play.", MessageType.Info);
 
             EditorGUILayout.Space();
             _gameName = EditorGUILayout.TextField("Folder / Class Name", _gameName);
@@ -49,18 +51,24 @@ namespace GameJamUniverse.DevTools.Editor
                 if (GUILayout.Button("Create Minigame"))
                 {
                     string displayName = string.IsNullOrWhiteSpace(_displayName) ? _gameName : _displayName.Trim();
-                    Create(_gameName.Trim(), displayName);
+                    CreateMinigameSkeleton(_gameName.Trim(), displayName);
                 }
             }
         }
 
-        private static void Create(string gameName, string displayName)
+        /// <summary>
+        /// Duplicates the _Template minigame into Minigames/&lt;gameName&gt;, renaming the
+        /// controller script, asmdef, scene and metadata asset so the result compiles and is
+        /// ready to register. Returns the new minigame's folder path, or null on failure.
+        /// Shared by this wizard and <see cref="NewGameWizard"/>.
+        /// </summary>
+        internal static string CreateMinigameSkeleton(string gameName, string displayName)
         {
             string targetFolder = $"{MinigamesRoot}/{gameName}";
             if (AssetDatabase.IsValidFolder(targetFolder))
             {
                 Debug.LogError($"[MinigameCreatorWizard] Folder already exists: '{targetFolder}'.");
-                return;
+                return null;
             }
 
             CopyDirectory(ToAbsolute(TemplateFolder), ToAbsolute(targetFolder));
@@ -124,6 +132,7 @@ namespace GameJamUniverse.DevTools.Editor
                       "Run Tools/GameJam/Game Registry and click 'Sync Registry' to add it to the Hub.");
 
             EditorGUIUtility.PingObject(metadata);
+            return targetFolder;
         }
 
         private static string ToAbsolute(string assetPath)

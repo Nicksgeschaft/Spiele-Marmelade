@@ -55,7 +55,7 @@ namespace GameJamUniverse.DevTools.Editor
             }
         }
 
-        private static List<MinigameMetadata> DiscoverMinigames()
+        internal static List<MinigameMetadata> DiscoverMinigames()
         {
             var results = new List<MinigameMetadata>();
             string[] guids = AssetDatabase.FindAssets("t:MinigameMetadata", new[] { "Assets/_Project/Minigames" });
@@ -72,7 +72,7 @@ namespace GameJamUniverse.DevTools.Editor
             return results.OrderBy(m => m.gameId).ToList();
         }
 
-        private static void SyncRegistry(List<MinigameMetadata> discovered)
+        internal static void SyncRegistry(List<MinigameMetadata> discovered)
         {
             var registry = AssetDatabase.LoadAssetAtPath<MinigameRegistry>(RegistryPath);
             if (registry == null)

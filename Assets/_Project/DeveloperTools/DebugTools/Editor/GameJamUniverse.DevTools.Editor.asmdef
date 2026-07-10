@@ -3,7 +3,8 @@
     "rootNamespace": "GameJamUniverse.DevTools.Editor",
     "references": [
         "GameJamUniverse.Core",
-        "GameJamUniverse.Shared"
+        "GameJamUniverse.Shared",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

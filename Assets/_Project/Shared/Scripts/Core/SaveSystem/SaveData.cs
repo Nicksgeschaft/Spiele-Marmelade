@@ -64,6 +64,10 @@ namespace GameJamUniverse.Core.SaveSystem
         public List<StringIntEntry> highscores = new();
         public List<StringFloatEntry> bestTimesSeconds = new();
 
+        /// <summary>Generic named counters for <see cref="Progression.AchievementStatKey.CustomEvent"/>
+        /// achievements, incremented via <see cref="Progression.AchievementManager.ReportEvent"/>.</summary>
+        public List<StringFloatEntry> eventCounters = new();
+
         public const int MaxRecentGames = 10;
 
         public bool IsGameUnlocked(string gameId) => unlockedGameIds.Contains(gameId);
@@ -161,6 +165,27 @@ namespace GameJamUniverse.Core.SaveSystem
             else
             {
                 playtimePerGameSeconds.Add(new StringFloatEntry { key = gameId, value = seconds });
+            }
+        }
+
+        public float GetEventCounter(string eventKey)
+        {
+            int index = eventCounters.FindIndex(e => e.key == eventKey);
+            return index >= 0 ? eventCounters[index].value : 0f;
+        }
+
+        public void AddEventCounter(string eventKey, float amount)
+        {
+            int index = eventCounters.FindIndex(e => e.key == eventKey);
+            if (index >= 0)
+            {
+                StringFloatEntry entry = eventCounters[index];
+                entry.value += amount;
+                eventCounters[index] = entry;
+            }
+            else
+            {
+                eventCounters.Add(new StringFloatEntry { key = eventKey, value = amount });
             }
         }
 

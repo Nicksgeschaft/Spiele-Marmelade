@@ -12,6 +12,13 @@ namespace GameJamUniverse.Core.Progression
         public Sprite icon;
 
         public AchievementStatKey statKey;
+
+        [Tooltip("Only used when statKey is CustomEvent: the event name reported via " +
+                 "AchievementManager.ReportEvent(eventKey, amount), e.g. 'EnemyKilled'. " +
+                 "Any gameplay event can be wired to that call via an AchievementEventHook, " +
+                 "so new achievements for new events never require new C# code.")]
+        public string eventKey;
+
         public float targetValue = 1f;
 
         [Tooltip("If true, the achievement unlocks when the stat drops to or below targetValue " +

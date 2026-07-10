@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cbd108963ef4a0f997e449f80bfc7d8, type: 3}
+  m_Name: MenuFlow_BrickDungeon
+  m_EditorClassIdentifier: GameJamUniverse.Shared::GameJamUniverse.Shared.UI.MenuFlow.MenuFlowGraph
+  screens:
+  - id: 8eba089a766b4669b91701909e296377
+    kind: 0
+    title: Main Menu
+    bodyText: 
+    buttons:
+    - label: Play
+      targetScreenId: 8bbee1b13d1d4060a1d2ff6e83a7291d
+      specialAction: 0
+    - label: Options
+      targetScreenId: a04b1f97e7794963b5f6215940850724
+      specialAction: 0
+    - label: Credits
+      targetScreenId: 156b5643b0444af1a6e65ff3a9b8677b
+      specialAction: 0
+    - label: Quit
+      targetScreenId: 
+      specialAction: 1
+    editorPosition: {x: 40, y: 40}
+  - id: a04b1f97e7794963b5f6215940850724
+    kind: 1
+    title: Options
+    bodyText: 
+    buttons:
+    - label: Back
+      targetScreenId: 8eba089a766b4669b91701909e296377
+      specialAction: 0
+    editorPosition: {x: 340, y: 40}
+  - id: 156b5643b0444af1a6e65ff3a9b8677b
+    kind: 0
+    title: Credits
+    bodyText: Made during a game jam with GameJam Universe.
+    buttons:
+    - label: Back
+      targetScreenId: 8eba089a766b4669b91701909e296377
+      specialAction: 0
+    editorPosition: {x: 340, y: 180}
+  - id: 8bbee1b13d1d4060a1d2ff6e83a7291d
+    kind: 3
+    title: Game
+    bodyText: 
+    buttons: []
+    editorPosition: {x: 40, y: 180}
+  - id: 0655897d2a864e038ede11c71e89f2a8
+    kind: 2
+    title: Pause
+    bodyText: 
+    buttons:
+    - label: Resume
+      targetScreenId: 
+      specialAction: 2
+    - label: Options
+      targetScreenId: a04b1f97e7794963b5f6215940850724
+      specialAction: 0
+    - label: Main Menu
+      targetScreenId: 8eba089a766b4669b91701909e296377
+      specialAction: 0
+    - label: Quit
+      targetScreenId: 
+      specialAction: 1
+    editorPosition: {x: 40, y: 320}
+  startScreenId: 8eba089a766b4669b91701909e296377
