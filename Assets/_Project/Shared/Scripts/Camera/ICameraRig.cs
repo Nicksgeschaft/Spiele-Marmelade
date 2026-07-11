@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Cameras
+namespace SpieleMarmelade.Shared.Cameras
 {
     // Contract for a swappable camera perspective (Side-Scroll, Top-Down, Third-Person, ...).
     // Kept hand-written and dependency-free (no Cinemachine) so jam projects stay light.

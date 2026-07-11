@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Cameras
+namespace SpieleMarmelade.Shared.Cameras
 {
     // Fixed-depth follow camera for 2.5D side-scrollers: keeps a constant offset from the
     // target on X/Y, locks Z so the camera never drifts along the depth axis.
     public class SideScrollCameraRig : MonoBehaviour, ICameraRig
     {
-        // Offset tuned for GameJam Universe's brick scale (1 brick ≈ 0.0795 world units).
+        // Offset tuned for Spiele Marmelade's brick scale (1 brick ≈ 0.0795 world units).
         [SerializeField] private Vector3 offset = new(0f, 0.2f, -0.8f);
         [SerializeField] private float   smoothTime = 0.15f;
 

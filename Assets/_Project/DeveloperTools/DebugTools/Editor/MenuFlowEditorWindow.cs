@@ -1,9 +1,9 @@
 using System.Linq;
-using GameJamUniverse.Shared.UI.MenuFlow;
+using SpieleMarmelade.Shared.UI.MenuFlow;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     /// <summary>
     /// Visual editor for a <see cref="MenuFlowGraph"/>: drag screens around a canvas, see
@@ -22,7 +22,7 @@ namespace GameJamUniverse.DevTools.Editor
         private Vector2 _canvasScroll;
         private Vector2 _inspectorScroll;
 
-        [MenuItem("Tools/GameJam/Menu Flow Editor")]
+        [MenuItem("Tools/Game Creation/Menu Flow Editor")]
         public static void Open() => GetWindow<MenuFlowEditorWindow>("Menu Flow Editor");
 
         private void OnGUI()
@@ -105,7 +105,7 @@ namespace GameJamUniverse.DevTools.Editor
             var mainMenu = new MenuScreenNode { kind = MenuScreenKind.Generic, title = "Main Menu", editorPosition = new Vector2(40, 40) };
             var options  = new MenuScreenNode { kind = MenuScreenKind.Options, title = "Options", editorPosition = new Vector2(340, 40) };
             var credits  = new MenuScreenNode { kind = MenuScreenKind.Generic, title = "Credits", editorPosition = new Vector2(340, 180),
-                bodyText = "Made during a game jam with GameJam Universe." };
+                bodyText = "Made during a game jam with Spiele Marmelade." };
             var game     = new MenuScreenNode { kind = MenuScreenKind.Game, title = "Game", editorPosition = new Vector2(40, 180) };
             var pause    = new MenuScreenNode { kind = MenuScreenKind.Pause, title = "Pause", editorPosition = new Vector2(40, 320) };
 

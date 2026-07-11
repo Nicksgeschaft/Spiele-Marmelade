@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Materials
+namespace SpieleMarmelade.Core.Materials
 {
     /// <summary>
     /// Maps each <see cref="MaterialCategory"/> to a shared preset material. Populated by the
     /// editor-only Material Preset Generator tool.
     /// </summary>
-    [CreateAssetMenu(fileName = "MaterialPresetDatabase", menuName = "GameJam Universe/Material Preset Database")]
+    [CreateAssetMenu(fileName = "MaterialPresetDatabase", menuName = "Spiele Marmelade/Material Preset Database")]
     public class MaterialPresetDatabase : ScriptableObject
     {
         [Serializable]

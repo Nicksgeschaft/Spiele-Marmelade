@@ -1,9 +1,9 @@
 {
-    "name": "GameJamUniverse.DevTools.Editor",
-    "rootNamespace": "GameJamUniverse.DevTools.Editor",
+    "name": "SpieleMarmelade.DevTools.Editor",
+    "rootNamespace": "SpieleMarmelade.DevTools.Editor",
     "references": [
-        "GameJamUniverse.Core",
-        "GameJamUniverse.Shared",
+        "SpieleMarmelade.Core",
+        "SpieleMarmelade.Shared",
         "Unity.InputSystem"
     ],
     "includePlatforms": [

@@ -1,6 +1,6 @@
 using System;
 
-namespace GameJamUniverse.Core.SaveSystem
+namespace SpieleMarmelade.Core.SaveSystem
 {
     [Serializable]
     public class StatisticsData

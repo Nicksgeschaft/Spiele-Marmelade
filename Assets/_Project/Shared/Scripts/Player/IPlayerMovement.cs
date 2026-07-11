@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared
+namespace SpieleMarmelade.Shared
 {
     // Contract for a swappable movement style (Platformer, Top-Down Grid, Free 3D, ...).
     // Deliberately not tied to CharacterController: a future grid-based mover may want to

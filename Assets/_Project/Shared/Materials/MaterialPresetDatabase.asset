@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a4c48d3c31053c24ba7714bef3f89fe7, type: 3}
   m_Name: MaterialPresetDatabase
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Materials.MaterialPresetDatabase
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Materials.MaterialPresetDatabase
   presets:
   - category: 0
     material: {fileID: 2100000, guid: e5bc640254fbc5743aad34e7399cf6f7, type: 2}

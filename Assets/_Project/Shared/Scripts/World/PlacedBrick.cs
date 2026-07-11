@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // Marker component on every brick prefab (Plate, Brick, PlateRound, BrickRound).
     // Lets tools (Level Painter, world export) identify a placed brick's shape and

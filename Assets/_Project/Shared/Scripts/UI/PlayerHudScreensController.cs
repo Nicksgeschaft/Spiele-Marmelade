@@ -1,11 +1,12 @@
 using System.Text;
-using GameJamUniverse.Shared.Combat;
-using GameJamUniverse.Shared.Items;
-using GameJamUniverse.Shared.Stats;
+using SpieleMarmelade.Shared.Audio;
+using SpieleMarmelade.Shared.Combat;
+using SpieleMarmelade.Shared.Items;
+using SpieleMarmelade.Shared.Stats;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.Shared.UI
+namespace SpieleMarmelade.Shared.UI
 {
     // Builds its own Canvas + three independently-toggleable overlay panels (Inventory/
     // Character/Map) at runtime, in the same plain-UnityEngine.UI code style as
@@ -18,6 +19,8 @@ namespace GameJamUniverse.Shared.UI
         private static readonly Color PanelBg = new(0.09f, 0.09f, 0.14f, 0.92f);
         private static readonly Color TitleCol = Color.white;
         private static readonly Color BodyCol = new(0.85f, 0.85f, 0.92f);
+
+        [SerializeField] private string toggleSfxId;
 
         private PlayerInputReader _input;
         private Inventory _inventory;
@@ -62,17 +65,30 @@ namespace GameJamUniverse.Shared.UI
         {
             bool nowActive = !_inventoryPanel.activeSelf;
             _inventoryPanel.SetActive(nowActive);
-            if (nowActive) RefreshInventoryPanel();
+            if (nowActive)
+            {
+                RefreshInventoryPanel();
+                SfxPlayer.PlayUi(toggleSfxId);
+            }
         }
 
         private void ToggleCharacter()
         {
             bool nowActive = !_characterPanel.activeSelf;
             _characterPanel.SetActive(nowActive);
-            if (nowActive) RefreshCharacterPanel();
+            if (nowActive)
+            {
+                RefreshCharacterPanel();
+                SfxPlayer.PlayUi(toggleSfxId);
+            }
         }
 
-        private void ToggleMap() => _mapPanel.SetActive(!_mapPanel.activeSelf);
+        private void ToggleMap()
+        {
+            bool nowActive = !_mapPanel.activeSelf;
+            _mapPanel.SetActive(nowActive);
+            if (nowActive) SfxPlayer.PlayUi(toggleSfxId);
+        }
 
         private void OnInventoryChanged()
         {

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Stats
+namespace SpieleMarmelade.Shared.Stats
 {
     // Designer-authored base stats for one character archetype (e.g. "Stats_Player",
     // "Stats_Slime"). Plain Inspector list - no custom editor tool needed for this.
-    [CreateAssetMenu(fileName = "Stats_", menuName = "GameJam Universe/Stat Block")]
+    [CreateAssetMenu(fileName = "Stats_", menuName = "Spiele Marmelade/Stat Block")]
     public class StatBlockDefinition : ScriptableObject
     {
         [Serializable]

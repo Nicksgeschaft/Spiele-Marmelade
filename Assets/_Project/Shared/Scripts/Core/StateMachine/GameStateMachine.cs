@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameJamUniverse.Core.StateMachine
+namespace SpieleMarmelade.Core.StateMachine
 {
     /// <summary>
     /// Minimal explicit state machine for <see cref="GameState"/>. No logic outside of the

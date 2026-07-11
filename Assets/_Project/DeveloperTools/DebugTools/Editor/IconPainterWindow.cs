@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     // Builds a blank W x H grid of Wand-Bausteine (Brick — same scale as the Brick Text
     // Generator, so icons and text signs sit flush together) and lets you click individual
@@ -34,7 +34,7 @@ namespace GameJamUniverse.DevTools.Editor
         private static readonly Color Accent  = new(0.45f, 0.75f, 1.00f);
         private static readonly Color GreenC  = new(0.30f, 0.88f, 0.50f);
 
-        [MenuItem("Tools/GameJam/Icon Painter")]
+        [MenuItem("Tools/Prefab Creation/Icon Painter")]
         public static void Open()
         {
             var w = GetWindow<IconPainterWindow>("Icon Painter");

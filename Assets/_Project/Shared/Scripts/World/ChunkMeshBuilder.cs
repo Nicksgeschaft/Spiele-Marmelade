@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // Generates combined meshes for a chunk with hidden-face culling.
     // Each exposed quad is a flat rectangle — no stud geometry.

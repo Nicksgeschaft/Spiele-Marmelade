@@ -11,12 +11,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 804416069cefbe0438acd3244107643a, type: 3}
   m_Name: MinigameMetadata_Template
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Minigames.MinigameMetadata
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Minigames.MinigameMetadata
   gameId: 000_Template
   displayName: Template Minigame
   description: A minimal demo minigame used as the starting point for new GameJam
     Universe minigames.
-  author: GameJam Universe Team
+  author: Spiele Marmelade Team
   genre: 12
   version: 0.1.0
   thumbnail: {fileID: 0}

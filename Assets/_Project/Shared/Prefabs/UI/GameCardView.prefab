@@ -253,7 +253,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: db056a0ed2008dd4e97158ec7d9afd95, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.Shared::GameJamUniverse.Shared.UI.GameCardView
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.GameCardView
   thumbnailImage: {fileID: 315888601451609557}
   titleText: {fileID: 4288789763082545024}
   descriptionText: {fileID: 4927015988702492520}

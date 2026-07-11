@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
     public enum ChallengeType
     {

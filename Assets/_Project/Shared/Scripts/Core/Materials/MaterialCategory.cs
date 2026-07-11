@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.Materials
+namespace SpieleMarmelade.Core.Materials
 {
     /// <summary>
     /// Central catalog of material "looks" that can be applied on top of the neutral Kenney

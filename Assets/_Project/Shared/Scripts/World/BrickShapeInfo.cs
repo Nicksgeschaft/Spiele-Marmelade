@@ -1,4 +1,4 @@
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // Single source of truth for per-shape brick behaviour.
     // Square bricks (Plate/Brick) fill their 1x1 cell completely and tile

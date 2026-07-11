@@ -1,9 +1,9 @@
 using System.IO;
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.SaveSystem;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     /// <summary>
     /// Pretty-prints the player's save.json from <see cref="Application.persistentDataPath"/> and
@@ -15,7 +15,7 @@ namespace GameJamUniverse.DevTools.Editor
         private string _json = "";
         private string _error;
 
-        [MenuItem("Tools/GameJam/Save Inspector")]
+        [MenuItem("Tools/Utilities/Save Inspector")]
         public static void Open()
         {
             var window = GetWindow<SaveInspectorWindow>("Save Inspector");

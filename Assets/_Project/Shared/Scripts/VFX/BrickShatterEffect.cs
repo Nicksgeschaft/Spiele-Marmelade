@@ -1,7 +1,7 @@
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.VFX
+namespace SpieleMarmelade.Shared.VFX
 {
     // Runtime "shatters into bricks" effect. Call Shatter() (e.g. wired to Health.OnDeath in
     // the Inspector) to spawn small brick-fragment cubes that fly outward and self-destruct.

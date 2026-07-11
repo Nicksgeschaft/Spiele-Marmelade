@@ -1,7 +1,7 @@
-using GameJamUniverse.Shared.Combat;
+using SpieleMarmelade.Shared.Combat;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Cameras
+namespace SpieleMarmelade.Shared.Cameras
 {
     // Simple orbit follow camera for FreeThirdPersonMovement: yaw/pitch driven by the shared
     // Look input (mouse delta / right stick), no Cinemachine. Orbits the target at a fixed
@@ -9,7 +9,7 @@ namespace GameJamUniverse.Shared.Cameras
     // geometry, and auto-frames player+target while a LockOnController target is active.
     public class ThirdPersonOrbitCameraRig : MonoBehaviour, ICameraRig
     {
-        // Distance/height tuned for GameJam Universe's brick scale (1 brick ≈ 0.0795 world units).
+        // Distance/height tuned for Spiele Marmelade's brick scale (1 brick ≈ 0.0795 world units).
         [SerializeField] private float distance        = 0.5f;
         [SerializeField] private float height           = 0.15f;
         [SerializeField] private float lookSensitivity  = 3f;

@@ -1,6 +1,6 @@
-using GameJamUniverse.Core.Managers;
+using SpieleMarmelade.Core.Managers;
 
-namespace GameJamUniverse.Core.Minigames
+namespace SpieleMarmelade.Core.Minigames
 {
     /// <summary>
     /// Handed to a minigame's <see cref="IMinigame.Initialize"/>. Gives the minigame a narrow,

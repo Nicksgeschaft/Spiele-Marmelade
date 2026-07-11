@@ -1,9 +1,10 @@
-using GameJamUniverse.Shared.Combat;
-using GameJamUniverse.Shared.Stats;
-using GameJamUniverse.World;
+using SpieleMarmelade.Shared.Audio;
+using SpieleMarmelade.Shared.Combat;
+using SpieleMarmelade.Shared.Stats;
+using SpieleMarmelade.World;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Movement
+namespace SpieleMarmelade.Shared.Movement
 {
     // Full 3D movement relative to the active camera's facing (pressing "forward" moves the
     // way the camera looks, projected onto the ground plane). Includes jump/gravity like
@@ -35,6 +36,11 @@ namespace GameJamUniverse.Shared.Movement
         [SerializeField] private float climbCheckDistance = 0.12f;
         [SerializeField] private float climbSpeed = 0.35f;
         [SerializeField] private float climbJumpOffDistance = 0.15f;
+
+        [Header("── Sound ─────────────────────────────")]
+        [SerializeField] private string jumpSfxId;
+        [SerializeField] private string dodgeSfxId;
+        [SerializeField] private string climbStartSfxId;
 
         private CharacterController _cc;
         private PlayerInputReader _input;
@@ -123,7 +129,10 @@ namespace GameJamUniverse.Shared.Movement
             {
                 _verticalVelocity = -2f;
                 if (canJump && _input.JumpPressedThisFrame)
+                {
                     _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+                    SfxPlayer.Play(jumpSfxId);
+                }
             }
             _verticalVelocity += gravity * dt;
             move.y = _verticalVelocity;
@@ -164,6 +173,7 @@ namespace GameJamUniverse.Shared.Movement
             _dodgeEndTime = Time.time + dodgeDuration;
             _dodgeDirection = inputDir.sqrMagnitude > 0.0001f ? inputDir.normalized : -transform.forward;
             if (_health != null) _health.IsInvulnerable = true;
+            SfxPlayer.Play(dodgeSfxId);
         }
 
         private void TickDodge(float dt)
@@ -186,6 +196,7 @@ namespace GameJamUniverse.Shared.Movement
                 _climbing = true;
                 _climbNormal = hit.normal;
                 _verticalVelocity = 0f;
+                SfxPlayer.Play(climbStartSfxId);
             }
         }
 

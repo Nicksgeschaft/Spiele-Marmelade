@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Minigames
+namespace SpieleMarmelade.Core.Minigames
 {
     /// <summary>
     /// Convenience base class for minigame entry points. Implements the plumbing of

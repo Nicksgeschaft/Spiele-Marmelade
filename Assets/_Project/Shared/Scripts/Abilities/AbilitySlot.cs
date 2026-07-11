@@ -1,6 +1,7 @@
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Abilities
+namespace SpieleMarmelade.Shared.Abilities
 {
     public enum SlotKey
     {
@@ -24,6 +25,7 @@ namespace GameJamUniverse.Shared.Abilities
         [Tooltip("Muss eine Komponente sein, die IUsable implementiert (z. B. HealthPotionUsable).")]
         [SerializeField] private MonoBehaviour usableBehaviour;
         [SerializeField] private float cooldown = 0.5f;
+        [SerializeField] private string useSfxId;
 
         private PlayerInputReader _input;
         private IUsable _usable;
@@ -76,6 +78,7 @@ namespace GameJamUniverse.Shared.Abilities
 
             _nextUseTime = Time.time + cooldown;
             _usable.Use(gameObject);
+            SfxPlayer.Play(useSfxId);
         }
     }
 }

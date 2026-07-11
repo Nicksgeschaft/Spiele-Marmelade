@@ -1,7 +1,8 @@
-using GameJamUniverse.Shared.Stats;
+using SpieleMarmelade.Shared.Audio;
+using SpieleMarmelade.Shared.Stats;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Combat
+namespace SpieleMarmelade.Shared.Combat
 {
     // OneHanded weapons can block/parry (RMB held); TwoHanded weapons trade that away for a
     // single heavy attack on RMB press instead — matches "Mit Zweihandwaffen stattdessen
@@ -46,6 +47,10 @@ namespace GameJamUniverse.Shared.Combat
         [SerializeField] private float heavyAttackCooldown = 1f;
         [SerializeField] private float heavyAttackSwingDuration = 0.4f;
 
+        [Header("── Sound ─────────────────────────────")]
+        [SerializeField] private string attackSfxId;
+        [SerializeField] private string blockStartSfxId;
+
         private CharacterStats _stats;
         private Health _health;
         private IPlayerMovement _movement;
@@ -87,7 +92,11 @@ namespace GameJamUniverse.Shared.Combat
             if (_health == null) return;
 
             bool blocking = _input.BlockHeld;
-            if (blocking && !_blocking) _blockStartTime = Time.time;
+            if (blocking && !_blocking)
+            {
+                _blockStartTime = Time.time;
+                SfxPlayer.Play(blockStartSfxId);
+            }
             _blocking = blocking;
 
             if (!_blocking)
@@ -122,6 +131,7 @@ namespace GameJamUniverse.Shared.Combat
             }
 
             hitbox.Activate(swingDuration, GetBaseDamage() * multiplier);
+            SfxPlayer.Play(attackSfxId);
         }
 
         private void TryHeavyAttack()
@@ -131,6 +141,7 @@ namespace GameJamUniverse.Shared.Combat
             _nextAttackTime = Time.time + heavyAttackCooldown;
             hitbox.Activate(heavyAttackSwingDuration, GetBaseDamage() * heavyAttackDamageMultiplier);
             ResetCombo();
+            SfxPlayer.Play(attackSfxId);
         }
 
         // If a CharacterStats component defines a Damage stat, it (base + modifiers) overrides

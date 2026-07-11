@@ -1,7 +1,7 @@
-using GameJamUniverse.Core.Managers;
+using SpieleMarmelade.Core.Managers;
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
     // No-code glue: wire any UnityEvent (Health.OnDeath, LevelExitTrigger.OnPlayerReached, ...)
     // to Report() in the Inspector to feed a named counter that CustomEvent achievements watch.

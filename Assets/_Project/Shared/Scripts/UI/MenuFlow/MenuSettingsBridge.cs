@@ -1,9 +1,9 @@
 using System;
-using GameJamUniverse.Core.Managers;
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.Managers;
+using SpieleMarmelade.Core.SaveSystem;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.UI.MenuFlow
+namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
     // Reads/writes audio + display settings through the real SaveSystem/AudioManager when
     // GameManager is present (Hub flow — values persist app-wide, same as HubUIController's

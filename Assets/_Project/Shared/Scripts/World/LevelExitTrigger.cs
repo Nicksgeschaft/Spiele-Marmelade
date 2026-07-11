@@ -1,7 +1,8 @@
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GameJamUniverse.Shared.World
+namespace SpieleMarmelade.Shared.World
 {
     // Generic "reached the goal" trigger — not tied to any specific genre, reusable across
     // archetypes (dungeon exit, platformer goal, etc.). Fires once when something tagged
@@ -9,6 +10,8 @@ namespace GameJamUniverse.Shared.World
     [RequireComponent(typeof(Collider))]
     public class LevelExitTrigger : MonoBehaviour
     {
+        [SerializeField] private string sfxId;
+
         public UnityEvent OnPlayerReached;
 
         private bool _fired;
@@ -21,6 +24,7 @@ namespace GameJamUniverse.Shared.World
 
             _fired = true;
             OnPlayerReached?.Invoke();
+            SfxPlayer.Play(sfxId);
         }
     }
 }

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a591f3cf04d268448beb9d11032878bc, type: 3}
   m_Name: Challenge_DailyPlayAGame
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Progression.ChallengeDefinition
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Progression.ChallengeDefinition
   challengeId: daily_play_a_game
   type: 0
   description: Play any minigame once today.

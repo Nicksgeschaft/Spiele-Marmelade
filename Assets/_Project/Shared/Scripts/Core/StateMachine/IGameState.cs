@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.StateMachine
+namespace SpieleMarmelade.Core.StateMachine
 {
     /// <summary>
     /// A single state in a <see cref="GameStateMachine{TContext}"/>.

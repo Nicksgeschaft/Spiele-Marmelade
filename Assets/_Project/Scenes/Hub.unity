@@ -707,7 +707,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'GameJam Universe
+  m_Text: 'Spiele Marmelade
 
     Built with Unity 6000.4.2f1 / URP'
 --- !u!222 &543452182
@@ -3840,7 +3840,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 321b23b4c89e7de4ca3483378661c5b7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.Shared::GameJamUniverse.Shared.UI.HubUIController
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.HubUIController
   tabButtons:
   - {fileID: 925317806}
   - {fileID: 1157287171}

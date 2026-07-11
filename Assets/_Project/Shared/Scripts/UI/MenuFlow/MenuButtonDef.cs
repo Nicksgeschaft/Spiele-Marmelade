@@ -1,6 +1,6 @@
 using System;
 
-namespace GameJamUniverse.Shared.UI.MenuFlow
+namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
     public enum MenuSpecialAction
     {

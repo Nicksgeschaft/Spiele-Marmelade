@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using GameJamUniverse.Core.Minigames;
-using GameJamUniverse.Core.Progression;
-using GameJamUniverse.Core.StateMachine;
+using SpieleMarmelade.Core.Minigames;
+using SpieleMarmelade.Core.Progression;
+using SpieleMarmelade.Core.StateMachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace GameJamUniverse.Core.Managers
+namespace SpieleMarmelade.Core.Managers
 {
     /// <summary>
     /// Persistent (DontDestroyOnLoad) root of the framework. Lives in the Boot scene and owns

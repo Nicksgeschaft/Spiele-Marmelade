@@ -1,7 +1,7 @@
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.SaveSystem;
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Managers
+namespace SpieleMarmelade.Core.Managers
 {
     /// <summary>
     /// Owns the four audio channels (Music, SFX, UI, Ambient) and exposes simple

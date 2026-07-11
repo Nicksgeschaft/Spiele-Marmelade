@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     // Visual tool for assembling small characters (Player/Enemy/NPC bodies) out of the same 4
     // brick prefabs the Level Painter uses — but with rotation and a manual height offset
@@ -52,7 +52,7 @@ namespace GameJamUniverse.DevTools.Editor
         private static readonly Color PurpleC  = new(0.70f, 0.45f, 1.00f);
         private static readonly Color OrangeC  = new(1.00f, 0.55f, 0.15f);
 
-        [MenuItem("Tools/GameJam/Character Builder")]
+        [MenuItem("Tools/Prefab Creation/Character Builder")]
         public static void Open()
         {
             var w = GetWindow<CharacterBuilderWindow>("Character Builder");

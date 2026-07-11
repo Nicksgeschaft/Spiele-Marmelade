@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace GameJamUniverse.Shared
+namespace SpieleMarmelade.Shared
 {
     // Reads the shared "Player" action map from the project-wide Input Actions asset
     // (InputSystem_Actions, already registered under Project Settings > Input System Package)

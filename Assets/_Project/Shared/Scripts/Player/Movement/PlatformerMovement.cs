@@ -1,13 +1,13 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Movement
+namespace SpieleMarmelade.Shared.Movement
 {
     // 2.5D side-scroller movement: horizontal run along X, gravity + jump on Y, depth (Z)
     // stays locked. Drives a CharacterController on the same GameObject as PlayerController.
     [RequireComponent(typeof(CharacterController))]
     public class PlatformerMovement : MonoBehaviour, IPlayerMovement
     {
-        // Defaults are tuned for GameJam Universe's brick scale (1 brick ≈ 0.0795 world
+        // Defaults are tuned for Spiele Marmelade's brick scale (1 brick ≈ 0.0795 world
         // units — see WorldConstants), not a 1-unit-= 1-meter world. moveSpeed and jumpHeight
         // are scaled down together with gravity so the jump arc timing still feels right.
         [Header("── Movement ──────────────────────────")]

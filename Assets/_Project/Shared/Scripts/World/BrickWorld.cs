@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // Central world manager. Place in scene, assign WorldData and a material palette.
     // Call SetBlock / RemoveBlock at runtime to mutate the world.

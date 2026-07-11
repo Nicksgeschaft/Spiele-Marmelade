@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     public class LevelPainterWindow : EditorWindow
     {
@@ -69,7 +69,7 @@ namespace GameJamUniverse.DevTools.Editor
         private static readonly Color OrangeC = new(1.00f, 0.55f, 0.15f);
 
         // ── Menu ───────────────────────────────────────────────────────────
-        [MenuItem("Tools/GameJam/Level Painter")]
+        [MenuItem("Tools/Level Creation/Level Painter")]
         public static void Open()
         {
             var w = GetWindow<LevelPainterWindow>("Level Painter");
@@ -477,8 +477,20 @@ namespace GameJamUniverse.DevTools.Editor
             EnsureIndex();
             HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 
-            Event e      = Event.current;
-            var   center = GetBaseCell(e);
+            Event e = Event.current;
+
+            // Replace (single tile) targets whatever brick is actually under the cursor —
+            // including a lower tile whose edge peeks out from under a shorter/narrower one on
+            // top — instead of always the topmost tile in the XZ column. Everything else keeps
+            // the ground-plane/column-based flow (brush shapes paint multiple new cells at once
+            // and have no single "picked object" to target).
+            bool precisionReplace = _brushMode == BrushMode.Paint &&
+                                     _stackMode == StackMode.Replace &&
+                                     _brushShape == BrushShape.Single;
+
+            if (precisionReplace) { HandlePrecisionReplace(e, sv); return; }
+
+            var center = GetBaseCell(e);
 
             if (center.HasValue && _brushMode == BrushMode.Paint)
             {
@@ -509,6 +521,88 @@ namespace GameJamUniverse.DevTools.Editor
                 e.Use();
             }
             sv.Repaint();
+        }
+
+        // Picks the exact brick GameObject under the mouse (real geometry, not the XZ column's
+        // topmost tile), highlights it in magenta, and on click destroys + reinstates exactly
+        // that one with the currently selected type/material. Falls back to the normal
+        // empty-cell ghost preview when nothing is under the cursor (Replace still places a new
+        // tile on empty ground, same as before).
+        void HandlePrecisionReplace(Event e, SceneView sv)
+        {
+            GameObject picked = HandleUtility.PickGameObject(e.mousePosition, false);
+            bool validPick = TryResolveTile(picked, out GameObject tile);
+
+            if (validPick)
+            {
+                Bounds b = TileBounds(tile);
+                Handles.color = new Color(1f, 0.35f, 0.95f, 0.9f);
+                Handles.DrawWireCube(b.center, b.size * 1.03f);
+            }
+            else
+            {
+                var center = GetBaseCell(e);
+                if (center.HasValue)
+                {
+                    float hh = TileHeightFor(_tileType);
+                    Handles.color = new Color(0.4f, 0.9f, 1f, 0.55f);
+                    Handles.DrawWireCube(center.Value + new Vector3(0f, hh * 0.5f, 0f), new Vector3(TileWidth, hh, TileWidth));
+                }
+            }
+
+            DrawSceneHUD(sv);
+
+            if (e.type == EventType.MouseUp && e.button == 0)
+                _lastCenter = Vector3.positiveInfinity;
+
+            bool lmb = (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
+                       && e.button == 0 && !e.alt;
+
+            if (lmb)
+            {
+                Vector3? targetCenter = validPick ? tile.transform.position : GetBaseCell(e);
+                if (targetCenter.HasValue && targetCenter.Value != _lastCenter)
+                {
+                    _lastCenter = targetCenter.Value;
+                    if (validPick)
+                    {
+                        Vector3 pos = tile.transform.position;
+                        Undo.DestroyObjectImmediate(tile);
+                        IndexRemove(pos.x, pos.z);
+                        InstantiateTile(pos);
+                    }
+                    else
+                    {
+                        InstantiateTile(targetCenter.Value);
+                    }
+                    e.Use();
+                }
+            }
+            sv.Repaint();
+        }
+
+        // Resolves a Scene-View pick to the tile GameObject the painter actually operates on
+        // (the PlacedBrick marker's own object, in case picking ever returns a nested child).
+        bool TryResolveTile(GameObject picked, out GameObject tile)
+        {
+            tile = null;
+            if (picked == null) return false;
+
+            var marker = picked.GetComponentInParent<PlacedBrick>();
+            if (marker != null) { tile = marker.gameObject; return true; }
+
+            // Fallback for stray tiles without the marker component (matches AllTiles()).
+            if (AllTiles().Contains(picked)) { tile = picked; return true; }
+            return false;
+        }
+
+        Bounds TileBounds(GameObject go)
+        {
+            var rends = go.GetComponentsInChildren<Renderer>();
+            if (rends.Length == 0) return new Bounds(go.transform.position, Vector3.one * TileWidth);
+            var b = rends[0].bounds;
+            foreach (var r in rends) b.Encapsulate(r.bounds);
+            return b;
         }
 
         void DrawSceneHUD(SceneView sv)

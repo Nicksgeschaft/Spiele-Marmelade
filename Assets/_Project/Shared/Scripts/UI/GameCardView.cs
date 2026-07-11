@@ -1,9 +1,9 @@
 using System;
-using GameJamUniverse.Core.Minigames;
+using SpieleMarmelade.Core.Minigames;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.Shared.UI
+namespace SpieleMarmelade.Shared.UI
 {
     /// <summary>
     /// Visual representation of a single <see cref="MinigameMetadata"/> entry in the Hub's

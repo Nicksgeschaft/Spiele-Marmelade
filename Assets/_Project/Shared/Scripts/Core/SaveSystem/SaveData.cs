@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GameJamUniverse.Core.SaveSystem
+namespace SpieleMarmelade.Core.SaveSystem
 {
     [Serializable]
     public struct StringIntEntry

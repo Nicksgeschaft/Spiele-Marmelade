@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cb12662dccf7d6c45874762cff461f51, type: 3}
   m_Name: AudioLibrary_Shared
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Managers.AudioLibrary
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Managers.AudioLibrary
   music: []
   sfx: []
   ui: []

@@ -1,7 +1,6 @@
-using GameJamUniverse.Core.Managers;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Audio
+namespace SpieleMarmelade.Shared.Audio
 {
     public enum AudioChannel
     {
@@ -25,15 +24,12 @@ namespace GameJamUniverse.Shared.Audio
         /// <summary>Plays an id supplied at call time instead of the configured sfxId (for dynamic sounds from code).</summary>
         public void PlayId(string id)
         {
-            AudioManager audio = GameManager.Instance?.AudioManager;
-            if (audio == null || string.IsNullOrEmpty(id)) return;
-
             switch (channel)
             {
-                case AudioChannel.Ui: audio.PlayUi(id); break;
-                case AudioChannel.Music: audio.PlayMusic(id); break;
-                case AudioChannel.Ambient: audio.PlayAmbient(id); break;
-                default: audio.PlaySfx(id); break;
+                case AudioChannel.Ui: SfxPlayer.PlayUi(id); break;
+                case AudioChannel.Music: SfxPlayer.PlayMusic(id); break;
+                case AudioChannel.Ambient: SfxPlayer.PlayAmbient(id); break;
+                default: SfxPlayer.Play(id); break;
             }
         }
     }

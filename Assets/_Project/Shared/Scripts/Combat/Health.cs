@@ -1,8 +1,9 @@
-using GameJamUniverse.Shared.Stats;
+using SpieleMarmelade.Shared.Audio;
+using SpieleMarmelade.Shared.Stats;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GameJamUniverse.Shared.Combat
+namespace SpieleMarmelade.Shared.Combat
 {
     // Generic health component used by both the player and enemies. Deliberately minimal —
     // no resistances/armor/status effects yet, just a number that goes down and an event when
@@ -10,6 +11,8 @@ namespace GameJamUniverse.Shared.Combat
     public class Health : MonoBehaviour
     {
         [SerializeField] private float maxHealth = 100f;
+        [SerializeField] private string hitSfxId;
+        [SerializeField] private string deathSfxId;
 
         public UnityEvent OnDamaged;
         public UnityEvent OnDeath;
@@ -47,11 +50,13 @@ namespace GameJamUniverse.Shared.Combat
 
             CurrentHealth = Mathf.Max(0f, CurrentHealth - amount);
             OnDamaged?.Invoke();
+            SfxPlayer.Play(hitSfxId);
 
             if (CurrentHealth <= 0f)
             {
                 IsDead = true;
                 OnDeath?.Invoke();
+                SfxPlayer.Play(deathSfxId);
             }
         }
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Stats
+namespace SpieleMarmelade.Shared.Stats
 {
     // Optional add-on: existing components (Health, MeleeCombatController, ...) check for this on their
     // own GameObject and use it when present, otherwise fall back to their own serialized

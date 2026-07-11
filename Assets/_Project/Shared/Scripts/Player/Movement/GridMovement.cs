@@ -1,7 +1,7 @@
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Movement
+namespace SpieleMarmelade.Shared.Movement
 {
     // Top-down grid movement (Bomberman-style): moves continuously along one axis at a time —
     // whichever input axis is stronger — and gently snaps the cross axis onto the brick grid

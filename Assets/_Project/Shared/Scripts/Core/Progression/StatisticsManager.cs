@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using GameJamUniverse.Core.Minigames;
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.Minigames;
+using SpieleMarmelade.Core.SaveSystem;
 
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
     /// <summary>
     /// Aggregates per-session results into the persisted <see cref="StatisticsData"/>.

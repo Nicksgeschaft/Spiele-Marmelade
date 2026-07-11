@@ -1,8 +1,9 @@
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-namespace GameJamUniverse.Shared.World
+namespace SpieleMarmelade.Shared.World
 {
     // Makes a brick-built sign/logo clickable as a genuine 3D in-world button — no uGUI/Canvas
     // involved. Needs a Collider covering the whole text somewhere on this object or its
@@ -13,6 +14,7 @@ namespace GameJamUniverse.Shared.World
     {
         [SerializeField] private Camera raycastCamera;
         [SerializeField] private float  maxDistance = 100f;
+        [SerializeField] private string clickSfxId;
 
         public UnityEvent OnClicked;
 
@@ -29,7 +31,10 @@ namespace GameJamUniverse.Shared.World
 
             var ray = raycastCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out var hit, maxDistance) && hit.collider.transform.IsChildOf(transform))
+            {
                 OnClicked?.Invoke();
+                SfxPlayer.PlayUi(clickSfxId);
+            }
         }
     }
 }

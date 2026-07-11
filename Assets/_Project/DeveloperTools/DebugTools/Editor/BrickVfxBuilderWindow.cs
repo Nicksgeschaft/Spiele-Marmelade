@@ -1,8 +1,8 @@
-using GameJamUniverse.Shared.VFX;
+using SpieleMarmelade.Shared.VFX;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     // Configures a BrickShatterEffect and saves it as a reusable prefab. No interactive Scene
     // View painting here (unlike Level/Character Builder) — physics doesn't simulate outside
@@ -12,14 +12,14 @@ namespace GameJamUniverse.DevTools.Editor
         private const string PreviewRootName = "__BrickShatterPreview";
 
         private int _fragmentCount = 8;
-        private float _fragmentSize = GameJamUniverse.World.WorldConstants.PlateWidth;
+        private float _fragmentSize = SpieleMarmelade.World.WorldConstants.PlateWidth;
         private Vector2 _forceRange = new(1f, 3f);
         private Vector2 _torqueRange = new(1f, 4f);
         private float _lifetime = 2f;
         private Color _previewColor = Color.white;
         private string _effectName = "Shatter_Default";
 
-        [MenuItem("Tools/GameJam/Brick VFX Builder")]
+        [MenuItem("Tools/Prefab Creation/Brick VFX Builder")]
         public static void Open()
         {
             var w = GetWindow<BrickVfxBuilderWindow>("Brick VFX Builder");

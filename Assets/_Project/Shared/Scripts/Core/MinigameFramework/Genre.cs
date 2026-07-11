@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.Minigames
+namespace SpieleMarmelade.Core.Minigames
 {
     /// <summary>
     /// Coarse genre classification used for Hub filtering, "Favorite Genre" stats, etc.

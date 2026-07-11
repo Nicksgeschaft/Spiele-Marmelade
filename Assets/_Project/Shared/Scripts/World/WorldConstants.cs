@@ -1,4 +1,4 @@
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     public static class WorldConstants
     {

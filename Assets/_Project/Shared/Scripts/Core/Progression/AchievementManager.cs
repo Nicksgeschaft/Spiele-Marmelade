@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using GameJamUniverse.Core.Minigames;
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.Managers;
+using SpieleMarmelade.Core.Minigames;
+using SpieleMarmelade.Core.SaveSystem;
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
     /// <summary>
     /// Evaluates <see cref="AchievementDefinition"/>s against the current <see cref="SaveData"/>
@@ -78,6 +79,12 @@ namespace GameJamUniverse.Core.Progression
                     progress.unlockedAtUtc = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
                     stats.achievementsUnlocked++;
                     AchievementUnlocked?.Invoke(def);
+
+                    // Same assembly as GameManager/AudioManager (Core) — can't use the Shared-
+                    // assembly SfxPlayer helper here (Core doesn't reference Shared), so this
+                    // mirrors its dual-mode-safe null-chain directly.
+                    if (!string.IsNullOrEmpty(def.unlockedSfxId))
+                        GameManager.Instance?.AudioManager?.PlayUi(def.unlockedSfxId);
                 }
             }
         }

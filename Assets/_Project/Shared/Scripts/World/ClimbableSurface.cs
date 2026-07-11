@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // Pure marker component — pack onto any wall brick's GameObject to make it climbable.
     // FreeThirdPersonMovement raycasts forward and checks for this via GetComponentInParent

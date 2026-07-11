@@ -1,12 +1,12 @@
 using System.Text.RegularExpressions;
-using GameJamUniverse.Shared.Cameras;
-using GameJamUniverse.Shared.UI.MenuFlow;
+using SpieleMarmelade.Shared.Cameras;
+using SpieleMarmelade.Shared.UI.MenuFlow;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     /// <summary>
     /// Asks for a movement style + camera perspective, then builds on top of
@@ -32,7 +32,7 @@ namespace GameJamUniverse.DevTools.Editor
         private MovementArchetype _archetype = MovementArchetype.Platformer2_5D;
         private bool _includeStarterLevel = true;
 
-        [MenuItem("Tools/GameJam/New Game...")]
+        [MenuItem("Tools/Game Creation/New Game...")]
         public static void Open() => GetWindow<NewGameWizard>("New Game");
 
         private void OnGUI()

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.Shared.UI.MenuFlow
+namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
     // Wires an Options panel's slider/toggle widgets to MenuSettingsBridge. Attached to the
     // generated Options screen panel by the Menu Flow Editor.

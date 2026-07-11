@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
     /// <summary>
     /// Which running statistic an <see cref="AchievementDefinition"/> tracks. The "All..."

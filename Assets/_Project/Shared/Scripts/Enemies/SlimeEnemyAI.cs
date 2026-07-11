@@ -1,7 +1,8 @@
-using GameJamUniverse.Shared.Combat;
+using SpieleMarmelade.Shared.Audio;
+using SpieleMarmelade.Shared.Combat;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Enemies
+namespace SpieleMarmelade.Shared.Enemies
 {
     // Simple chase-and-bump enemy: hops toward whatever is tagged "Player", deals contact
     // damage on a cooldown when close enough. No NavMesh — fine for one small hand-built room;
@@ -20,6 +21,10 @@ namespace GameJamUniverse.Shared.Enemies
         [SerializeField] private float contactDamage = 10f;
         [SerializeField] private float contactRange = 0.08f;
         [SerializeField] private float contactCooldown = 1f;
+
+        [Header("Sound")]
+        [SerializeField] private string hopSfxId;
+        [SerializeField] private string contactSfxId;
 
         private CharacterController _cc;
         private Transform _player;
@@ -57,6 +62,7 @@ namespace GameJamUniverse.Shared.Enemies
                 {
                     _verticalVelocity = Mathf.Sqrt(hopHeight * -2f * gravity);
                     _nextHopTime = Time.time + 1f / Mathf.Max(0.01f, hopsPerSecond);
+                    SfxPlayer.Play(hopSfxId);
                 }
             }
             _verticalVelocity += gravity * Time.deltaTime;
@@ -71,6 +77,7 @@ namespace GameJamUniverse.Shared.Enemies
                 {
                     health.TakeDamage(contactDamage);
                     _nextContactTime = Time.time + contactCooldown;
+                    SfxPlayer.Play(contactSfxId);
                 }
             }
         }

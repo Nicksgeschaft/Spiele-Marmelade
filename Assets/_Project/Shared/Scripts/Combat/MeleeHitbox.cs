@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Combat
+namespace SpieleMarmelade.Shared.Combat
 {
     // A trigger volume that deals damage to Health components it touches while active. Call
     // Activate() for a short window (e.g. during an attack swing) — each target is only hit
@@ -13,6 +14,7 @@ namespace GameJamUniverse.Shared.Combat
     public class MeleeHitbox : MonoBehaviour
     {
         [SerializeField] private float damage = 20f;
+        [SerializeField] private string hitSfxId;
 
         /// <summary>Current base damage (before any caller-supplied override). Lets attack
         /// controllers (e.g. combo multipliers) scale a known baseline instead of guessing.</summary>
@@ -47,6 +49,7 @@ namespace GameJamUniverse.Shared.Combat
 
             _hitThisActivation.Add(health);
             health.TakeDamage(damage);
+            SfxPlayer.Play(hitSfxId);
         }
     }
 }

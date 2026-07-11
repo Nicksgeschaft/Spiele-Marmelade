@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     // Generates text/logos/buttons built entirely out of Wand-Baustein (Brick) bricks — each
     // letter is a fixed 3-wide x 5-tall grid (see BrickFont), with a mandatory 1-brick gap
@@ -31,7 +31,7 @@ namespace GameJamUniverse.DevTools.Editor
         private static readonly Color BG     = new(0.13f, 0.13f, 0.19f);
         private static readonly Color Accent = new(0.45f, 0.75f, 1.00f);
 
-        [MenuItem("Tools/GameJam/Brick Text Generator")]
+        [MenuItem("Tools/Prefab Creation/Brick Text Generator")]
         public static void Open()
         {
             var w = GetWindow<BrickTextGeneratorWindow>("Brick Text Generator");

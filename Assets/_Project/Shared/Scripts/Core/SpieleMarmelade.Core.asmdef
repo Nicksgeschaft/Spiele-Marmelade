@@ -1,6 +1,6 @@
 {
-    "name": "GameJamUniverse.Core",
-    "rootNamespace": "GameJamUniverse.Core",
+    "name": "SpieleMarmelade.Core",
+    "rootNamespace": "SpieleMarmelade.Core",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,8 +1,8 @@
-using GameJamUniverse.World;
+using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     // Builds small starter levels for the New Game Wizard out of the same 4 brick prefabs the
     // Level Painter uses. Procedural rather than a pre-baked prefab, so it always reflects

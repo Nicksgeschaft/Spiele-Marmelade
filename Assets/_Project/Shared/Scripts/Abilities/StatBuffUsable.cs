@@ -1,7 +1,7 @@
-using GameJamUniverse.Shared.Stats;
+using SpieleMarmelade.Shared.Stats;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Abilities
+namespace SpieleMarmelade.Shared.Abilities
 {
     // Example IUsable: a timed buff potion. Drop on the player alongside an AbilitySlot
     // (usableBehaviour = this) and a CharacterStats component to wire it into any slot.

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Profiling;
 
-namespace GameJamUniverse.DevTools
+namespace SpieleMarmelade.DevTools
 {
     /// <summary>
     /// Always-available debug HUD. Press F1 to toggle FPS and memory usage. Attach to a

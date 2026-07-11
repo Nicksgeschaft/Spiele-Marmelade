@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Cameras
+namespace SpieleMarmelade.Shared.Cameras
 {
     // Top-down follow camera shared by GridMovement and TopDownFreeMovement: stays above the
     // target at a fixed offset/angle, following X/Z position.
     public class TopDownCameraRig : MonoBehaviour, ICameraRig
     {
-        // Offset tuned for GameJam Universe's brick scale (1 brick ≈ 0.0795 world units).
+        // Offset tuned for Spiele Marmelade's brick scale (1 brick ≈ 0.0795 world units).
         [SerializeField] private Vector3 offset = new(0f, 0.9f, -0.35f);
         [SerializeField] private float   smoothTime = 0.15f;
 

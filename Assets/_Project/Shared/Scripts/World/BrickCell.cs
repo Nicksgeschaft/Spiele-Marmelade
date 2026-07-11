@@ -1,6 +1,6 @@
 using System;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     [Serializable]
     public struct BrickCell

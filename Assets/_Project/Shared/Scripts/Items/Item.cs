@@ -1,10 +1,10 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Items
+namespace SpieleMarmelade.Shared.Items
 {
     // Designer-authored item definition (health potion, key, quest item, ...). One asset per
     // item type; Inventory holds counts of these, never duplicates the data itself.
-    [CreateAssetMenu(fileName = "Item_", menuName = "GameJam Universe/Item")]
+    [CreateAssetMenu(fileName = "Item_", menuName = "Spiele Marmelade/Item")]
     public class Item : ScriptableObject
     {
         [Tooltip("Stable unique id, e.g. 'health_potion'. Never reuse or change once shipped.")]

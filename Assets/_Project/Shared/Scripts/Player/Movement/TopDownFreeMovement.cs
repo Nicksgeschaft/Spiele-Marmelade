@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Movement
+namespace SpieleMarmelade.Shared.Movement
 {
     // Free top-down movement (Zelda / twin-stick style): 8-directional, no grid snapping.
     // Turns the character to face whichever direction it's currently moving. Flat world

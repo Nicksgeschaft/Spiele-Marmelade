@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
-    [CreateAssetMenu(menuName = "GameJam/World Data", fileName = "NewWorldData")]
+    [CreateAssetMenu(menuName = "Spiele Marmelade/World Data", fileName = "NewWorldData")]
     public class WorldData : ScriptableObject
     {
         [SerializeField] private List<SerializedChunk> _chunks = new();

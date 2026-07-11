@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
-using GameJamUniverse.Core.Materials;
+using SpieleMarmelade.Core.Materials;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     /// <summary>
     /// Generates the shared <see cref="MaterialCategory"/> preset materials under
@@ -61,7 +61,7 @@ namespace GameJamUniverse.DevTools.Editor
             new(MaterialCategory.CelShading, new Color(0.75f, 0.75f, 0.75f), 0f, 0.1f),
         };
 
-        [MenuItem("Tools/GameJam/Generate Material Presets")]
+        [MenuItem("Tools/Utilities/Generate Material Presets")]
         public static void Generate()
         {
             if (!AssetDatabase.IsValidFolder(PresetsFolder))

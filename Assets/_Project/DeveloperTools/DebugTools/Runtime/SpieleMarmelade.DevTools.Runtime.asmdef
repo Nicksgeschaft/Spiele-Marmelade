@@ -1,10 +1,9 @@
 {
-    "name": "GameJamUniverse.Minigames.BrickDungeon",
-    "rootNamespace": "GameJamUniverse.Minigames.BrickDungeon",
+    "name": "SpieleMarmelade.DevTools.Runtime",
+    "rootNamespace": "SpieleMarmelade.DevTools",
     "references": [
-        "GameJamUniverse.Core",
-        "GameJamUniverse.Shared",
-        "UnityEngine.UI"
+        "SpieleMarmelade.Core",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

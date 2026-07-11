@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Shared.UI.MenuFlow
+namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
     // Kept deliberately small: Generic covers MainMenu/LevelSelect/Credits/anything custom
     // (a title + optional body text + a list of buttons). Options and Pause get dedicated

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.UI.MenuFlow
+namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
     [Serializable]
     public class MenuScreenNode

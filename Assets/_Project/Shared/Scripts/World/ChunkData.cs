@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     [Serializable]
     public class ChunkData

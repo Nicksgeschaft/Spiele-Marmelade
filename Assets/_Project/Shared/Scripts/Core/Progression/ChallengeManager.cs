@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.SaveSystem;
 
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
     /// <summary>
     /// Tracks progress on <see cref="ChallengeDefinition"/>s and rotates them on a schedule

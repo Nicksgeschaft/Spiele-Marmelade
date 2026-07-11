@@ -1,4 +1,6 @@
-using GameJamUniverse.Shared.UI.MenuFlow;
+using SpieleMarmelade.Shared.UI.MenuFlow;
+using SpieleMarmelade.Shared.World;
+using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEditor.Events;
 using UnityEngine;
@@ -6,14 +8,18 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
-    // Turns a MenuFlowGraph into an actual Canvas + panels + buttons in the currently open
-    // scene, and wires a MenuFlowController to drive navigation between them at runtime.
-    // Safe to re-run: it removes any previously generated "MenuCanvas" first.
+    // Turns a MenuFlowGraph into an actual Canvas (titles/body text/Options sliders) + a
+    // separate 3D brick-text button stage (see MenuStageRoot/MenuCamera) in the currently open
+    // scene, and wires a MenuFlowController to drive navigation between them at runtime. Safe
+    // to re-run: it removes any previously generated "MenuCanvas"/"MenuStageRoot"/"MenuCamera" first.
     public static class MenuFlowGenerator
     {
         private const string GameplayRootName = "GameplayRoot";
+        private const string BrickPrefabPath = "Assets/_Project/Shared/Prefabs/Bricks/Brick.prefab";
+        private const float StageHeight = 500f; // far above any gameplay geometry — dedicated "menu stage"
+        private const float ButtonSpacing = 0.6f;
 
         private static readonly Color PanelBg  = new(0.09f, 0.09f, 0.14f, 0.96f);
         private static readonly Color AccentBg = new(0.22f, 0.47f, 0.78f);
@@ -25,8 +31,11 @@ namespace GameJamUniverse.DevTools.Editor
         {
             if (graph == null) return;
 
-            var existing = GameObject.Find("MenuCanvas");
-            if (existing != null) Object.DestroyImmediate(existing);
+            foreach (var name in new[] { "MenuCanvas", "MenuStageRoot", "MenuCamera" })
+            {
+                var existing = GameObject.Find(name);
+                if (existing != null) Object.DestroyImmediate(existing);
+            }
 
             var canvasGo = new GameObject("MenuCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -36,6 +45,24 @@ namespace GameJamUniverse.DevTools.Editor
             scaler.referenceResolution = new Vector2(1920, 1080);
 
             EnsureEventSystem();
+
+            var stageRoot = new GameObject("MenuStageRoot");
+            stageRoot.transform.position = new Vector3(0f, StageHeight, 0f);
+
+            var menuCamGo = new GameObject("MenuCamera", typeof(Camera));
+            menuCamGo.transform.SetPositionAndRotation(new Vector3(0f, StageHeight, -5f), Quaternion.identity);
+            var menuCam = menuCamGo.GetComponent<Camera>();
+            menuCam.orthographic = true;
+            menuCam.orthographicSize = 3f;
+            menuCam.clearFlags = CameraClearFlags.SolidColor;
+            menuCam.backgroundColor = PanelBg;
+            menuCam.nearClipPlane = 0.3f;
+            menuCam.farClipPlane = 20f;
+            menuCamGo.SetActive(false);
+
+            var brickPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BrickPrefabPath);
+            if (brickPrefab == null)
+                Debug.LogWarning($"[MenuFlowGenerator] Brick-Prefab fehlt: {BrickPrefabPath} — Buttons bleiben leer.");
 
             var controllerGo = new GameObject("MenuFlowController", typeof(MenuFlowController));
             var controller = controllerGo.GetComponent<MenuFlowController>();
@@ -52,6 +79,7 @@ namespace GameJamUniverse.DevTools.Editor
             var so = new SerializedObject(controller);
             so.FindProperty("graph").objectReferenceValue = graph;
             so.FindProperty("gameplayRoot").objectReferenceValue = gameplayRoot;
+            so.FindProperty("menuCamera").objectReferenceValue = menuCam;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             foreach (var node in graph.screens)
@@ -61,15 +89,12 @@ namespace GameJamUniverse.DevTools.Editor
                 var panel = BuildPanel(canvasGo.transform, node);
                 controller.RegisterPanel(node.id, panel);
 
-                foreach (var btn in node.buttons)
-                    WireButton(BuildButton(panel.transform, btn.label), btn, controller);
-
-                var marker = panel.GetComponent<PanelLayoutMarker>();
-                if (marker != null) Object.DestroyImmediate(marker);
+                var signGroup = BuildBrickButtonGroup(stageRoot.transform, node, graph, brickPrefab, menuCam, controller);
+                controller.RegisterBrickSigns(node.id, signGroup);
             }
 
             EditorUtility.SetDirty(controllerGo);
-            Debug.Log($"[MenuFlowGenerator] Generated {graph.screens.Count} screen(s) into 'MenuCanvas'.");
+            Debug.Log($"[MenuFlowGenerator] Generated {graph.screens.Count} screen(s) into 'MenuCanvas'/'MenuStageRoot'.");
         }
 
         private static void EnsureEventSystem()
@@ -87,7 +112,10 @@ namespace GameJamUniverse.DevTools.Editor
             var panelGo = new GameObject($"Panel_{node.title}", typeof(RectTransform), typeof(Image));
             panelGo.transform.SetParent(parent, false);
             StretchFull(panelGo.GetComponent<RectTransform>());
-            panelGo.GetComponent<Image>().color = PanelBg;
+            // Fully transparent: MenuCamera's SolidColor clear provides the backdrop now, so
+            // the brick-text buttons it renders (behind this Overlay Canvas in compositing
+            // terms) aren't hidden behind an opaque panel image.
+            panelGo.GetComponent<Image>().color = new Color(PanelBg.r, PanelBg.g, PanelBg.b, 0f);
 
             BuildText(panelGo.transform, "Title", node.title, 48, TitleCol, new Vector2(0, -80), new Vector2(900, 100));
 
@@ -114,43 +142,56 @@ namespace GameJamUniverse.DevTools.Editor
                 optSo.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            // Buttons are appended by the caller (Generate) after this returns, starting from
-            // just below whatever was built here — recompute where via child count.
-            panelGo.AddComponent<PanelLayoutMarker>().nextButtonY = nextY;
-
             return panelGo;
         }
 
-        private static GameObject BuildButton(Transform panelTransform, string label)
+        // Builds one brick-text sign per button (see BrickTextBuilder), stacked vertically and
+        // centered on the MenuStageRoot's local origin, wires each sign's click straight to the
+        // same ShowScreen/TriggerSpecialAction targets the old uGUI buttons used.
+        private static GameObject BuildBrickButtonGroup(Transform stageParent, MenuScreenNode node,
+            MenuFlowGraph graph, GameObject brickPrefab, Camera menuCam, MenuFlowController controller)
         {
-            var marker = panelTransform.GetComponent<PanelLayoutMarker>();
-            float y = marker.nextButtonY;
-            marker.nextButtonY -= 84f;
+            var groupGo = new GameObject($"Signs_{node.title}");
+            groupGo.transform.SetParent(stageParent, false);
 
-            var go = new GameObject($"Btn_{label}", typeof(RectTransform), typeof(Image), typeof(Button));
-            go.transform.SetParent(panelTransform, false);
-            var rt = go.GetComponent<RectTransform>();
-            AnchorTopCenter(rt, new Vector2(0, y), new Vector2(360, 64));
-            go.GetComponent<Image>().color = AccentBg;
+            if (brickPrefab == null || node.buttons.Count == 0) return groupGo;
 
-            var button = go.GetComponent<Button>();
-            var colors = button.colors;
-            colors.highlightedColor = new Color(0.30f, 0.60f, 0.92f);
-            colors.pressedColor = new Color(0.15f, 0.32f, 0.55f);
-            button.colors = colors;
+            Material letterMat = graph.buttonLetterMaterial != null ? graph.buttonLetterMaterial : FindMaterial("M_Special_GlowWhite");
+            Material bgMat     = graph.buttonBackgroundMaterial != null ? graph.buttonBackgroundMaterial : FindMaterial("M_Brick_Black");
 
-            BuildText(go.transform, "Label", label, 26, Color.white, Vector2.zero, Vector2.zero, stretch: true);
+            float y = (node.buttons.Count - 1) * ButtonSpacing * 0.5f;
+            foreach (var btn in node.buttons)
+            {
+                var result = BrickTextBuilder.Build(brickPrefab, btn.label, letterMat, bgMat, $"Btn_{btn.label}");
+                BrickTextBuilder.MakeClickable(result);
 
-            return go;
+                result.Root.transform.SetParent(groupGo.transform, false);
+                result.Root.transform.localPosition = new Vector3(-result.Width * 0.5f, y - result.Height * 0.5f, 0f);
+                y -= ButtonSpacing;
+
+                var button = result.Root.GetComponent<BrickTextButton>();
+                var btnSo = new SerializedObject(button);
+                btnSo.FindProperty("raycastCamera").objectReferenceValue = menuCam;
+                btnSo.ApplyModifiedPropertiesWithoutUndo();
+
+                WireBrickButton(button, btn, controller);
+            }
+
+            return groupGo;
         }
 
-        private static void WireButton(GameObject buttonGo, MenuButtonDef def, MenuFlowController controller)
+        private static void WireBrickButton(BrickTextButton button, MenuButtonDef def, MenuFlowController controller)
         {
-            var button = buttonGo.GetComponent<Button>();
             if (def.specialAction != MenuSpecialAction.None)
-                UnityEventTools.AddStringPersistentListener(button.onClick, controller.TriggerSpecialAction, def.specialAction.ToString());
+                UnityEventTools.AddStringPersistentListener(button.OnClicked, controller.TriggerSpecialAction, def.specialAction.ToString());
             else if (!string.IsNullOrEmpty(def.targetScreenId))
-                UnityEventTools.AddStringPersistentListener(button.onClick, controller.ShowScreen, def.targetScreenId);
+                UnityEventTools.AddStringPersistentListener(button.OnClicked, controller.ShowScreen, def.targetScreenId);
+        }
+
+        private static Material FindMaterial(string name)
+        {
+            var guids = AssetDatabase.FindAssets($"{name} t:Material", new[] { "Assets/_Project/Shared/Materials" });
+            return guids.Length == 0 ? null : AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
 
         private static Slider BuildSlider(Transform parent, string label, float y)
@@ -290,14 +331,6 @@ namespace GameJamUniverse.DevTools.Editor
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-        }
-
-        // Tiny helper component so BuildButton knows where to place the next button without
-        // threading an extra ref-parameter through BuildPanel's caller. Generate() removes it
-        // again once a panel's buttons are all placed — pure editor-time bookkeeping.
-        private class PanelLayoutMarker : MonoBehaviour
-        {
-            public float nextButtonY;
         }
     }
 }

@@ -11,8 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 631ab0d20b67ea74c96079dd754907f5, type: 3}
   m_Name: MinigameRegistry
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Minigames.MinigameRegistry
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Minigames.MinigameRegistry
   games:
   - {fileID: 11400000, guid: e80c2cdd6ae4dd646b8f9b994642bf2d, type: 2}
   - {fileID: 11400000, guid: ca900f1c3e9693241b6a2dbb2cb9518e, type: 2}
-  - {fileID: 11400000, guid: 3486fa349e129914aba190a066560021, type: 2}

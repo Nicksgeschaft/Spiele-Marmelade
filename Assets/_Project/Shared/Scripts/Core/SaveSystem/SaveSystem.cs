@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace GameJamUniverse.Core.SaveSystem
+namespace SpieleMarmelade.Core.SaveSystem
 {
     /// <summary>
     /// Reads/writes the player's <see cref="SaveData"/> as JSON under

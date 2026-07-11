@@ -1,10 +1,10 @@
 using System.IO;
 using System.Text.RegularExpressions;
-using GameJamUniverse.Core.Minigames;
+using SpieleMarmelade.Core.Minigames;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     /// <summary>
     /// Duplicates the _Template minigame into a new Minigames/&lt;Name&gt; folder, renaming the
@@ -16,12 +16,12 @@ namespace GameJamUniverse.DevTools.Editor
         private const string TemplateFolder = "Assets/_Project/Minigames/_Template";
         private const string MinigamesRoot = "Assets/_Project/Minigames";
         private const string TemplateClassName = "TemplateMinigameController";
-        private const string TemplateNamespace = "GameJamUniverse.Minigames.Template";
+        private const string TemplateNamespace = "SpieleMarmelade.Minigames.Template";
 
         private string _gameName = "MyNewGame";
         private string _displayName = "My New Game";
 
-        [MenuItem("Tools/GameJam/Create New Minigame...")]
+        [MenuItem("Tools/Game Creation/Create New Minigame...")]
         public static void Open()
         {
             GetWindow<MinigameCreatorWizard>("Create Minigame");
@@ -31,9 +31,9 @@ namespace GameJamUniverse.DevTools.Editor
         {
             EditorGUILayout.HelpBox(
                 "Duplicates the _Template minigame into Minigames/<Name>, renaming the controller " +
-                "script, asmdef, scene and metadata asset. Run Tools/GameJam/Game Registry afterwards " +
+                "script, asmdef, scene and metadata asset. Run Tools/Game Creation/Game Registry afterwards " +
                 "to add it to the Hub.\n\n" +
-                "Tip: use Tools/GameJam/New Game... instead if you want Player + Camera + a starter " +
+                "Tip: use Tools/Game Creation/New Game... instead if you want Player + Camera + a starter " +
                 "level already set up and ready to Play.", MessageType.Info);
 
             EditorGUILayout.Space();
@@ -74,7 +74,7 @@ namespace GameJamUniverse.DevTools.Editor
             CopyDirectory(ToAbsolute(TemplateFolder), ToAbsolute(targetFolder));
 
             string newClassName = $"{gameName}MinigameController";
-            string newNamespace = $"GameJamUniverse.Minigames.{gameName}";
+            string newNamespace = $"SpieleMarmelade.Minigames.{gameName}";
 
             // Controller script: rewrite namespace/class name and rename the file.
             string oldScriptAbs = ToAbsolute($"{targetFolder}/Scripts/{TemplateClassName}.cs");
@@ -86,8 +86,8 @@ namespace GameJamUniverse.DevTools.Editor
             File.Delete(oldScriptAbs);
 
             // Asmdef: rewrite name/rootNamespace and rename the file.
-            string oldAsmdefAbs = ToAbsolute($"{targetFolder}/Scripts/GameJamUniverse.Minigames.Template.asmdef");
-            string newAsmdefAbs = ToAbsolute($"{targetFolder}/Scripts/GameJamUniverse.Minigames.{gameName}.asmdef");
+            string oldAsmdefAbs = ToAbsolute($"{targetFolder}/Scripts/SpieleMarmelade.Minigames.Template.asmdef");
+            string newAsmdefAbs = ToAbsolute($"{targetFolder}/Scripts/SpieleMarmelade.Minigames.{gameName}.asmdef");
             string asmdefSource = File.ReadAllText(oldAsmdefAbs).Replace(TemplateNamespace, newNamespace);
             File.WriteAllText(newAsmdefAbs, asmdefSource);
             File.Delete(oldAsmdefAbs);
@@ -129,7 +129,7 @@ namespace GameJamUniverse.DevTools.Editor
             }
 
             Debug.Log($"[MinigameCreatorWizard] Created minigame '{gameName}' at '{targetFolder}'. " +
-                      "Run Tools/GameJam/Game Registry and click 'Sync Registry' to add it to the Hub.");
+                      "Run Tools/Game Creation/Game Registry and click 'Sync Registry' to add it to the Hub.");
 
             EditorGUIUtility.PingObject(metadata);
             return targetFolder;

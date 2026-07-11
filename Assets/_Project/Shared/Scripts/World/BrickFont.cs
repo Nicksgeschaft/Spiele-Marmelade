@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // A deliberately blocky 3-wide x 5-tall pixel font, used by the Brick Text Generator to
     // build letters out of Wand-Baustein (Brick) bricks. Every glyph is exactly 3 columns wide

@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.StateMachine
+namespace SpieleMarmelade.Core.StateMachine
 {
     /// <summary>
     /// Global application states. Drives which systems/UI are active and how scenes flow.

@@ -1,9 +1,9 @@
-using GameJamUniverse.Core.Managers;
-using GameJamUniverse.Shared.World;
-using GameJamUniverse.World;
+using SpieleMarmelade.Core.Managers;
+using SpieleMarmelade.Shared.World;
+using SpieleMarmelade.World;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.UI
+namespace SpieleMarmelade.Shared.UI
 {
     // Runtime controller for the Hub's brick-built main menu: a 3D world of clickable
     // BrickTextButton signs instead of a uGUI Canvas (menus/buttons in this project are built

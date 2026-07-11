@@ -233,7 +233,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0c0eead44235bd42825407f6277e224, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Managers.AudioManager
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Managers.AudioManager
   sharedLibrary: {fileID: 11400000, guid: 8386c5b36355a8541af7617de432181c, type: 2}
 --- !u!114 &1068620700
 MonoBehaviour:
@@ -246,7 +246,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 726b6bdb57f22a84e913e7899e7db235, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Managers.SceneFlowManager
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Managers.SceneFlowManager
 --- !u!114 &1068620701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b4c56887a24918e40876d9a8f31b8efd, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.Core::GameJamUniverse.Core.Managers.GameManager
+  m_EditorClassIdentifier: SpieleMarmelade.Core::SpieleMarmelade.Core.Managers.GameManager
   minigameRegistry: {fileID: 11400000, guid: b30fbd85166b63c4d85ef60a28b6be8a, type: 2}
   achievementDefinitions:
   - {fileID: 11400000, guid: 383d598da809c344ea5cc00835c3e57b, type: 2}
@@ -301,7 +301,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d19de2bd878d15e448b7350411dc0993, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.DevTools.Runtime::GameJamUniverse.DevTools.DebugOverlay
+  m_EditorClassIdentifier: SpieleMarmelade.DevTools.Runtime::SpieleMarmelade.DevTools.DebugOverlay
 --- !u!1 &1638206467
 GameObject:
   m_ObjectHideFlags: 0

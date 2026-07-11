@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.Minigames
+namespace SpieleMarmelade.Core.Minigames
 {
     /// <summary>
     /// Contract every minigame module must implement. The Hub/GameManager only ever talks to

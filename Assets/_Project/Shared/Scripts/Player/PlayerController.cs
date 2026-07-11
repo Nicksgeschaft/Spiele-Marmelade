@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace GameJamUniverse.Shared
+namespace SpieleMarmelade.Shared
 {
     /// <summary>
     /// Thin per-frame orchestrator: reads input via <see cref="PlayerInputReader"/> and delegates

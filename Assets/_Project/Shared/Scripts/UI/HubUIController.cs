@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using GameJamUniverse.Core.Managers;
-using GameJamUniverse.Core.Minigames;
-using GameJamUniverse.Core.Progression;
-using GameJamUniverse.Core.SaveSystem;
+using SpieleMarmelade.Core.Managers;
+using SpieleMarmelade.Core.Minigames;
+using SpieleMarmelade.Core.Progression;
+using SpieleMarmelade.Core.SaveSystem;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.Shared.UI
+namespace SpieleMarmelade.Shared.UI
 {
     /// <summary>
     /// Top-level Hub UI: a tab bar over a stack of section panels.

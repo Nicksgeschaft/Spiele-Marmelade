@@ -1,6 +1,6 @@
 using System;
 
-namespace GameJamUniverse.Shared.Stats
+namespace SpieleMarmelade.Shared.Stats
 {
     public enum StatModifierMode
     {

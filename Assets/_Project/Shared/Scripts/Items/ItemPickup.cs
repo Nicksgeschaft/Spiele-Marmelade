@@ -1,6 +1,7 @@
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Items
+namespace SpieleMarmelade.Shared.Items
 {
     // Place in a level with an Item assigned — works immediately, no wiring needed (same
     // "drop it in and it just works" pattern as LevelExitTrigger). Adds count to whatever
@@ -10,6 +11,7 @@ namespace GameJamUniverse.Shared.Items
     {
         [SerializeField] private Item item;
         [SerializeField] private int count = 1;
+        [SerializeField] private string pickupSfxId;
 
         private void Awake() => GetComponent<Collider>().isTrigger = true;
 
@@ -21,6 +23,7 @@ namespace GameJamUniverse.Shared.Items
             if (inventory == null) return;
 
             inventory.AddItem(item, count);
+            SfxPlayer.Play(pickupSfxId);
             Destroy(gameObject);
         }
     }

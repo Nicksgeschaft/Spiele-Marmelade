@@ -1,7 +1,8 @@
-using GameJamUniverse.Shared;
+using SpieleMarmelade.Shared;
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Combat
+namespace SpieleMarmelade.Shared.Combat
 {
     // Toggleable target-lock for third-person combat: press LockOn to snap to the nearest
     // Health-bearing enemy roughly in front of the camera; press again (or let the target die
@@ -18,6 +19,10 @@ namespace GameJamUniverse.Shared.Combat
         [Tooltip("Wie lange das Ziel verdeckt sein darf, bevor das Lock-On abbricht — kurze " +
                  "Verdeckung durch eine Ecke/einen Türrahmen soll es nicht sofort lösen.")]
         [SerializeField] private float losBreakGrace = 0.3f;
+
+        [Header("── Sound ─────────────────────────────")]
+        [SerializeField] private string lockOnSfxId;
+        [SerializeField] private string lockOffSfxId;
 
         private PlayerInputReader _input;
         private Camera _cam;
@@ -134,12 +139,15 @@ namespace GameJamUniverse.Shared.Combat
         {
             CurrentTarget = target;
             _targetHealth?.OnDeath.AddListener(ClearTarget);
+            SfxPlayer.Play(lockOnSfxId);
         }
 
         private void ClearTarget()
         {
             Unsubscribe();
+            bool wasLocked = CurrentTarget != null;
             CurrentTarget = null;
+            if (wasLocked) SfxPlayer.Play(lockOffSfxId);
         }
 
         private void Unsubscribe()

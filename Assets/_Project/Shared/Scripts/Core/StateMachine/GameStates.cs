@@ -1,7 +1,7 @@
-using GameJamUniverse.Core.Managers;
+using SpieleMarmelade.Core.Managers;
 using UnityEngine;
 
-namespace GameJamUniverse.Core.StateMachine
+namespace SpieleMarmelade.Core.StateMachine
 {
     // Concrete states are intentionally thin: the actual flow (scene loading, save/load,
     // minigame lifecycle calls) is orchestrated explicitly by GameManager. States only carry

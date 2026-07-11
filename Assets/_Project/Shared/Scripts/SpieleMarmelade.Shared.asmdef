@@ -1,10 +1,10 @@
 {
-    "name": "GameJamUniverse.Minigames.Testgame1",
-    "rootNamespace": "GameJamUniverse.Minigames.Testgame1",
+    "name": "SpieleMarmelade.Shared",
+    "rootNamespace": "SpieleMarmelade.Shared",
     "references": [
-        "GameJamUniverse.Core",
-        "GameJamUniverse.Shared",
-        "UnityEngine.UI"
+        "SpieleMarmelade.Core",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

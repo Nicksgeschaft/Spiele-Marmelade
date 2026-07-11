@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // One per chunk. Owned and created by BrickWorld.
     // Call Rebuild() after any block change in this chunk.

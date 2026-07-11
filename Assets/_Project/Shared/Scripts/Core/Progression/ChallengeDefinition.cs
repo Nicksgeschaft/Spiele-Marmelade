@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Progression
+namespace SpieleMarmelade.Core.Progression
 {
-    [CreateAssetMenu(fileName = "Challenge_", menuName = "GameJam Universe/Challenge Definition")]
+    [CreateAssetMenu(fileName = "Challenge_", menuName = "Spiele Marmelade/Challenge Definition")]
     public class ChallengeDefinition : ScriptableObject
     {
         [Tooltip("Stable unique id, e.g. 'daily_play_3_games'.")]

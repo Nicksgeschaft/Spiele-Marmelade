@@ -122,7 +122,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 3527135741225846522}
-        m_TargetAssemblyTypeName: GameJamUniverse.Shared.Combat.MeleeCombatController, GameJamUniverse.Shared
+        m_TargetAssemblyTypeName: SpieleMarmelade.Shared.Combat.MeleeCombatController, SpieleMarmelade.Shared
         m_MethodName: OnAttackPressed
         m_Mode: 1
         m_Arguments:

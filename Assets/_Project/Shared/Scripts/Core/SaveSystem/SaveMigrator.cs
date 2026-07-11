@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.SaveSystem
+namespace SpieleMarmelade.Core.SaveSystem
 {
     /// <summary>
     /// Upgrades older save files in place. Add one branch per version bump - never delete old

@@ -1,7 +1,7 @@
-using GameJamUniverse.Shared.Combat;
+using SpieleMarmelade.Shared.Combat;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Abilities
+namespace SpieleMarmelade.Shared.Abilities
 {
     // Example IUsable: a simple healing potion. Drop on the player alongside an AbilitySlot
     // (usableBehaviour = this) to wire it into any Q/R/F/quick-item slot.

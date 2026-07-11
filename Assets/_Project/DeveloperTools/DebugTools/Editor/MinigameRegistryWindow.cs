@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using GameJamUniverse.Core.Minigames;
+using SpieleMarmelade.Core.Minigames;
 using UnityEditor;
 using UnityEngine;
 
-namespace GameJamUniverse.DevTools.Editor
+namespace SpieleMarmelade.DevTools.Editor
 {
     /// <summary>
     /// Shows every <see cref="MinigameMetadata"/> found under Minigames/*/Config/ and lets the
@@ -17,7 +17,7 @@ namespace GameJamUniverse.DevTools.Editor
 
         private Vector2 _scroll;
 
-        [MenuItem("Tools/GameJam/Game Registry")]
+        [MenuItem("Tools/Game Creation/Game Registry")]
         public static void Open()
         {
             GetWindow<MinigameRegistryWindow>("Game Registry");

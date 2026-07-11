@@ -1,7 +1,7 @@
-using GameJamUniverse.Shared.World;
+using SpieleMarmelade.Shared.World;
 using UnityEngine;
 
-namespace GameJamUniverse.World
+namespace SpieleMarmelade.World
 {
     // Runtime-safe core logic for building brick text (see BrickFont) — used by both
     // BrickTextGeneratorWindow (Editor tool, saves the result as a prefab) and runtime code that

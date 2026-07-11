@@ -1,8 +1,8 @@
-using GameJamUniverse.Core.Minigames;
+using SpieleMarmelade.Core.Minigames;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.Minigames.Template
+namespace SpieleMarmelade.Minigames.Template
 {
     /// <summary>
     /// Minimal demo minigame: shows the current highscore/best time and offers two buttons that

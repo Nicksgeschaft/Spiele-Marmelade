@@ -1,12 +1,12 @@
 using UnityEngine;
 
-namespace GameJamUniverse.Core.Minigames
+namespace SpieleMarmelade.Core.Minigames
 {
     /// <summary>
     /// The "game card" data for a single minigame. One asset per minigame, stored in
     /// Minigames/&lt;Name&gt;/Config/. Collected into a <see cref="MinigameRegistry"/> for the Hub.
     /// </summary>
-    [CreateAssetMenu(fileName = "MinigameMetadata_", menuName = "GameJam Universe/Minigame Metadata")]
+    [CreateAssetMenu(fileName = "MinigameMetadata_", menuName = "Spiele Marmelade/Minigame Metadata")]
     public class MinigameMetadata : ScriptableObject
     {
         [Header("Identity")]
@@ -14,7 +14,7 @@ namespace GameJamUniverse.Core.Minigames
         public string gameId;
         public string displayName;
         [TextArea] public string description;
-        public string author = "GameJam Universe Team";
+        public string author = "Spiele Marmelade Team";
         public Genre genre = Genre.Other;
         public string version = "0.1.0";
 

@@ -1,4 +1,4 @@
-namespace GameJamUniverse.Core.Minigames
+namespace SpieleMarmelade.Core.Minigames
 {
     public enum Difficulty
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
-using GameJamUniverse.Core.Minigames;
+using SpieleMarmelade.Core.Minigames;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace GameJamUniverse.Core.Managers
+namespace SpieleMarmelade.Core.Managers
 {
     /// <summary>
     /// Additive scene loading/unloading for the Hub <-> Minigame flow. The Boot scene (holding

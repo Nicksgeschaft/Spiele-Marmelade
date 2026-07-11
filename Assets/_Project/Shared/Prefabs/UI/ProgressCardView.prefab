@@ -580,7 +580,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2270ad1bae4a28a4aa43854d71080761, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: GameJamUniverse.Shared::GameJamUniverse.Shared.UI.ProgressCardView
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.ProgressCardView
   titleText: {fileID: 4070900629425774696}
   descriptionText: {fileID: 5310406848583179385}
   progressText: {fileID: 424234485196848534}

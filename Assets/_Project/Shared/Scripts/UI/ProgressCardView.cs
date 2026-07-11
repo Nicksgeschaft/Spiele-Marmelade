@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJamUniverse.Shared.UI
+namespace SpieleMarmelade.Shared.UI
 {
     /// <summary>
     /// Generic progress card used by the Hub's Achievements and Challenges tabs. Shows a title,

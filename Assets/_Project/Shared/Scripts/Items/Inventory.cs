@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameJamUniverse.Shared.Items
+namespace SpieleMarmelade.Shared.Items
 {
     [Serializable]
     public struct InventorySlot
