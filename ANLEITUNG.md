@@ -1,4 +1,4 @@
-# GameJam Universe – Anleitung: Level aus den 4 Bausteinen bauen
+# Spiele Marmelade – Anleitung: Level aus den 4 Bausteinen bauen
 
 Diese Anleitung ist für alle gedacht, die während der Jam ein Level bauen wollen –
 auch ohne Programmiererfahrung. Alle Werkzeuge findest du in Unity oben in der
@@ -47,9 +47,16 @@ können soll (siehe "Export to WorldData" unten).
 
 Weitere Einstellungen:
 
-- **Stacking**: `Stack` baut einfach nach oben weiter, `Replace` ersetzt das oberste
-  Teil, `Only` ersetzt nur wenn schon etwas da ist, `Stack N` ersetzt die obersten
-  N Teile auf einmal.
+- **Stacking**: `Stack` baut einfach nach oben weiter, `Only` ersetzt nur wenn schon
+  etwas da ist, `Stack N` ersetzt die obersten N Teile auf einmal.
+- **Replace** (nur bei Brush Shape `Single`): zielt jetzt exakt auf den Brick unter der
+  Maus, nicht mehr nur auf den obersten in der Spalte. Der anvisierte Brick wird beim
+  Hovern **pink gehighlighted** – so lässt sich z. B. ein tiefer liegender Brick ersetzen,
+  dessen Kante unter einem kleineren/kürzeren Brick obendrauf noch sichtbar ist, einfach
+  indem man genau auf diese Kante zeigt. Zeigt die Maus auf leeren Boden, wird dort ganz
+  normal ein neuer Brick platziert (cyane Vorschau wie gehabt). Bei `Rect`/`Circle`-Pinsel
+  bleibt Replace beim alten Spalten-Verhalten (mehrere Zellen auf einmal haben kein
+  einzelnes "anvisiertes" Ziel).
 - **Brush Shape**: `Single` = ein Feld, `Rect`/`Circle` = größere Flächen auf
   einmal malen (mit Radius-Regler).
 - **Parent Object**: Wohin die gemalten Bausteine einsortiert werden. Ohne Angabe
@@ -220,6 +227,17 @@ zusammenklickst, statt es zu programmieren.
   (Lautstärke-Regler + Vollbild-Schalter) und, sofern ein `Pause`-Screen im
   Graphen existiert, automatischem Pausieren per **Escape** während des Spiels.
 
+**Buttons sind jetzt Brick-Text-Schilder**, kein normales UI-Text mehr (Titel/
+Bodytext und die Options-Regler bleiben uGUI, da Brick-Text keine live
+nachgeführten Werte kann). Dafür wird automatisch eine eigene, feste
+`MenuCamera` gebaut, die unabhängig von der Gameplay-Kamera zuverlässig auf
+die Buttons zeigt – wichtig bei Pause, wo die Gameplay-Kamera ja mitten im
+Spiel irgendwohin zeigen kann. Farbe/Material der Buttons: `MenuFlowGraph`-
+Asset im Inspector öffnen, `Button Letter Material`/`Button Background
+Material` setzen (leer lassen für einen automatischen Fallback). Schon
+bestehende Menüs (z. B. Brick Dungeon) einmal neu **Generate** klicken, um
+die neuen Brick-Buttons zu bekommen.
+
 Das Options-Menü funktioniert auch dann, wenn du die Minigame-Szene ganz allein
 öffnest und direkt Play drückst (ohne über den Hub zu gehen) – in dem Fall
 werden die Einstellungen lokal gespeichert, statt im großen Spielstand.
@@ -239,7 +257,7 @@ später ergänzt.
 ### Achievement-Hooks (an jedem Event "hooken")
 
 1. Neue **Achievement Definition** anlegen: Rechtsklick im Project-Fenster →
-   `Create → GameJam Universe → Achievement Definition`.
+   `Create → Spiele Marmelade → Achievement Definition`.
 2. `Stat Key` auf **CustomEvent** stellen, `Event Key` z. B. `"EnemyKilled"` eintragen,
    `Target Value` z. B. `10` (= "10 Slimes besiegt").
 3. Auf das Objekt, das das Event auslöst (z. B. `Enemy_Slime`), die Komponente
@@ -262,7 +280,7 @@ später ergänzt.
 
 ### Stat-Blöcke & Modifikatoren (Balancing)
 
-1. Neuen **Stat Block** anlegen: `Create → GameJam Universe → Stat Block`, z. B.
+1. Neuen **Stat Block** anlegen: `Create → Spiele Marmelade → Stat Block`, z. B.
    `Stats_Slime` – darin eine Liste mit `Type` (MaxHealth/MoveSpeed/Damage/Armor/
    AttackSpeed/JumpForce) + `Base Value` pro Zeile.
 2. **`CharacterStats`**-Komponente auf das Enemy/Player-Prefab packen, den Stat
@@ -415,7 +433,7 @@ weitergespielt wird.
 
 **Items ins Spiel bringen:**
 
-1. Neues **Item**-Asset anlegen: `Create → GameJam Universe → Item`, `Display Name`/`Description`
+1. Neues **Item**-Asset anlegen: `Create → Spiele Marmelade → Item`, `Display Name`/`Description`
    eintragen, `Stackable`/`Max Stack` je nach Bedarf.
 2. Ein GameObject mit **`ItemPickup`** in den Level stellen (Collider wird automatisch zum
    Trigger gemacht), das Item-Asset zuweisen, `Count` setzen.
@@ -427,6 +445,67 @@ Spielstand gespeichert – wie `Health`/`CharacterStats` auch) und `PlayerHudScr
 (baut sich sein eigenes Canvas + die drei Panels beim Start selbst, keine manuelle UI-Arbeit
 nötig). Schnellslots (Q/R/F/1-4 aus Phase 2) sind bewusst noch **nicht** ans Inventar gekoppelt –
 sie rufen weiterhin feste `IUsable`-Komponenten auf, unabhängig vom Item-Bestand.
+
+## Brick Bar Builder – Lebensbalken & Slider aus Bricks
+
+Öffnen über **Tools → GameJam → Brick Bar Builder**. Baut eine Reihe/einen Stapel aus N Bricks
+(Typ/Material/Anzahl/Ausrichtung frei wählbar) als Prefab – reines Formular, kein Malen im
+Scene-View nötig.
+
+**Modus `Bar`** – Segmente, die sich einzeln ein-/ausblenden lassen:
+
+1. Brick-Typ (z. B. `PlateRound`), Material (z. B. Rot), Anzahl (z. B. 10), Ausrichtung `Row`
+   wählen, **Als Prefab speichern**.
+2. Prefab in die Szene ziehen (z. B. unter die Kamera, oben im Sichtfeld – für ein HUD gibt es
+   keinen automatischen Schritt dafür, das Prefab muss von Hand passend platziert werden).
+3. Komponente **`BrickHealthBarView`** draufpacken, `Health` (z. B. vom Spieler) zuweisen –
+   fertig. Nimmt der Spieler Schaden, verschwindet automatisch der letzte Brick.
+4. Eigene Zähler (nicht Health-basiert): direkt `BrickBar.SetFilledCount(int)`/`SetValue01(float)`
+   aus eigenem Code aufrufen.
+
+**Modus `Slider`** – dieselbe Schiene + ein Griff-Brick zum Ziehen:
+
+1. Wie oben, aber Modus `Slider`, optional ein eigenes Griff-Material wählen (sonst
+   Fallback-Weiß).
+2. Nach dem Speichern am `BrickSliderTrack` im Inspector **`Raycast Camera`** zuweisen (z. B.
+   die `MenuCamera` aus dem Menü-Flow-System) – ohne das fällt es auf `Camera.main` zurück, was
+   bei einer eigenen Menü-Bühne nicht das Richtige trifft.
+3. Griff-Brick anklicken und seitlich ziehen → `OnValueChanged` feuert mit dem aktuellen Wert
+   (`Min Value`/`Max Value` im Inspector einstellbar, z. B. 0-1 für Lautstärke).
+
+Noch nicht Teil davon: die eigentlichen Options-Lautstärke-Regler im Menu-Flow-System laufen
+weiterhin über normale uGUI-Slider – dieses Tool liefert nur den wiederverwendbaren Baustein,
+falls du sie später auf Brick-Slider umstellen willst.
+
+## Sound-Felder überall – direkt eingebaut, kein Verdrahten nötig
+
+Zusätzlich zum generischen `SfxTrigger` (siehe "Balancing & Hooks") haben die wichtigsten
+Gameplay-Komponenten jetzt **eigene Sound-ID-Felder direkt im Inspector** – einfach eine ID
+eintragen (muss in einer `AudioLibrary` existieren), fertig, kein UnityEvent-Wiring nötig. Leer
+gelassen = stumm, ändert nichts am Verhalten.
+
+| Komponente | Felder |
+|---|---|
+| `Health` | `Hit Sfx Id`, `Death Sfx Id` |
+| `MeleeCombatController` | `Attack Sfx Id`, `Block Start Sfx Id` |
+| `MeleeHitbox` | `Hit Sfx Id` (Treffer-Impact, separat vom Schwung) |
+| `LockOnController` | `Lock On Sfx Id`, `Lock Off Sfx Id` |
+| `SlimeEnemyAI` | `Hop Sfx Id`, `Contact Sfx Id` |
+| `ItemPickup` | `Pickup Sfx Id` |
+| `AbilitySlot` | `Use Sfx Id` |
+| `LevelExitTrigger` | `Sfx Id` |
+| `BrickTextButton` | `Click Sfx Id` |
+| `BrickSliderTrack` | `Drag Start Sfx Id` |
+| `MenuFlowController` | `Pause Sfx Id`, `Resume Sfx Id` |
+| `AchievementDefinition`-Asset | `Unlocked Sfx Id` |
+| `PlayerHudScreensController` | `Toggle Sfx Id` (Tab/I/M) |
+| `FreeThirdPersonMovement` | `Jump Sfx Id`, `Dodge Sfx Id`, `Climb Start Sfx Id` |
+
+Technisch: neue statische Klasse `SfxPlayer` (`Shared/Scripts/Audio/`) kapselt den
+Dual-Mode-sicheren `AudioManager`-Zugriff – `SfxTrigger` nutzt sie jetzt intern auch. Bei
+`AchievementDefinition`/`AchievementManager` (die liegen in der Core-Assembly, die `Shared`
+nicht referenziert) läuft der Aufruf direkt über `GameManager`, gleiches Muster, nur ohne den
+Helfer.
 
 ## Weitere Werkzeuge
 
