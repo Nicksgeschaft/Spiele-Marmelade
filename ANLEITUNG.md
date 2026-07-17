@@ -2,15 +2,16 @@
 
 Diese Anleitung ist für alle gedacht, die während der Jam ein Level bauen wollen –
 auch ohne Programmiererfahrung. Alle Werkzeuge findest du in Unity oben in der
-Menüleiste unter **Tools → GameJam**.
+Menüleiste unter **Tools**, sortiert in Game Creation / Level Creation / Prefab
+Creation / Utilities.
 
 ## Schnellstart – in 3 Schritten loslegen
 
-1. **Tools → GameJam → New Game...** öffnen, Namen eingeben, Bewegungsstil wählen
+1. **Tools → Game Creation → New Game...** öffnen, Namen eingeben, Bewegungsstil wählen
    (z. B. "2.5D Platformer"), **Create Game** klicken.
 2. **Play** drücken – Spieler, Kamera und ein kleines Starter-Level sind schon da.
-3. Eigenes Level bauen: **Tools → GameJam → Level Painter** öffnen und drauflos malen
-   (siehe unten).
+3. Eigenes Level bauen: **Tools → Level Creation → Asset Builder** öffnen und drauflos
+   malen (siehe unten).
 
 Alles Weitere in dieser Anleitung ist Hintergrundwissen, falls du mehr Kontrolle willst.
 
@@ -33,9 +34,9 @@ Die runden Bausteine sind bewusst nur Deko (z. B. Säulen, Buttons, Verzierungen
 Sie werden nicht mit exportiert, wenn ein Spiel zur Laufzeit Wände verändern
 können soll (siehe "Export to WorldData" unten).
 
-## Level Painter – ein Level malen
+## Asset Builder – ein Level malen
 
-Öffnen über **Tools → GameJam → Level Painter**.
+Öffnen über **Tools → Level Creation → Asset Builder**.
 
 1. **Baustein wählen** – oben im Fenster einen der 4 Bausteine anklicken (der Tooltip
    beim Draufhalten erklärt kurz, was er tut).
@@ -49,58 +50,53 @@ Weitere Einstellungen:
 
 - **Stacking**: `Stack` baut einfach nach oben weiter, `Only` ersetzt nur wenn schon
   etwas da ist, `Stack N` ersetzt die obersten N Teile auf einmal.
-- **Replace** (nur bei Brush Shape `Single`): zielt jetzt exakt auf den Brick unter der
-  Maus, nicht mehr nur auf den obersten in der Spalte. Der anvisierte Brick wird beim
-  Hovern **pink gehighlighted** – so lässt sich z. B. ein tiefer liegender Brick ersetzen,
-  dessen Kante unter einem kleineren/kürzeren Brick obendrauf noch sichtbar ist, einfach
-  indem man genau auf diese Kante zeigt. Zeigt die Maus auf leeren Boden, wird dort ganz
-  normal ein neuer Brick platziert (cyane Vorschau wie gehabt). Bei `Rect`/`Circle`-Pinsel
-  bleibt Replace beim alten Spalten-Verhalten (mehrere Zellen auf einmal haben kein
-  einzelnes "anvisiertes" Ziel).
-- **Brush Shape**: `Single` = ein Feld, `Rect`/`Circle` = größere Flächen auf
-  einmal malen (mit Radius-Regler).
+- **Replace** (nur bei Brush Shape `Single`): zielt exakt auf den Brick unter der
+  Maus, nicht auf den obersten in der Spalte. Der anvisierte Brick wird beim Hovern
+  **pink gehighlighted**. Zeigt die Maus auf leeren Boden, wird dort ganz normal ein
+  neuer Brick platziert. Bei `Rect`/`Circle`-Pinsel bleibt Replace beim alten
+  Spalten-Verhalten.
+- **Erase** (Brush Shape `Single`) zielt genauso exakt auf den Brick unter der Maus
+  (rot gehighlighted) und löscht nur den.
+- **Brush Shape**: `Single` = ein Feld, `Rect`/`Circle` = größere Flächen auf einmal
+  malen (Radius-Regler), `Line` = eine gerade Reihe von N Bausteinen entlang X, Y
+  (stapelt übereinander) oder Z ab dem Klickpunkt — z. B. eine 10er-Mauer mit einem
+  Klick.
+- **Mauer erhöhen** (dritter Brush-Modus neben Paint/Erase): Klick auf eine Mauer
+  findet alle direkt verbundenen Bausteine auf derselben Höhe (grün markiert) und
+  packt auf jeden davon eine weitere Reihe. Verweigert die Aktion, wenn ein Baustein
+  in der Gruppe komplett umschlossen ist (keine dünne Mauer, sondern eine volle Fläche).
 - **Parent Object**: Wohin die gemalten Bausteine einsortiert werden. Ohne Angabe
   "Create Root" klicken, dann landet alles sauber unter einem `LevelRoot`-Objekt.
 
-## Level fertigstellen
-
-Zwei Wege, je nachdem was das Spiel braucht:
+Level fertigstellen, drei Wege je nachdem was gebraucht wird:
 
 - **Bake to Mesh** – kombiniert alle gemalten Bausteine zu wenigen fertigen Meshes
-  (schnell, gut für die Performance). Der Standardweg für die meisten Jam-Spiele,
-  bei denen das Level nach dem Bauen nicht mehr verändert wird.
+  (schnell, gut für die Performance). Erzeugt standardmäßig auch einen `MeshCollider`
+  ("Add MeshCollider to baked mesh") – exakte Kollision, aber inklusive der Noppen
+  auf jedem Baustein, was sich beim Laufen leicht holprig anfühlen kann.
+- **Generate Merged Box Colliders** – Alternative nur für die Kollision: führt
+  benachbarte Bausteine auf derselben Höhe zu möglichst wenigen, komplett flachen
+  Box-Collidern zusammen (keine Noppen, viel glatteres Laufgefühl). Landet unter einem
+  eigenen `Colliders_Baked`-Objekt – kombinierbar mit Bake to Mesh (dort dann "Add
+  MeshCollider" abschalten) oder mit den sichtbaren Original-Bricks.
 - **Export to WorldData Asset** – exportiert das Level in ein `WorldData`-Asset,
   das zur Laufzeit von einem `BrickWorld`-Objekt geladen und verändert werden kann
   (z. B. zerstörbare Wände bei einem Bomberman-artigen Spiel). Nur Boden-Platte und
   Wand-Baustein werden dabei mitgenommen, runde Deko-Teile bleiben absichtlich außen vor.
 
-## Character Builder – Enemy/Player/NPC-Figuren aus den 4 Bricks bauen
+Egal welcher Weg: **Original-Bricks nur ausblenden, wenn die gewählte Alternative auch
+wirklich eine eigene Kollision mitbringt** – sonst fällt der Spieler durch den Boden
+(genau das ist die häufigste Ursache für "ich kann nicht richtig laufen").
 
-Öffnen über **Tools → GameJam → Character Builder**. Funktioniert ähnlich wie der Level
-Painter, baut aber eine kleine Figur statt eines Levels — mit Rotation, damit z. B. ein
-Wand-Baustein seitlich als Arm ausgerichtet werden kann.
-
-1. **Character Root** anlegen (Pflicht — ohne Root kein Bauen).
-2. **Baustein + Material** wählen wie im Level Painter.
-3. **Rotation** (X/Y/Z, je in 90°-Schritten) einstellen, falls der Baustein z. B. liegend als
-   Arm oder Bein ausgerichtet werden soll.
-4. **Platzierung**: `Stapeln` baut automatisch auf dem höchsten Baustein an der Stelle auf
-   (z. B. Platte auf Platte, wie im Level Painter) — dabei ist das Höhen-Feld ausgegraut, da
-   die Höhe automatisch kommt. `Frei` setzt die Höhe manuell (+/− oder Zahl eintippen) — für
-   Arme, Kopf oder seitliche Teile, die nicht einfach aufeinanderstehen.
-5. **Mirror X** anschalten, um z. B. beim Bauen des rechten Arms automatisch eine gespiegelte
-   Kopie für den linken zu bekommen (funktioniert zuverlässig bei Y-Rotationen; bei X/Z-Drehungen
-   ggf. von Hand nachjustieren).
-6. **Start Building** → im Scene-View klicken zum Platzieren, **Erase**-Modus zum Löschen.
-7. Wenn die Figur fertig ist: Namen eingeben, **Save as Prefab** — landet unter
-   `Shared/Prefabs/Characters/`.
-
-Das gespeicherte Prefab danach von Hand als **Body**-Kind in dein Player- oder Enemy-Prefab
-ziehen (die alte Platzhalter-Kapsel/Kugel vorher entfernen).
+Der Asset Builder ist nicht nur für ganze Level gedacht — auch kleinere Zusammenbauten
+(z. B. eine einfache Figur aus ein paar Bricks) lassen sich damit über **Parent Object**
++ Stack/Replace/Line/Mauer erhöhen zusammenstellen; als eigenes Prefab dann über das
+Objekt selbst speichern (Rechtsklick im Project-Fenster → "Prefab erstellen" bzw. das
+`LevelRoot`-Objekt in den Project-Ordner ziehen).
 
 ## Brick Text Generator – Texte, Logos & Buttons aus Bricks
 
-Öffnen über **Tools → GameJam → Brick Text Generator**. Baut Text komplett aus
+Öffnen über **Tools → Prefab Creation → Brick Text Generator**. Baut Text komplett aus
 Wand-Bausteinen (wie im "BRICKROT"/"PLAY"/"EXIT"-Stil): jeder Buchstabe ist 5 Bricks hoch
 und 3 Bricks breit, mit 1 Brick Abstand zwischen Buchstaben. Die ganze Fläche wird als
 durchgehende Wand gefüllt — die Buchstaben-Pixel bekommen ein Material, der Rest ein
@@ -119,7 +115,7 @@ werden sie mit diesem Tool aus Bricks gebaut — kein normaler UI-Text.
 
 ## Icon Painter – Pixel Art aus Bricks
 
-Öffnen über **Tools → GameJam → Icon Painter**. Baut ein leeres Gitter aus Wand-Bausteinen
+Öffnen über **Tools → Prefab Creation → Icon Painter**. Baut ein leeres Gitter aus Wand-Bausteinen
 (gleiche Größe wie im Brick Text Generator, damit Icons und Text-Schilder zueinander passen)
 und lässt dich einzelne Bricks im Scene-View anklicken, um sie umzufärben — Pixel Art, nur
 mit Bricks statt Pixeln.
@@ -172,14 +168,14 @@ Zwei Werkzeuge stehen zur Wahl, je nachdem wie viel du direkt fertig haben wills
 
 ### Create New Minigame (leeres Gerüst)
 
-Über **Tools → GameJam → Create New Minigame...** – dupliziert die Vorlage
+Über **Tools → Game Creation → Create New Minigame...** – dupliziert die Vorlage
 (`_Template`) in einen neuen Ordner mit eigenem Skript, eigener Szene und eigener
-Metadaten-Datei. Danach einmal **Tools → GameJam → Game Registry** öffnen und
+Metadaten-Datei. Danach einmal **Tools → Game Creation → Game Registry** öffnen und
 synchronisieren, damit das neue Spiel im Hub auftaucht.
 
 ### New Game (mit Spieler, Kamera & Start-Level)
 
-Über **Tools → GameJam → New Game...** – macht dasselbe wie oben, fragt aber
+Über **Tools → Game Creation → New Game...** – macht dasselbe wie oben, fragt aber
 zusätzlich:
 
 - **Bewegungsstil** – alle 4 sind fertig eingerichtet:
@@ -208,7 +204,7 @@ anpassen.
 
 ## Menu Flow Editor – Start-/Pause-/Options-Menü gestalten
 
-Öffnen über **Tools → GameJam → Menu Flow Editor**. Hier legst du fest, welche
+Öffnen über **Tools → Game Creation → Menu Flow Editor**. Hier legst du fest, welche
 Menü-Screens es gibt und welcher Button wohin führt – als Diagramm, das du dir
 zusammenklickst, statt es zu programmieren.
 
@@ -227,16 +223,18 @@ zusammenklickst, statt es zu programmieren.
   (Lautstärke-Regler + Vollbild-Schalter) und, sofern ein `Pause`-Screen im
   Graphen existiert, automatischem Pausieren per **Escape** während des Spiels.
 
-**Buttons sind jetzt Brick-Text-Schilder**, kein normales UI-Text mehr (Titel/
-Bodytext und die Options-Regler bleiben uGUI, da Brick-Text keine live
-nachgeführten Werte kann). Dafür wird automatisch eine eigene, feste
-`MenuCamera` gebaut, die unabhängig von der Gameplay-Kamera zuverlässig auf
-die Buttons zeigt – wichtig bei Pause, wo die Gameplay-Kamera ja mitten im
-Spiel irgendwohin zeigen kann. Farbe/Material der Buttons: `MenuFlowGraph`-
-Asset im Inspector öffnen, `Button Letter Material`/`Button Background
-Material` setzen (leer lassen für einen automatischen Fallback). Schon
+**Buttons UND Titel sind Brick-Text-Schilder**, kein normales UI-Text mehr dafür
+(nur noch Bodytext-Absätze und die Options-Regler-Beschriftungen bleiben uGUI,
+da Brick-Text weder Fließtext noch live nachgeführte Werte kann). Der Titel
+sitzt automatisch oberhalb des Button-Stapels auf derselben `MenuCamera`-Bühne.
+Dafür wird automatisch eine eigene, feste `MenuCamera` gebaut, die unabhängig
+von der Gameplay-Kamera zuverlässig auf Titel/Buttons zeigt – wichtig bei
+Pause, wo die Gameplay-Kamera ja mitten im Spiel irgendwohin zeigen kann.
+Farbe/Material: `MenuFlowGraph`-Asset im Inspector öffnen, `Button Letter
+Material`/`Button Background Material` setzen (leer lassen für einen
+automatischen Fallback — gilt für Titel und Buttons gleichermaßen). Schon
 bestehende Menüs (z. B. Brick Dungeon) einmal neu **Generate** klicken, um
-die neuen Brick-Buttons zu bekommen.
+die Brick-Titel zu bekommen.
 
 Das Options-Menü funktioniert auch dann, wenn du die Minigame-Szene ganz allein
 öffnest und direkt Play drückst (ohne über den Hub zu gehen) – in dem Fall
@@ -297,7 +295,7 @@ später ergänzt.
 
 ### Brick-VFX (Effekte aus Bricks)
 
-1. **Tools → GameJam → Brick VFX Builder** öffnen.
+1. **Tools → Prefab Creation → Brick VFX Builder** öffnen.
 2. Fragment-Anzahl/-Größe, Kraft- und Drehimpuls-Bereich sowie Lebensdauer
    einstellen (**Vorschau** zeigt nur Anzahl/Farbe/Größe, keine echte Physik –
    die simuliert erst im Play Mode).
@@ -408,7 +406,7 @@ Phase 3 des Action-Kampf-Fahrplans. Jede Wand aus Bricks kann kletterbar gemacht
 ohne neue Bausteine, nur eine Marker-Komponente.
 
 1. Auf das GameObject einer gewünschten Wand (ein einzelner platzierter Brick, z. B. ein
-   "Wand-Baustein" aus dem Level Painter) die Komponente **`ClimbableSurface`** packen.
+   "Wand-Baustein" aus dem Asset Builder) die Komponente **`ClimbableSurface`** packen.
 2. Im Spiel: davor stehen, **Strg gedrückt halten** → der Spieler dreht sich zur Wand und
    klettert. **WASD** bewegt hoch/runter/seitlich an der Wand entlang.
 3. **Leertaste** springt von der Wand ab (kleiner Schub weg von der Wand + normaler Sprung).
@@ -448,7 +446,7 @@ sie rufen weiterhin feste `IUsable`-Komponenten auf, unabhängig vom Item-Bestan
 
 ## Brick Bar Builder – Lebensbalken & Slider aus Bricks
 
-Öffnen über **Tools → GameJam → Brick Bar Builder**. Baut eine Reihe/einen Stapel aus N Bricks
+Öffnen über **Tools → Prefab Creation → Brick Bar Builder**. Baut eine Reihe/einen Stapel aus N Bricks
 (Typ/Material/Anzahl/Ausrichtung frei wählbar) als Prefab – reines Formular, kein Malen im
 Scene-View nötig.
 
@@ -509,9 +507,9 @@ Helfer.
 
 ## Weitere Werkzeuge
 
-- **Tools → GameJam → Game Registry** – zeigt alle registrierten Minigames, synct
+- **Tools → Game Creation → Game Registry** – zeigt alle registrierten Minigames, synct
   neue Spiele in die Liste, die der Hub anzeigt.
-- **Tools → GameJam → Save Inspector** – zeigt den aktuellen Spielstand, kann ihn
+- **Tools → Utilities → Save Inspector** – zeigt den aktuellen Spielstand, kann ihn
   öffnen oder löschen.
-- **Tools → GameJam → Generate Material Presets** – erzeugt die Stil-Materialien
+- **Tools → Utilities → Generate Material Presets** – erzeugt die Stil-Materialien
   (Stein, Metall, Neon, …) neu, falls mal eines fehlt.

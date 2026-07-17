@@ -101,7 +101,7 @@ namespace SpieleMarmelade.World
             go.transform.localPosition = new Vector3(
                 coord.x * ChunkData.SizeX * WorldConstants.PlateWidth,
                 0f,
-                coord.z * ChunkData.SizeZ * WorldConstants.PlateWidth);
+                coord.z * ChunkData.SizeZ * WorldConstants.PlateDepth);
 
             r = go.AddComponent<ChunkRenderer>();
             r.Init(this, coord, _worldData.GetOrCreateChunk(coord));
@@ -133,11 +133,12 @@ namespace SpieleMarmelade.World
         private static Vector3Int WorldToGlobal(Vector3 worldPos)
         {
             const float pw = WorldConstants.PlateWidth;
+            const float pd = WorldConstants.PlateDepth;
             const float ph = WorldConstants.PlateHeight;
             return new Vector3Int(
                 Mathf.FloorToInt(worldPos.x / pw),
                 Mathf.FloorToInt(worldPos.y / ph),
-                Mathf.FloorToInt(worldPos.z / pw));
+                Mathf.FloorToInt(worldPos.z / pd));
         }
 
         private static (Vector3Int chunk, Vector3Int local) GlobalToChunkLocal(Vector3Int g)

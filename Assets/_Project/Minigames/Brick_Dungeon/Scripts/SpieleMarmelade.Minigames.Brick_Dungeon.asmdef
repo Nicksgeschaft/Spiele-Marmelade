@@ -1,0 +1,18 @@
+{
+    "name": "SpieleMarmelade.Minigames.Brick_Dungeon",
+    "rootNamespace": "SpieleMarmelade.Minigames.Brick_Dungeon",
+    "references": [
+        "SpieleMarmelade.Core",
+        "SpieleMarmelade.Shared",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

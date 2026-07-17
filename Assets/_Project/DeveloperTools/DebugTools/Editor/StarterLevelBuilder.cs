@@ -51,25 +51,26 @@ namespace SpieleMarmelade.DevTools.Editor
             var plateRound = Load("PlateRound");
 
             float pw = WorldConstants.PlateWidth;
+            float pd = WorldConstants.PlateDepth;
             float ph = WorldConstants.PlateHeight;
             const int size = 6;
 
             for (int x = 0; x < size; x++)
             for (int z = 0; z < size; z++)
-                Place(plate, root.transform, new Vector3(x * pw, 0f, z * pw));
+                Place(plate, root.transform, new Vector3(x * pw, 0f, z * pd));
 
             for (int x = -1; x <= size; x++)
             {
-                Place(brick, root.transform, new Vector3(x * pw, ph, -1 * pw));
-                Place(brick, root.transform, new Vector3(x * pw, ph, size * pw));
+                Place(brick, root.transform, new Vector3(x * pw, ph, -1 * pd));
+                Place(brick, root.transform, new Vector3(x * pw, ph, size * pd));
             }
             for (int z = 0; z < size; z++)
             {
-                Place(brick, root.transform, new Vector3(-1 * pw, ph, z * pw));
-                Place(brick, root.transform, new Vector3(size * pw, ph, z * pw));
+                Place(brick, root.transform, new Vector3(-1 * pw, ph, z * pd));
+                Place(brick, root.transform, new Vector3(size * pw, ph, z * pd));
             }
 
-            Place(plateRound, root.transform, new Vector3(2 * pw, ph, 2 * pw));
+            Place(plateRound, root.transform, new Vector3(2 * pw, ph, 2 * pd));
 
             return root;
         }
@@ -85,15 +86,16 @@ namespace SpieleMarmelade.DevTools.Editor
             var plateRound = Load("PlateRound");
 
             float pw = WorldConstants.PlateWidth;
+            float pd = WorldConstants.PlateDepth;
             float ph = WorldConstants.PlateHeight;
             const int size = 8;
 
             for (int x = 0; x < size; x++)
             for (int z = 0; z < size; z++)
-                Place(plate, root.transform, new Vector3(x * pw, 0f, z * pw));
+                Place(plate, root.transform, new Vector3(x * pw, 0f, z * pd));
 
-            Place(plateRound, root.transform, new Vector3(2 * pw, ph, 2 * pw));
-            Place(plateRound, root.transform, new Vector3(5 * pw, ph, 5 * pw));
+            Place(plateRound, root.transform, new Vector3(2 * pw, ph, 2 * pd));
+            Place(plateRound, root.transform, new Vector3(5 * pw, ph, 5 * pd));
 
             return root;
         }

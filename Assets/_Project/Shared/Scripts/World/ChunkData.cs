@@ -34,25 +34,28 @@ namespace SpieleMarmelade.World
         public static bool InBounds(int x, int y, int z) =>
             x >= 0 && x < SizeX && y >= 0 && y < SizeY && z >= 0 && z < SizeZ;
 
-        // Convert chunk-local plate-unit position to world position
+        // Convert chunk-local plate-unit position to world position — X and Z use separate
+        // constants because the brick footprint isn't a perfect square (see WorldConstants).
         public static Vector3 LocalToWorld(Vector3Int chunkCoord, int lx, int ly, int lz)
         {
             const float pw = WorldConstants.PlateWidth;
+            const float pd = WorldConstants.PlateDepth;
             const float ph = WorldConstants.PlateHeight;
             return new Vector3(
                 (chunkCoord.x * SizeX + lx) * pw,
                 ly * ph,
-                (chunkCoord.z * SizeZ + lz) * pw);
+                (chunkCoord.z * SizeZ + lz) * pd);
         }
 
         // Convert world position to chunk coord + local plate position
         public static (Vector3Int chunk, Vector3Int local) WorldToChunkLocal(Vector3 worldPos)
         {
             const float pw = WorldConstants.PlateWidth;
+            const float pd = WorldConstants.PlateDepth;
             const float ph = WorldConstants.PlateHeight;
             int gx = Mathf.FloorToInt(worldPos.x / pw);
             int gy = Mathf.FloorToInt(worldPos.y / ph);
-            int gz = Mathf.FloorToInt(worldPos.z / pw);
+            int gz = Mathf.FloorToInt(worldPos.z / pd);
             int cx = Mathf.FloorToInt((float)gx / SizeX);
             int cz = Mathf.FloorToInt((float)gz / SizeZ);
             return (new Vector3Int(cx, 0, cz),

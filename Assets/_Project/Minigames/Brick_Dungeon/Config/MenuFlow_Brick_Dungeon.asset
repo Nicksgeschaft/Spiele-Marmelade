@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cbd108963ef4a0f997e449f80bfc7d8, type: 3}
+  m_Name: MenuFlow_Brick_Dungeon
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.MenuFlow.MenuFlowGraph
+  screens:
+  - id: e1e8efa19f6a468e8e8b0e14bf587254
+    kind: 0
+    title: Main Menu
+    bodyText: 
+    buttons:
+    - label: Play
+      targetScreenId: 446c73ffa88f4f90a7358f757c02cbad
+      specialAction: 0
+    - label: Options
+      targetScreenId: aee1be4b62894653aa36513275077e74
+      specialAction: 0
+    - label: Credits
+      targetScreenId: 61267502f88b47a3955cd4c9e89779cd
+      specialAction: 0
+    - label: Quit
+      targetScreenId: 
+      specialAction: 1
+    editorPosition: {x: 40, y: 40}
+  - id: aee1be4b62894653aa36513275077e74
+    kind: 1
+    title: Options
+    bodyText: 
+    buttons:
+    - label: Back
+      targetScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+      specialAction: 0
+    editorPosition: {x: 340, y: 40}
+  - id: 61267502f88b47a3955cd4c9e89779cd
+    kind: 0
+    title: Credits
+    bodyText: Made during a game jam with Spiele Marmelade.
+    buttons:
+    - label: Back
+      targetScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+      specialAction: 0
+    editorPosition: {x: 340, y: 180}
+  - id: 446c73ffa88f4f90a7358f757c02cbad
+    kind: 3
+    title: Game
+    bodyText: 
+    buttons: []
+    editorPosition: {x: 40, y: 180}
+  - id: a3c035643817434ba67f9abb61b10810
+    kind: 2
+    title: Pause
+    bodyText: 
+    buttons:
+    - label: Resume
+      targetScreenId: 
+      specialAction: 2
+    - label: Options
+      targetScreenId: aee1be4b62894653aa36513275077e74
+      specialAction: 0
+    - label: Main Menu
+      targetScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+      specialAction: 0
+    - label: Quit
+      targetScreenId: 
+      specialAction: 1
+    editorPosition: {x: 40, y: 320}
+  startScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+  buttonHasBackground: 1
+  buttonBackgroundMaterial: {fileID: 0}
+  buttonBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
+  buttonLetterMaterial: {fileID: 0}
+  buttonLetterColors:
+  - {r: 1, g: 0.033018887, b: 0.033018887, a: 1}
+  sliderFilledColor: {r: 0.39066333, g: 1, b: 0, a: 1}
+  sliderUnfilledColor: {r: 0.5188679, g: 0.5188679, b: 0.5188679, a: 1}

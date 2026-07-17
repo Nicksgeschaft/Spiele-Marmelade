@@ -28,24 +28,71 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         [SerializeField] private string pauseSfxId;
         [SerializeField] private string resumeSfxId;
 
-        // Filled in by the Menu Flow Editor's Generate step: screenId -> its panel/sign-group GameObject.
-        private readonly Dictionary<string, GameObject> _panels = new();
-        private readonly Dictionary<string, GameObject> _brickSigns = new();
+        // Filled in by the Menu Flow Editor's Generate step: screenId -> its panel/sign-group
+        // GameObject. Must be a serialized list, not a plain Dictionary — Generate() calls
+        // RegisterPanel/RegisterBrickSigns on the live component at EDITOR time, and a
+        // non-[SerializeField] Dictionary never survives into the saved scene or a Play-mode
+        // domain reload, so at runtime it would just be empty and every screen (main menu,
+        // options, pause, ...) would stay in whatever active state Generate() last left it in
+        // — i.e. all visible/overlapping at once instead of only the current screen.
+        [Serializable]
+        private struct ScreenBinding
+        {
+            public string screenId;
+            public GameObject panel;
+            public GameObject brickSigns;
+        }
+
+        [SerializeField] private List<ScreenBinding> bindings = new();
 
         private Camera _gameplayCamera;
         private string _pauseScreenId;
         private bool   _isPaused;
         private bool   _gameActive;
 
-        public void RegisterPanel(string screenId, GameObject panel) => _panels[screenId] = panel;
-        public void RegisterBrickSigns(string screenId, GameObject signRoot) => _brickSigns[screenId] = signRoot;
+        public void RegisterPanel(string screenId, GameObject panel) =>
+            SetBinding(screenId, panel: panel);
+        public void RegisterBrickSigns(string screenId, GameObject signRoot) =>
+            SetBinding(screenId, brickSigns: signRoot);
+
+        private void SetBinding(string screenId, GameObject panel = null, GameObject brickSigns = null)
+        {
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                if (bindings[i].screenId != screenId) continue;
+                var b = bindings[i];
+                if (panel != null) b.panel = panel;
+                if (brickSigns != null) b.brickSigns = brickSigns;
+                bindings[i] = b;
+                return;
+            }
+            bindings.Add(new ScreenBinding { screenId = screenId, panel = panel, brickSigns = brickSigns });
+        }
+
+        private GameObject FindPanel(string screenId)
+        {
+            foreach (var b in bindings) if (b.screenId == screenId) return b.panel;
+            return null;
+        }
+
+        private GameObject FindBrickSigns(string screenId)
+        {
+            foreach (var b in bindings) if (b.screenId == screenId) return b.brickSigns;
+            return null;
+        }
+
+        private void HideAllScreens()
+        {
+            foreach (var b in bindings)
+            {
+                if (b.panel != null) b.panel.SetActive(false);
+                if (b.brickSigns != null) b.brickSigns.SetActive(false);
+            }
+        }
 
         private void Start()
         {
-            foreach (var panel in _panels.Values)
-                if (panel != null) panel.SetActive(false);
-            foreach (var signs in _brickSigns.Values)
-                if (signs != null) signs.SetActive(false);
+            HideAllScreens();
 
             _pauseScreenId = FindFirst(MenuScreenKind.Pause)?.id;
             _gameActive = false;
@@ -68,15 +115,12 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
                 return;
             }
 
-            foreach (var panel in _panels.Values)
-                if (panel != null) panel.SetActive(false);
-            foreach (var signs in _brickSigns.Values)
-                if (signs != null) signs.SetActive(false);
+            HideAllScreens();
 
-            if (_panels.TryGetValue(screenId, out var target) && target != null)
-                target.SetActive(true);
-            if (_brickSigns.TryGetValue(screenId, out var signGroup) && signGroup != null)
-                signGroup.SetActive(true);
+            var target = FindPanel(screenId);
+            if (target != null) target.SetActive(true);
+            var signGroup = FindBrickSigns(screenId);
+            if (signGroup != null) signGroup.SetActive(true);
 
             SetMenuCameraActive(true);
         }
@@ -112,10 +156,7 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
 
         private void EnterGame()
         {
-            foreach (var panel in _panels.Values)
-                if (panel != null) panel.SetActive(false);
-            foreach (var signs in _brickSigns.Values)
-                if (signs != null) signs.SetActive(false);
+            HideAllScreens();
 
             if (gameplayRoot != null)
             {
@@ -133,10 +174,10 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         {
             if (_pauseScreenId != null)
             {
-                if (_panels.TryGetValue(_pauseScreenId, out var pausePanel) && pausePanel != null)
-                    pausePanel.SetActive(false);
-                if (_brickSigns.TryGetValue(_pauseScreenId, out var pauseSigns) && pauseSigns != null)
-                    pauseSigns.SetActive(false);
+                var pausePanel = FindPanel(_pauseScreenId);
+                if (pausePanel != null) pausePanel.SetActive(false);
+                var pauseSigns = FindBrickSigns(_pauseScreenId);
+                if (pauseSigns != null) pauseSigns.SetActive(false);
             }
 
             SetMenuCameraActive(false);
@@ -169,10 +210,10 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
 
             _isPaused = true;
             Time.timeScale = 0f;
-            if (_panels.TryGetValue(_pauseScreenId, out var pausePanel) && pausePanel != null)
-                pausePanel.SetActive(true);
-            if (_brickSigns.TryGetValue(_pauseScreenId, out var pauseSigns) && pauseSigns != null)
-                pauseSigns.SetActive(true);
+            var pausePanel = FindPanel(_pauseScreenId);
+            if (pausePanel != null) pausePanel.SetActive(true);
+            var pauseSigns = FindBrickSigns(_pauseScreenId);
+            if (pauseSigns != null) pauseSigns.SetActive(true);
             SetMenuCameraActive(true);
             SfxPlayer.PlayUi(pauseSfxId);
         }

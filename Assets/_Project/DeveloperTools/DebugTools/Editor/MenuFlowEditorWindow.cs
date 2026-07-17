@@ -213,6 +213,9 @@ namespace SpieleMarmelade.DevTools.Editor
             {
                 _inspectorScroll = EditorGUILayout.BeginScrollView(_inspectorScroll);
 
+                DrawStylingSection();
+                EditorGUILayout.Space();
+
                 var node = _graph.FindScreen(_selectedScreenId);
                 if (node == null)
                 {
@@ -225,6 +228,59 @@ namespace SpieleMarmelade.DevTools.Editor
 
                 EditorGUILayout.EndScrollView();
             }
+        }
+
+        // Graph-wide styling (applies to every screen this graph generates), set here before
+        // clicking Generate rather than by hunting for the graph .asset in the Project window.
+        private bool _showStyling = true;
+
+        private void DrawStylingSection()
+        {
+            _showStyling = EditorGUILayout.Foldout(_showStyling, "Darstellung (vor Generate einstellen)", true);
+            if (!_showStyling) return;
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Button-Hintergrund", EditorStyles.boldLabel);
+                _graph.buttonHasBackground = EditorGUILayout.ToggleLeft("Hintergrund-Bricks", _graph.buttonHasBackground);
+                using (new EditorGUI.DisabledScope(!_graph.buttonHasBackground))
+                {
+                    _graph.buttonBackgroundMaterial = (Material)EditorGUILayout.ObjectField(
+                        "Material (optional)", _graph.buttonBackgroundMaterial, typeof(Material), false);
+                    using (new EditorGUI.DisabledScope(_graph.buttonBackgroundMaterial != null))
+                        _graph.buttonBackgroundColor = EditorGUILayout.ColorField("Farbe", _graph.buttonBackgroundColor);
+                }
+
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Button-Schrift", EditorStyles.boldLabel);
+                _graph.buttonLetterMaterial = (Material)EditorGUILayout.ObjectField(
+                    "Material (optional)", _graph.buttonLetterMaterial, typeof(Material), false);
+
+                using (new EditorGUI.DisabledScope(_graph.buttonLetterMaterial != null))
+                {
+                    EditorGUILayout.LabelField("Farben (mehrere = wechseln pro Buchstabe)");
+                    int colorToRemove = -1;
+                    for (int i = 0; i < _graph.buttonLetterColors.Count; i++)
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            _graph.buttonLetterColors[i] = EditorGUILayout.ColorField(_graph.buttonLetterColors[i]);
+                            if (GUILayout.Button("x", GUILayout.Width(20))) colorToRemove = i;
+                        }
+                    }
+                    if (colorToRemove >= 0) _graph.buttonLetterColors.RemoveAt(colorToRemove);
+
+                    if (GUILayout.Button("+ Farbe hinzufügen"))
+                        _graph.buttonLetterColors.Add(Color.white);
+                }
+
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Options-Slider", EditorStyles.boldLabel);
+                _graph.sliderFilledColor = EditorGUILayout.ColorField("Gefüllt", _graph.sliderFilledColor);
+                _graph.sliderUnfilledColor = EditorGUILayout.ColorField("Leer", _graph.sliderUnfilledColor);
+            }
+
+            if (GUI.changed) EditorUtility.SetDirty(_graph);
         }
 
         private void DrawScreenInspector(MenuScreenNode node)

@@ -40,7 +40,19 @@ namespace SpieleMarmelade.DevTools.Editor
             _brickType = (BrickType)EditorGUILayout.EnumPopup("Brick-Typ", _brickType);
             _material = (Material)EditorGUILayout.ObjectField("Material", _material, typeof(Material), false);
             _count = Mathf.Max(1, EditorGUILayout.IntField("Anzahl", _count));
-            _orientation = (Orientation)EditorGUILayout.EnumPopup("Ausrichtung", _orientation);
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Ausrichtung");
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                OrientationBtn("↔  Nebeneinander (Row)", Orientation.Row);
+                OrientationBtn("↕  Übereinander (Stack)", Orientation.Stack);
+            }
+            EditorGUILayout.HelpBox(
+                _orientation == Orientation.Row
+                    ? "Bricks werden entlang X aufgereiht (z.B. für einen horizontalen Lebensbalken)."
+                    : "Bricks werden entlang Y gestapelt (z.B. für einen vertikalen Balken).",
+                MessageType.None);
 
             EditorGUILayout.Space();
             _mode = (Mode)EditorGUILayout.EnumPopup("Modus", _mode);
@@ -57,6 +69,16 @@ namespace SpieleMarmelade.DevTools.Editor
                 if (GUILayout.Button("Als Prefab speichern"))
                     BuildAndSave();
             }
+        }
+
+        private void OrientationBtn(string label, Orientation o)
+        {
+            bool sel = _orientation == o;
+            var  old = GUI.backgroundColor;
+            GUI.backgroundColor = sel ? new Color(0.45f, 0.75f, 1.00f) : GUI.backgroundColor;
+            if (GUILayout.Toggle(sel, label, EditorStyles.miniButton, GUILayout.Height(24)) && !sel)
+                _orientation = o;
+            GUI.backgroundColor = old;
         }
 
         private void BuildAndSave()

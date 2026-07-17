@@ -25,7 +25,15 @@ namespace SpieleMarmelade.Shared.World
         [SerializeField] private float value;
         [SerializeField] private string dragStartSfxId;
 
-        public BrickSliderValueChanged OnValueChanged;
+        [Header("── Fill-Optik (optional) ──────────────")]
+        [Tooltip("Track-Bricks von links bis zum Griff, in Bau-Reihenfolge. Leer lassen, um nur den Griff zu bewegen ohne Einfärben.")]
+        [SerializeField] private GameObject[] segments;
+        [Tooltip("Farbe für Segmente links vom Griff (\"gefüllt\").")]
+        [SerializeField] private Material filledMaterial;
+        [Tooltip("Farbe für Segmente rechts vom Griff (\"leer\").")]
+        [SerializeField] private Material unfilledMaterial;
+
+        public BrickSliderValueChanged OnValueChanged = new();
 
         private bool _dragging;
         private Vector3 _axisWorld;
@@ -76,7 +84,25 @@ namespace SpieleMarmelade.Shared.World
             value = Mathf.Clamp(newValue, minValue, maxValue);
             float t = maxValue > minValue ? (value - minValue) / (maxValue - minValue) : 0f;
             if (handle != null) handle.position = transform.position + _axisWorld * (t * trackLength);
+            ApplySegmentColors(t);
             if (notify) OnValueChanged?.Invoke(value);
+        }
+
+        // Recolors the track bricks left of the handle as "filled" and the rest as "unfilled" —
+        // a lot of bricks laid down in a row, one dark handle brick on top, everything from the
+        // left up to the handle turned light — the brick equivalent of a filled slider track.
+        private void ApplySegmentColors(float t)
+        {
+            if (segments == null || segments.Length == 0) return;
+            int filledCount = Mathf.RoundToInt(t * segments.Length);
+            for (int i = 0; i < segments.Length; i++)
+            {
+                if (segments[i] == null) continue;
+                var mat = i < filledCount ? filledMaterial : unfilledMaterial;
+                if (mat == null) continue;
+                foreach (var mr in segments[i].GetComponentsInChildren<MeshRenderer>())
+                    mr.sharedMaterial = mat;
+            }
         }
     }
 }

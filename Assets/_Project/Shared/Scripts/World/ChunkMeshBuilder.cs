@@ -8,7 +8,11 @@ namespace SpieleMarmelade.World
     // Returns one Mesh per unique material index used.
     public static class ChunkMeshBuilder
     {
+        // X and Z use separate constants — the brick footprint isn't a perfect square
+        // (see WorldConstants.PlateWidth/PlateDepth), so a quad's far edge along Z must
+        // extend by PD, not PW, or adjacent chunk/brick quads leave a hairline gap.
         private const float PW = WorldConstants.PlateWidth;
+        private const float PD = WorldConstants.PlateDepth;
         private const float PH = WorldConstants.PlateHeight;
 
         // Result: list of (mesh, materialIndex) pairs
@@ -44,7 +48,7 @@ namespace SpieleMarmelade.World
                 float brickH  = BrickShapeInfo.HeightInPlates(cell.type) * PH;
                 float wx      = x * PW;
                 float wy      = y * PH;
-                float wz      = z * PW;
+                float wz      = z * PD;
 
                 // Top face — exposed if cell above is empty
                 int topY = y + BrickShapeInfo.HeightInPlates(cell.type);
@@ -52,15 +56,15 @@ namespace SpieleMarmelade.World
                     acc.AddQuad(
                         new Vector3(wx,      wy + brickH, wz),
                         new Vector3(wx + PW, wy + brickH, wz),
-                        new Vector3(wx + PW, wy + brickH, wz + PW),
-                        new Vector3(wx,      wy + brickH, wz + PW),
+                        new Vector3(wx + PW, wy + brickH, wz + PD),
+                        new Vector3(wx,      wy + brickH, wz + PD),
                         Vector3.up);
 
                 // Bottom face
                 if (IsSolidAt(chunk, neighbors, x, y - 1, z) == false)
                     acc.AddQuad(
-                        new Vector3(wx,      wy, wz + PW),
-                        new Vector3(wx + PW, wy, wz + PW),
+                        new Vector3(wx,      wy, wz + PD),
+                        new Vector3(wx + PW, wy, wz + PD),
                         new Vector3(wx + PW, wy, wz),
                         new Vector3(wx,      wy, wz),
                         Vector3.down);
@@ -68,8 +72,8 @@ namespace SpieleMarmelade.World
                 // +X face
                 if (IsSolidAt(chunk, neighbors, x + 1, y, z) == false)
                     acc.AddQuad(
-                        new Vector3(wx + PW, wy,          wz + PW),
-                        new Vector3(wx + PW, wy + brickH, wz + PW),
+                        new Vector3(wx + PW, wy,          wz + PD),
+                        new Vector3(wx + PW, wy + brickH, wz + PD),
                         new Vector3(wx + PW, wy + brickH, wz),
                         new Vector3(wx + PW, wy,          wz),
                         Vector3.right);
@@ -79,17 +83,17 @@ namespace SpieleMarmelade.World
                     acc.AddQuad(
                         new Vector3(wx, wy,          wz),
                         new Vector3(wx, wy + brickH, wz),
-                        new Vector3(wx, wy + brickH, wz + PW),
-                        new Vector3(wx, wy,          wz + PW),
+                        new Vector3(wx, wy + brickH, wz + PD),
+                        new Vector3(wx, wy,          wz + PD),
                         Vector3.left);
 
                 // +Z face
                 if (IsSolidAt(chunk, neighbors, x, y, z + 1) == false)
                     acc.AddQuad(
-                        new Vector3(wx,      wy,          wz + PW),
-                        new Vector3(wx,      wy + brickH, wz + PW),
-                        new Vector3(wx + PW, wy + brickH, wz + PW),
-                        new Vector3(wx + PW, wy,          wz + PW),
+                        new Vector3(wx,      wy,          wz + PD),
+                        new Vector3(wx,      wy + brickH, wz + PD),
+                        new Vector3(wx + PW, wy + brickH, wz + PD),
+                        new Vector3(wx + PW, wy,          wz + PD),
                         Vector3.forward);
 
                 // -Z face

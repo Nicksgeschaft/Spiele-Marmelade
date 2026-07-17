@@ -25,6 +25,8 @@ namespace SpieleMarmelade.Shared.Combat
 
         [Header("── Attack ────────────────────────────")]
         [SerializeField] private MeleeHitbox hitbox;
+        [Tooltip("Optional — spielt bei jedem Angriff eine zufällige Schwung-Animation (siehe SwordSwingAnimator).")]
+        [SerializeField] private SwordSwingAnimator swingAnimator;
         [SerializeField] private float swingDuration = 0.25f;
         [SerializeField] private float cooldown = 0.4f;
 
@@ -131,6 +133,7 @@ namespace SpieleMarmelade.Shared.Combat
             }
 
             hitbox.Activate(swingDuration, GetBaseDamage() * multiplier);
+            swingAnimator?.PlayRandomSwing(swingDuration);
             SfxPlayer.Play(attackSfxId);
         }
 
@@ -140,6 +143,7 @@ namespace SpieleMarmelade.Shared.Combat
 
             _nextAttackTime = Time.time + heavyAttackCooldown;
             hitbox.Activate(heavyAttackSwingDuration, GetBaseDamage() * heavyAttackDamageMultiplier);
+            swingAnimator?.PlayRandomSwing(heavyAttackSwingDuration);
             ResetCombo();
             SfxPlayer.Play(attackSfxId);
         }

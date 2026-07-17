@@ -42,8 +42,8 @@ namespace SpieleMarmelade.Shared.Movement
             if (Mathf.Abs(raw.x) >= Mathf.Abs(raw.y))
             {
                 dx = raw.x * moveSpeed * dt;
-                float targetZ = Mathf.Round(pos.z / WorldConstants.PlateWidth) * WorldConstants.PlateWidth;
-                dz = Mathf.MoveTowards(pos.z, targetZ, snapSpeed * WorldConstants.PlateWidth * dt) - pos.z;
+                float targetZ = Mathf.Round(pos.z / WorldConstants.PlateDepth) * WorldConstants.PlateDepth;
+                dz = Mathf.MoveTowards(pos.z, targetZ, snapSpeed * WorldConstants.PlateDepth * dt) - pos.z;
             }
             else
             {

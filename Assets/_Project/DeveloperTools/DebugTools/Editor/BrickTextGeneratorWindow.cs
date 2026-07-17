@@ -21,6 +21,7 @@ namespace SpieleMarmelade.DevTools.Editor
         private int    _letterMatIndex;
         private int    _bgMatIndex;
         private bool   _asButton = true;
+        private bool   _includeBackground = true;
 
         private Material[] _mats     = System.Array.Empty<Material>();
         private string[]   _matNames = System.Array.Empty<string>();
@@ -80,12 +81,18 @@ namespace SpieleMarmelade.DevTools.Editor
                 if (_matNames.Length > 0)
                 {
                     _letterMatIndex = EditorGUILayout.Popup("Buchstaben-Material", Mathf.Clamp(_letterMatIndex, 0, _matNames.Length - 1), _matNames);
-                    _bgMatIndex     = EditorGUILayout.Popup("Hintergrund-Material", Mathf.Clamp(_bgMatIndex, 0, _matNames.Length - 1), _matNames);
+                    using (new EditorGUI.DisabledScope(!_includeBackground))
+                        _bgMatIndex = EditorGUILayout.Popup("Hintergrund-Material", Mathf.Clamp(_bgMatIndex, 0, _matNames.Length - 1), _matNames);
                 }
                 else
                 {
                     EditorGUILayout.HelpBox("Keine Materialien unter Shared/Materials gefunden.", MessageType.Warning);
                 }
+
+                GUILayout.Space(6);
+                _includeBackground = EditorGUILayout.ToggleLeft(
+                    "Background-Bricks einbauen (aus = nur die Buchstaben-Pixel selbst, offene Lücken dazwischen)",
+                    _includeBackground);
 
                 GUILayout.Space(6);
                 _asButton = EditorGUILayout.ToggleLeft("Als Button nutzbar (klickbar per Mausklick, BrickTextButton)", _asButton);
@@ -140,7 +147,7 @@ namespace SpieleMarmelade.DevTools.Editor
             var letterMat = _mats[Mathf.Clamp(_letterMatIndex, 0, _mats.Length - 1)];
             var bgMat     = _mats[Mathf.Clamp(_bgMatIndex, 0, _mats.Length - 1)];
 
-            var result = BrickTextBuilder.Build(brickPrefab, _text, letterMat, bgMat, _objectName);
+            var result = BrickTextBuilder.Build(brickPrefab, _text, letterMat, bgMat, _objectName, _includeBackground);
             if (_asButton) BrickTextBuilder.MakeClickable(result);
 
             if (!AssetDatabase.IsValidFolder(OutputFolder))

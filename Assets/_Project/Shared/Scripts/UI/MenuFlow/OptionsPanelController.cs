@@ -1,47 +1,49 @@
+using SpieleMarmelade.Shared.World;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
     // Wires an Options panel's slider/toggle widgets to MenuSettingsBridge. Attached to the
-    // generated Options screen panel by the Menu Flow Editor.
+    // generated Options screen panel by the Menu Flow Editor. Everything here is brick-built on
+    // the MenuStageRoot now (BrickSliderTrack, IconToggleButton) — no uGUI widgets left at all
+    // for Options, so there's nothing left to keep aligned with a separate 2D counterpart.
     public class OptionsPanelController : MonoBehaviour
     {
-        [SerializeField] private Slider masterVolumeSlider;
-        [SerializeField] private Slider musicVolumeSlider;
-        [SerializeField] private Slider sfxVolumeSlider;
-        [SerializeField] private Toggle fullscreenToggle;
+        [SerializeField] private BrickSliderTrack masterVolumeSlider;
+        [SerializeField] private BrickSliderTrack musicVolumeSlider;
+        [SerializeField] private BrickSliderTrack sfxVolumeSlider;
+        [SerializeField] private IconToggleButton fullscreenButton;
 
         private void OnEnable()
         {
             if (masterVolumeSlider != null)
             {
-                masterVolumeSlider.SetValueWithoutNotify(MenuSettingsBridge.GetMasterVolume());
-                masterVolumeSlider.onValueChanged.AddListener(MenuSettingsBridge.SetMasterVolume);
+                masterVolumeSlider.SetValue(MenuSettingsBridge.GetMasterVolume(), notify: false);
+                masterVolumeSlider.OnValueChanged.AddListener(MenuSettingsBridge.SetMasterVolume);
             }
             if (musicVolumeSlider != null)
             {
-                musicVolumeSlider.SetValueWithoutNotify(MenuSettingsBridge.GetMusicVolume());
-                musicVolumeSlider.onValueChanged.AddListener(MenuSettingsBridge.SetMusicVolume);
+                musicVolumeSlider.SetValue(MenuSettingsBridge.GetMusicVolume(), notify: false);
+                musicVolumeSlider.OnValueChanged.AddListener(MenuSettingsBridge.SetMusicVolume);
             }
             if (sfxVolumeSlider != null)
             {
-                sfxVolumeSlider.SetValueWithoutNotify(MenuSettingsBridge.GetSfxVolume());
-                sfxVolumeSlider.onValueChanged.AddListener(MenuSettingsBridge.SetSfxVolume);
+                sfxVolumeSlider.SetValue(MenuSettingsBridge.GetSfxVolume(), notify: false);
+                sfxVolumeSlider.OnValueChanged.AddListener(MenuSettingsBridge.SetSfxVolume);
             }
-            if (fullscreenToggle != null)
+            if (fullscreenButton != null)
             {
-                fullscreenToggle.SetIsOnWithoutNotify(MenuSettingsBridge.GetFullscreen());
-                fullscreenToggle.onValueChanged.AddListener(MenuSettingsBridge.SetFullscreen);
+                fullscreenButton.SetIsOn(MenuSettingsBridge.GetFullscreen(), notify: false);
+                fullscreenButton.OnValueChanged.AddListener(MenuSettingsBridge.SetFullscreen);
             }
         }
 
         private void OnDisable()
         {
-            masterVolumeSlider?.onValueChanged.RemoveListener(MenuSettingsBridge.SetMasterVolume);
-            musicVolumeSlider?.onValueChanged.RemoveListener(MenuSettingsBridge.SetMusicVolume);
-            sfxVolumeSlider?.onValueChanged.RemoveListener(MenuSettingsBridge.SetSfxVolume);
-            fullscreenToggle?.onValueChanged.RemoveListener(MenuSettingsBridge.SetFullscreen);
+            masterVolumeSlider?.OnValueChanged.RemoveListener(MenuSettingsBridge.SetMasterVolume);
+            musicVolumeSlider?.OnValueChanged.RemoveListener(MenuSettingsBridge.SetMusicVolume);
+            sfxVolumeSlider?.OnValueChanged.RemoveListener(MenuSettingsBridge.SetSfxVolume);
+            fullscreenButton?.OnValueChanged.RemoveListener(MenuSettingsBridge.SetFullscreen);
         }
     }
 }

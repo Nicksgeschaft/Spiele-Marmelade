@@ -25,6 +25,10 @@ namespace SpieleMarmelade.Shared.Movement
         [SerializeField] private float gravity = -2f;
 
         [Header("── Brick-Grid Feel ───────────────────────")]
+        [Tooltip("Zieht die Bewegung leicht in Richtung der nächsten Brick-Rasterzelle. Kann bei " +
+                 "normalem Lauftempo ruckelig wirken (die 'nächste Zelle' springt beim Überqueren " +
+                 "der Zellmitte um) — bei Bedarf einfach ausschalten.")]
+        [SerializeField] private bool useGridSnap = false;
         [Tooltip("0 = kein Einrasten, 1 = hart aufs Raster geklemmt. Klein halten für ein subtiles Gefühl.")]
         [SerializeField, Range(0f, 1f)] private float gridSnapStrength = 0.15f;
 
@@ -154,12 +158,12 @@ namespace SpieleMarmelade.Shared.Movement
         // the input to _cc.Move(), never teleport the transform directly.
         private Vector3 ApplyGridSnap(Vector3 move, float dt)
         {
-            if (gridSnapStrength <= 0f || move.sqrMagnitude < 0.0001f || dt <= 0f) return move;
+            if (!useGridSnap || gridSnapStrength <= 0f || move.sqrMagnitude < 0.0001f || dt <= 0f) return move;
 
             Vector3 current = _cc.transform.position;
             Vector3 nextPos = current + move * dt;
             float snappedX = Mathf.Round(nextPos.x / WorldConstants.PlateWidth) * WorldConstants.PlateWidth;
-            float snappedZ = Mathf.Round(nextPos.z / WorldConstants.PlateWidth) * WorldConstants.PlateWidth;
+            float snappedZ = Mathf.Round(nextPos.z / WorldConstants.PlateDepth) * WorldConstants.PlateDepth;
             Vector3 biasedNext = Vector3.Lerp(nextPos, new Vector3(snappedX, nextPos.y, snappedZ), gridSnapStrength);
 
             Vector3 biasedMove = (biasedNext - current) / dt;

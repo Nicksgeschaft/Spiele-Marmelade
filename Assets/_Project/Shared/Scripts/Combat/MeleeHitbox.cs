@@ -6,10 +6,13 @@ namespace SpieleMarmelade.Shared.Combat
 {
     // A trigger volume that deals damage to Health components it touches while active. Call
     // Activate() for a short window (e.g. during an attack swing) — each target is only hit
-    // once per activation, even if it stays inside the volume for the whole window. Lives on
-    // its own child GameObject (starts inactive) so toggling it doesn't affect its parent.
-    // Re-enabling an already-overlapping collider reliably fires OnTriggerEnter again in
-    // Unity's physics system, so no extra "already inside" bookkeeping is needed.
+    // once per activation, even if it stays inside the volume for the whole window.
+    //
+    // Only the Collider itself is toggled, not the GameObject — this typically lives on the
+    // same object as the visible weapon mesh (e.g. SwordBlade), which should stay visible and
+    // animatable (see SwordSwingAnimator) at all times instead of blinking in/out with the hit
+    // window. Re-enabling an already-overlapping collider reliably fires OnTriggerEnter again
+    // in Unity's physics system, so no extra "already inside" bookkeeping is needed.
     [RequireComponent(typeof(Collider))]
     public class MeleeHitbox : MonoBehaviour
     {
@@ -20,13 +23,15 @@ namespace SpieleMarmelade.Shared.Combat
         /// controllers (e.g. combo multipliers) scale a known baseline instead of guessing.</summary>
         public float Damage => damage;
 
+        private Collider _collider;
         private readonly HashSet<Health> _hitThisActivation = new();
         private float _activeUntil = -1f;
 
         private void Awake()
         {
-            GetComponent<Collider>().isTrigger = true;
-            gameObject.SetActive(false);
+            _collider = GetComponent<Collider>();
+            _collider.isTrigger = true;
+            _collider.enabled = false;
         }
 
         public void Activate(float duration, float? damageOverride = null)
@@ -34,12 +39,12 @@ namespace SpieleMarmelade.Shared.Combat
             if (damageOverride.HasValue) damage = damageOverride.Value;
             _hitThisActivation.Clear();
             _activeUntil = Time.time + duration;
-            gameObject.SetActive(true);
+            _collider.enabled = true;
         }
 
         private void Update()
         {
-            if (Time.time >= _activeUntil) gameObject.SetActive(false);
+            if (_collider.enabled && Time.time >= _activeUntil) _collider.enabled = false;
         }
 
         private void OnTriggerEnter(Collider other)
