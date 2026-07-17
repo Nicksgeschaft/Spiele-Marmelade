@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using SpieleMarmelade.Shared.UI.MenuFlow;
 using UnityEditor;
@@ -92,6 +93,7 @@ namespace SpieleMarmelade.DevTools.Editor
 
             var graph = CreateInstance<MenuFlowGraph>();
             SeedDefaultGraph(graph);
+            ApplyRememberedAppearance(graph);
             AssetDatabase.CreateAsset(graph, path);
             AssetDatabase.SaveAssets();
             _graph = graph;
@@ -239,6 +241,7 @@ namespace SpieleMarmelade.DevTools.Editor
             _showStyling = EditorGUILayout.Foldout(_showStyling, "Darstellung (vor Generate einstellen)", true);
             if (!_showStyling) return;
 
+            EditorGUI.BeginChangeCheck();
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 EditorGUILayout.LabelField("Button-Hintergrund", EditorStyles.boldLabel);
@@ -280,8 +283,58 @@ namespace SpieleMarmelade.DevTools.Editor
                 _graph.sliderUnfilledColor = EditorGUILayout.ColorField("Leer", _graph.sliderUnfilledColor);
             }
 
-            if (GUI.changed) EditorUtility.SetDirty(_graph);
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(_graph);
+                SaveAppearanceAsDefault(_graph);
+            }
         }
+
+        // ── Gemerkte Darstellung (über Projekte/Minigames hinweg, pro Rechner) ──
+        private const string PrefPrefix = "SpieleMarmelade.MenuFlow.Appearance.";
+
+        private static void SaveAppearanceAsDefault(MenuFlowGraph graph)
+        {
+            EditorPrefs.SetBool(PrefPrefix + "HasBackground", graph.buttonHasBackground);
+            EditorPrefs.SetString(PrefPrefix + "BackgroundMaterialGuid", MaterialToGuid(graph.buttonBackgroundMaterial));
+            EditorPrefs.SetString(PrefPrefix + "BackgroundColor", ColorUtility.ToHtmlStringRGBA(graph.buttonBackgroundColor));
+            EditorPrefs.SetString(PrefPrefix + "LetterMaterialGuid", MaterialToGuid(graph.buttonLetterMaterial));
+            EditorPrefs.SetString(PrefPrefix + "LetterColors",
+                string.Join(";", graph.buttonLetterColors.Select(ColorUtility.ToHtmlStringRGBA)));
+            EditorPrefs.SetString(PrefPrefix + "SliderFilledColor", ColorUtility.ToHtmlStringRGBA(graph.sliderFilledColor));
+            EditorPrefs.SetString(PrefPrefix + "SliderUnfilledColor", ColorUtility.ToHtmlStringRGBA(graph.sliderUnfilledColor));
+        }
+
+        private static void ApplyRememberedAppearance(MenuFlowGraph graph)
+        {
+            if (!EditorPrefs.HasKey(PrefPrefix + "HasBackground")) return; // noch nie gespeichert
+
+            graph.buttonHasBackground = EditorPrefs.GetBool(PrefPrefix + "HasBackground", graph.buttonHasBackground);
+            graph.buttonBackgroundMaterial = GuidToMaterial(EditorPrefs.GetString(PrefPrefix + "BackgroundMaterialGuid", ""));
+            graph.buttonBackgroundColor = ParseColor(EditorPrefs.GetString(PrefPrefix + "BackgroundColor", ""), graph.buttonBackgroundColor);
+            graph.buttonLetterMaterial = GuidToMaterial(EditorPrefs.GetString(PrefPrefix + "LetterMaterialGuid", ""));
+
+            string letterColors = EditorPrefs.GetString(PrefPrefix + "LetterColors", "");
+            graph.buttonLetterColors = string.IsNullOrEmpty(letterColors)
+                ? new List<Color>()
+                : letterColors.Split(';').Select(hex => ParseColor(hex, Color.white)).ToList();
+
+            graph.sliderFilledColor = ParseColor(EditorPrefs.GetString(PrefPrefix + "SliderFilledColor", ""), graph.sliderFilledColor);
+            graph.sliderUnfilledColor = ParseColor(EditorPrefs.GetString(PrefPrefix + "SliderUnfilledColor", ""), graph.sliderUnfilledColor);
+        }
+
+        private static string MaterialToGuid(Material mat) =>
+            mat != null && AssetDatabase.TryGetGUIDAndLocalFileIdentifier(mat, out string guid, out long _) ? guid : "";
+
+        private static Material GuidToMaterial(string guid)
+        {
+            if (string.IsNullOrEmpty(guid)) return null;
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            return string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<Material>(path);
+        }
+
+        private static Color ParseColor(string hex, Color fallback) =>
+            !string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString("#" + hex, out var c) ? c : fallback;
 
         private void DrawScreenInspector(MenuScreenNode node)
         {

@@ -1,0 +1,18 @@
+{
+    "name": "SpieleMarmelade.Minigames.JumpBrickScale",
+    "rootNamespace": "SpieleMarmelade.Minigames.JumpBrickScale",
+    "references": [
+        "SpieleMarmelade.Core",
+        "SpieleMarmelade.Shared",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

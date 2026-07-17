@@ -10,52 +10,52 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7cbd108963ef4a0f997e449f80bfc7d8, type: 3}
-  m_Name: MenuFlow_Brick_Dungeon
+  m_Name: MenuFlow_JumpBrickScale
   m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.MenuFlow.MenuFlowGraph
   screens:
-  - id: e1e8efa19f6a468e8e8b0e14bf587254
+  - id: 416cd3cb4b7749b889d6a6162310a4c1
     kind: 0
     title: Main Menu
     bodyText: 
     buttons:
     - label: Play
-      targetScreenId: 446c73ffa88f4f90a7358f757c02cbad
+      targetScreenId: ec1de1e70caf4fdda0034dfdfca93c6a
       specialAction: 0
     - label: Options
-      targetScreenId: aee1be4b62894653aa36513275077e74
+      targetScreenId: 4b33e3ecb5fd4db8b39323b1ba75ba9c
       specialAction: 0
     - label: Credits
-      targetScreenId: 61267502f88b47a3955cd4c9e89779cd
+      targetScreenId: d1dd31dda77f4817bd2a8547a3d3a600
       specialAction: 0
     - label: Quit
       targetScreenId: 
       specialAction: 1
     editorPosition: {x: 40, y: 40}
-  - id: aee1be4b62894653aa36513275077e74
+  - id: 4b33e3ecb5fd4db8b39323b1ba75ba9c
     kind: 1
     title: Options
     bodyText: 
     buttons:
     - label: Back
-      targetScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+      targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
       specialAction: 0
     editorPosition: {x: 340, y: 40}
-  - id: 61267502f88b47a3955cd4c9e89779cd
+  - id: d1dd31dda77f4817bd2a8547a3d3a600
     kind: 0
     title: Credits
-    bodyText: Made during a game jam with Spiele Marmelade.
+    bodyText: 
     buttons:
     - label: Back
-      targetScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+      targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
       specialAction: 0
     editorPosition: {x: 340, y: 180}
-  - id: 446c73ffa88f4f90a7358f757c02cbad
+  - id: ec1de1e70caf4fdda0034dfdfca93c6a
     kind: 3
     title: Game
     bodyText: 
     buttons: []
     editorPosition: {x: 40, y: 180}
-  - id: a3c035643817434ba67f9abb61b10810
+  - id: 773050dfc0b247e7b014b9a500d01d5b
     kind: 2
     title: Pause
     bodyText: 
@@ -64,24 +64,24 @@ MonoBehaviour:
       targetScreenId: 
       specialAction: 2
     - label: Options
-      targetScreenId: aee1be4b62894653aa36513275077e74
+      targetScreenId: 4b33e3ecb5fd4db8b39323b1ba75ba9c
       specialAction: 0
     - label: Main Menu
-      targetScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+      targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
       specialAction: 0
     - label: Quit
       targetScreenId: 
       specialAction: 1
     editorPosition: {x: 40, y: 320}
-  startScreenId: e1e8efa19f6a468e8e8b0e14bf587254
+  startScreenId: 416cd3cb4b7749b889d6a6162310a4c1
   buttonHasBackground: 0
   buttonBackgroundMaterial: {fileID: 0}
-  buttonBackgroundColor: {r: 0.052355535, g: 0.0047169924, b: 1, a: 1}
+  buttonBackgroundColor: {r: 0.05, g: 0.05, b: 0.05, a: 1}
   buttonLetterMaterial: {fileID: 0}
   buttonLetterColors:
-  - {r: 0.24056602, g: 0.30310768, b: 1, a: 1}
-  - {r: 1, g: 0.2971698, b: 0.2971698, a: 1}
-  - {r: 0.06607044, g: 1, b: 0, a: 1}
-  - {r: 0.93819284, g: 1, b: 0, a: 1}
-  sliderFilledColor: {r: 1, g: 0.6065906, b: 0.023584902, a: 1}
-  sliderUnfilledColor: {r: 0.4433962, g: 0.4433962, b: 0.4433962, a: 1}
+  - {r: 0.990566, g: 0.9417935, b: 0.378471, a: 1}
+  - {r: 0.30660388, g: 0.3066038, b: 1, a: 1}
+  - {r: 0.990566, g: 0.3317462, b: 0.3317462, a: 1}
+  - {r: 0.30081883, g: 0.9811321, b: 0.30081886, a: 1}
+  sliderFilledColor: {r: 1, g: 0.675526, b: 0.2688679, a: 1}
+  sliderUnfilledColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
