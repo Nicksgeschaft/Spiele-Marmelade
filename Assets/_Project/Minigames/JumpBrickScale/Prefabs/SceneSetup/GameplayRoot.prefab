@@ -47,6 +47,85 @@ MonoBehaviour:
   maxPerColumn: 8
   studOverlap: 0.18
   stackedScale: 1
+--- !u!1 &8362225348740233011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2216640776118190117}
+  - component: {fileID: 3966196556203310908}
+  m_Layer: 0
+  m_Name: RoundTimerBar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2216640776118190117
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8362225348740233011}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 5.08, y: 3.84, z: 6.85}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5076114121318262536}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3966196556203310908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8362225348740233011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efe50e7a892a3f94aac9a763fd2eea71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.RoundTimerBar
+  brickPrefab: {fileID: 1996174042166477367, guid: c99743a35120d944392795b25655794d, type: 3}
+  brickScale: 0.3
+  brickRotation: {x: 0, y: 0, z: -90}
+  studOverlap: 0.18
+  spacingPadding: 0
+  roundDuration: 600
+  secondsPerBrick: 3
+  startAutomatically: 1
+  OnTimeUp:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11500000, guid: d5a76b61713f4bb4287d40b815d070eb, type: 3}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 11400000, guid: 4a9f964c3515790409a89cd60cd86768, type: 2}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &8420494894688474122
 GameObject:
   m_ObjectHideFlags: 0
@@ -221,6 +300,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4059072506629941714}
+    - targetCorrespondingSourceObject: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2216640776118190117}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7550086481216944717, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       insertIndex: -1

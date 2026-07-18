@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2510427481102491800
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5422227771787880781}
+  - component: {fileID: 3480715722378932467}
+  m_Layer: 0
+  m_Name: GameOverScreen
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5422227771787880781
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2510427481102491800}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 64.23298, y: 30.74788, z: -0.73916}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3480715722378932467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2510427481102491800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e798364007f840c4ea0937241d2751dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.GameOverScreen
+  menuFlow: {fileID: 0}
+  gameOverScreenTitle: Time is Over
+  bricksAnchor: {x: -1.5, y: 0.4, z: 0}
+  bricksPerRow: 10
+  brickSpacing: 0.32
+  rowSpacing: 0.36
+  flightDuration: 0.35
+  delayBetweenBricks: 0.08
+  flightEase:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  brickPrefab: {fileID: 5788791348711292769, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
+  letterMaterials:
+  - {fileID: 2100000, guid: 34ac640b4bc4faa47b6659a3607973f6, type: 2}
+  - {fileID: 2100000, guid: 015087087e9af5c43995770ca7221cc4, type: 2}
+  - {fileID: 2100000, guid: bb25df5dd724f264981ea995e7b91032, type: 2}
+  - {fileID: 2100000, guid: 9311f3fe5c1236f418cc12be079f3dd7, type: 2}
+  ratingAnchor: {x: 0, y: -0.9, z: 0}
+  ratingScale: 0.5
+  ratingTiers:
+  - maxPoints: 4
+    text: BRICKLESS
+  - maxPoints: 15
+    text: SOLID
+  - maxPoints: 2147483647
+    text: BRICKPOT

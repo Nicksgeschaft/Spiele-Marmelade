@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3072066097699428960
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6471642679836687000}
+  - component: {fileID: 2245969414520993495}
+  m_Layer: 0
+  m_Name: MenuFlowController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6471642679836687000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3072066097699428960}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2245969414520993495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3072066097699428960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fa87c96c3f54faf818dde359c0b14c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.MenuFlow.MenuFlowController
+  graph: {fileID: 11400000, guid: 4a9f964c3515790409a89cd60cd86768, type: 2}
+  gameplayRoot: {fileID: 0}
+  menuCamera: {fileID: 0}
+  pauseSfxId: 
+  resumeSfxId: 
+  menuMusicId: menu
+  gameMusicId: game
+  bindings:
+  - screenId: 416cd3cb4b7749b889d6a6162310a4c1
+    panel: {fileID: 0}
+    brickSigns: {fileID: 0}
+  - screenId: 4b33e3ecb5fd4db8b39323b1ba75ba9c
+    panel: {fileID: 0}
+    brickSigns: {fileID: 0}
+  - screenId: d1dd31dda77f4817bd2a8547a3d3a600
+    panel: {fileID: 0}
+    brickSigns: {fileID: 0}
+  - screenId: 773050dfc0b247e7b014b9a500d01d5b
+    panel: {fileID: 0}
+    brickSigns: {fileID: 0}
+  - screenId: e32af3089cff4009aab097658b5a28f5
+    panel: {fileID: 0}
+    brickSigns: {fileID: 0}

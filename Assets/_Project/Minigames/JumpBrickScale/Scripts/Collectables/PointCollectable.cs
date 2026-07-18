@@ -186,6 +186,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             transform.localPosition = slotLocalPosition;
             transform.localRotation = Quaternion.identity;
             transform.localScale = targetScale;
+            stack.RegisterCollectedBrick(transform);
         }
     }
 }

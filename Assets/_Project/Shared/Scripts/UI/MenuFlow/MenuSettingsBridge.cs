@@ -82,6 +82,11 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
                 {
                     setter(standalone);
                     standaloneManager.ApplyVolumes();
+
+                    // The manager already folds master into every channel, so the global listener has
+                    // to sit at unity gain. Without this it keeps whatever the old listener-only
+                    // fallback last wrote, and master ends up applied twice (0.7 -> 0.49).
+                    AudioListener.volume = 1f;
                 }
                 else
                 {

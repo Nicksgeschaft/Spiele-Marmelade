@@ -164,6 +164,24 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
             SfxPlayer.PlayMusic(menuMusicId);
         }
 
+        /// <summary>The generated brick-sign group of a screen, so gameplay code can parent extra
+        /// runtime content into it and have it show/hide with that screen automatically.</summary>
+        public GameObject GetBrickSigns(string screenId) => FindBrickSigns(screenId);
+
+        /// <summary>Resolves a screen's id from its title as typed in the Menu Flow Editor. Ids are
+        /// auto-generated GUIDs that the editor never shows, so titles are what gameplay wiring can
+        /// realistically refer to.</summary>
+        public string FindScreenIdByTitle(string title) => graph != null ? graph.FindScreenByTitle(title)?.id : null;
+
+        /// <summary>Ends the current run and returns to the main menu. Same path as the pause menu's
+        /// button, so the level is reloaded and the next Play starts fresh. Meant to be wired to
+        /// gameplay events (round timer running out, player death, ...) via the Inspector.</summary>
+        public void ReturnToMainMenu()
+        {
+            if (graph == null || string.IsNullOrEmpty(graph.startScreenId)) return;
+            ShowScreen(graph.startScreenId);
+        }
+
         // Bound as a persistent BrickTextButton.OnClicked listener by MenuFlowGenerator, with
         // the enum name baked in as the argument (OnClicked has no parameters of its own, but
         // UnityEventTools.AddStringPersistentListener lets a persistent call carry one fixed

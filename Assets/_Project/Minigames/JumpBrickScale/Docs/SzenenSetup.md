@@ -39,6 +39,23 @@ Selbst wenn es durchginge: Das nächste „Generate" baut den Inhalt in der Szen
 den Prefab-Link zerreißen. Dazu speichert `MenuFlowController` seine Bindings auf Objekte in
 `MenuCanvas` *und* `MenuStageRoot` – diese Verdrahtung entsteht beim Generieren.
 
+**4. Menü-Objekte müssen auf Root-Ebene bleiben – nicht gruppieren!**
+`MenuCanvas`, `MenuStageRoot`, `MenuCamera` und `MenuFlowController` dürfen **nicht** in ein
+Sammel-Objekt (z. B. „UIStuff") einsortiert werden. `MenuFlowGenerator.Generate()` räumt seine
+alten Objekte so auf:
+
+```csharp
+foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+    if (namesToClean.Contains(root.name)) DestroyImmediate(root);
+```
+
+Es werden also nur **Root**-Objekte gefunden. Liegen sie in einer Gruppe, sieht der Generator sie
+nicht, löscht nichts – und legt einen kompletten **zweiten** Menü-Satz auf Root-Ebene an. Man
+arbeitet dann versehentlich mit dem alten Satz weiter und wundert sich, dass neue Screens fehlen.
+
+Falls das passiert ist: den alten (gruppierten) Satz löschen, den neuen behalten und alle
+Referenzen darauf neu setzen (`GameOverScreen.Menu Flow`, `RoundTimerBar.On Time Up`, …).
+
 ## Ablauf für eine neue Szene
 
 1. Bestehende `JumpBrickScale.unity` als Vorlage duplizieren und umbenennen.

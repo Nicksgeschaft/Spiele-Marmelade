@@ -73,6 +73,15 @@ MonoBehaviour:
       targetScreenId: 
       specialAction: 1
     editorPosition: {x: 40, y: 320}
+  - id: e32af3089cff4009aab097658b5a28f5
+    kind: 0
+    title: Time is Over
+    bodyText: 
+    buttons:
+    - label: Main Menu
+      targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
+      specialAction: 0
+    editorPosition: {x: 346, y: 325}
   startScreenId: 416cd3cb4b7749b889d6a6162310a4c1
   buttonHasBackground: 0
   buttonBackgroundMaterial: {fileID: 0}
@@ -85,3 +94,4 @@ MonoBehaviour:
   - {r: 0.30081883, g: 0.9811321, b: 0.30081886, a: 1}
   sliderFilledColor: {r: 1, g: 0.675526, b: 0.2688679, a: 1}
   sliderUnfilledColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+  sliderHandleColor: {r: 0.95, g: 0.35, b: 0.15, a: 1}

@@ -33,5 +33,10 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
 
         public MenuScreenNode FindScreen(string id) =>
             string.IsNullOrEmpty(id) ? null : screens.Find(s => s.id == id);
+
+        // Ids are auto-generated GUIDs and aren't surfaced in the Menu Flow Editor, so the title is
+        // the only practical handle when wiring gameplay to a specific screen from the Inspector.
+        public MenuScreenNode FindScreenByTitle(string title) =>
+            string.IsNullOrEmpty(title) ? null : screens.Find(s => s.title == title);
     }
 }

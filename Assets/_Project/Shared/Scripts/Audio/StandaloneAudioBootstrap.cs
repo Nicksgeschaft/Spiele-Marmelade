@@ -31,6 +31,10 @@ namespace SpieleMarmelade.Shared.Audio
                 return;
             }
 
+            // A previous session's listener-only fallback may have left this attenuated. The manager
+            // applies master per channel from here on, so reset it or master would be applied twice.
+            AudioListener.volume = 1f;
+
             var host = new GameObject("StandaloneAudio (editor/direct play only)");
             host.transform.SetParent(transform, false);
 

@@ -20,6 +20,12 @@ namespace SpieleMarmelade.Core.Managers
         private AudioSource _ui;
         private SettingsData _settings;
 
+        // Per-clip trim of whatever is currently on the looping channels. Kept as state because
+        // ApplyVolumes() recomputes those channels from scratch whenever a slider moves - without
+        // remembering it, dragging a volume slider would silently wipe the clip's own trim.
+        private float _musicClipVolume = 1f;
+        private float _ambientClipVolume = 1f;
+
         public void Initialize(SettingsData settings)
         {
             _settings = settings;
@@ -43,19 +49,28 @@ namespace SpieleMarmelade.Core.Managers
         {
             if (_settings == null) return;
 
-            _music.volume = _settings.masterVolume * _settings.musicVolume;
-            _ambient.volume = _settings.masterVolume * _settings.ambientVolume;
+            // Looping channels fold in the current clip's own level. One-shot channels don't need it
+            // here - PlaySfx/PlayUi pass it straight to PlayOneShot, which scales per sound.
+            //
+            // Deliberately not clamped to 1: a per-clip value above 1 is how a too-quiet track gets
+            // boosted past its original level. Unity documents AudioSource.volume as 0-1, so treat
+            // anything above 1 as best-effort - it can also clip. Balancing the other clips downward
+            // is the safer route when a mix needs headroom.
+            _music.volume = _settings.masterVolume * _settings.musicVolume * _musicClipVolume;
+            _ambient.volume = _settings.masterVolume * _settings.ambientVolume * _ambientClipVolume;
             _sfx.volume = _settings.masterVolume * _settings.sfxVolume;
             _ui.volume = _settings.masterVolume * _settings.uiVolume;
         }
 
         public void PlayMusic(string id, bool restartIfAlreadyPlaying = false)
         {
-            AudioClip clip = _activeLibrary != null ? _activeLibrary.FindMusic(id) : null;
-            if (clip == null) return;
-            if (!restartIfAlreadyPlaying && _music.isPlaying && _music.clip == clip) return;
+            AudioLibrary.Entry entry = _activeLibrary != null ? _activeLibrary.FindMusicEntry(id) : null;
+            if (entry == null || entry.clip == null) return;
+            if (!restartIfAlreadyPlaying && _music.isPlaying && _music.clip == entry.clip) return;
 
-            _music.clip = clip;
+            _musicClipVolume = entry.volume;
+            _music.clip = entry.clip;
+            ApplyVolumes();
             _music.Play();
         }
 
@@ -63,11 +78,13 @@ namespace SpieleMarmelade.Core.Managers
 
         public void PlayAmbient(string id, bool restartIfAlreadyPlaying = false)
         {
-            AudioClip clip = _activeLibrary != null ? _activeLibrary.FindAmbient(id) : null;
-            if (clip == null) return;
-            if (!restartIfAlreadyPlaying && _ambient.isPlaying && _ambient.clip == clip) return;
+            AudioLibrary.Entry entry = _activeLibrary != null ? _activeLibrary.FindAmbientEntry(id) : null;
+            if (entry == null || entry.clip == null) return;
+            if (!restartIfAlreadyPlaying && _ambient.isPlaying && _ambient.clip == entry.clip) return;
 
-            _ambient.clip = clip;
+            _ambientClipVolume = entry.volume;
+            _ambient.clip = entry.clip;
+            ApplyVolumes();
             _ambient.Play();
         }
 
@@ -75,14 +92,14 @@ namespace SpieleMarmelade.Core.Managers
 
         public void PlaySfx(string id)
         {
-            AudioClip clip = _activeLibrary != null ? _activeLibrary.FindSfx(id) : null;
-            if (clip != null) _sfx.PlayOneShot(clip);
+            AudioLibrary.Entry entry = _activeLibrary != null ? _activeLibrary.FindSfxEntry(id) : null;
+            if (entry != null && entry.clip != null) _sfx.PlayOneShot(entry.clip, entry.volume);
         }
 
         public void PlayUi(string id)
         {
-            AudioClip clip = _activeLibrary != null ? _activeLibrary.FindUi(id) : null;
-            if (clip != null) _ui.PlayOneShot(clip);
+            AudioLibrary.Entry entry = _activeLibrary != null ? _activeLibrary.FindUiEntry(id) : null;
+            if (entry != null && entry.clip != null) _ui.PlayOneShot(entry.clip, entry.volume);
         }
 
         private AudioSource CreateSource(string name, bool loop)

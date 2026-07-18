@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SpieleMarmelade.Minigames.JumpBrickScale
@@ -37,6 +38,17 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         private Vector3 _brickUnitSize = DefaultBrickUnitSize;
 
         public int Count { get; private set; }
+
+        // Kept so the game-over screen can fly the actual collected bricks in rather than spawning
+        // look-alikes. Registered by PointCollectable once it has landed.
+        private readonly List<Transform> _collectedBricks = new();
+
+        public IReadOnlyList<Transform> CollectedBricks => _collectedBricks;
+
+        public void RegisterCollectedBrick(Transform brick)
+        {
+            if (brick != null) _collectedBricks.Add(brick);
+        }
 
         /// <summary>Raised whenever a point is added. Carries the new total.</summary>
         public event Action<int> OnCountChanged;

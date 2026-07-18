@@ -15,8 +15,10 @@ MonoBehaviour:
   music:
   - id: menu
     clip: {fileID: 8300000, guid: 62c10bf434d38e1418c456b0095c0dfb, type: 3}
+    volume: 2
   - id: game
     clip: {fileID: 8300000, guid: 84576af739b7c7c4c83f89602c167bd7, type: 3}
+    volume: 0.284
   sfx: []
   ui: []
   ambient: []

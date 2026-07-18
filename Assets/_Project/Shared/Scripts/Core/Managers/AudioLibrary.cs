@@ -17,6 +17,12 @@ namespace SpieleMarmelade.Core.Managers
         {
             public string id;
             public AudioClip clip;
+
+            [Tooltip("Per-Clip-Lautstärke. Wird mit der Kanal-Lautstärke multipliziert, um unterschiedlich " +
+                     "laut gemasterte Dateien auszugleichen. 1 = Original, darunter leiser, darüber lauter. " +
+                     "Achtung: Über 1 kann übersteuern (Clipping) - im Zweifel lieber die anderen Clips " +
+                     "leiser stellen, statt einen einzelnen hochzuziehen.")]
+            [Range(0f, 2f)] public float volume = 1f;
         }
 
         public List<Entry> music = new();
@@ -24,19 +30,24 @@ namespace SpieleMarmelade.Core.Managers
         public List<Entry> ui = new();
         public List<Entry> ambient = new();
 
-        public AudioClip FindMusic(string id) => Find(music, id);
-        public AudioClip FindSfx(string id) => Find(sfx, id);
-        public AudioClip FindUi(string id) => Find(ui, id);
-        public AudioClip FindAmbient(string id) => Find(ambient, id);
+        public Entry FindMusicEntry(string id) => FindEntry(music, id);
+        public Entry FindSfxEntry(string id) => FindEntry(sfx, id);
+        public Entry FindUiEntry(string id) => FindEntry(ui, id);
+        public Entry FindAmbientEntry(string id) => FindEntry(ambient, id);
 
-        private static AudioClip Find(List<Entry> entries, string id)
+        public AudioClip FindMusic(string id) => FindEntry(music, id)?.clip;
+        public AudioClip FindSfx(string id) => FindEntry(sfx, id)?.clip;
+        public AudioClip FindUi(string id) => FindEntry(ui, id)?.clip;
+        public AudioClip FindAmbient(string id) => FindEntry(ambient, id)?.clip;
+
+        private static Entry FindEntry(List<Entry> entries, string id)
         {
             if (string.IsNullOrEmpty(id)) return null;
             for (int i = 0; i < entries.Count; i++)
             {
                 if (entries[i] != null && entries[i].id == id)
                 {
-                    return entries[i].clip;
+                    return entries[i];
                 }
             }
             return null;
