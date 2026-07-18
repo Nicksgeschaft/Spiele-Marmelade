@@ -1,13 +1,14 @@
-Shader "Custom/LavaHazard_StaticMesh_URP"
+Shader "Custom/LavaHazard_SeamlessGrid_URP"
 {
     Properties
     {
-        [HDR] _ColorA ("Color A (Yellow)", Color) = (1.0, 0.8, 0.0, 1.0)
-        [HDR] _ColorB ("Color B (Orange)", Color) = (1.0, 0.3, 0.0, 1.0)
-        _SloshSpeed ("Slosh Speed (Time based)", Float) = 2.0
-        _SloshScale ("Slosh Scale (Coordinate based)", Float) = 5.0
-        _SloshStrength ("Slosh Strength (Intensity)", Float) = 0.5
-        _NoiseScale ("Noise Size", Float) = 15.0
+        [HDR] _BottomColor ("Bottom Color (Bright)", Color) = (1.0, 0.8, 0.0, 1.0)
+        [HDR] _TopColor ("Top Color (Dark)", Color) = (0.8, 0.2, 0.0, 1.0)
+        _LavaLevel ("Base Lava Level (Height)", Float) = 0.0
+        _WaveHeight ("Wave Amplitude", Float) = 0.05
+        _WaveFrequency ("Wave Frequency", Float) = 8.0
+        _WaveSpeed ("Wave Speed", Float) = 3.0
+        _GradientSpread ("Gradient Spread", Float) = 0.05
     }
     
     SubShader
@@ -34,32 +35,18 @@ Shader "Custom/LavaHazard_StaticMesh_URP"
             {
                 float4 positionHCS : SV_POSITION;
                 float3 positionOS : TEXCOORD0;
+                float3 positionWS : TEXCOORD1; // NEU: World Space Position
             };
 
             CBUFFER_START(UnityPerMaterial)
-                half4 _ColorA;
-                half4 _ColorB;
-                float _SloshSpeed;
-                float _SloshScale;
-                float _SloshStrength;
-                float _NoiseScale;
+                half4 _BottomColor;
+                half4 _TopColor;
+                float _LavaLevel;
+                float _WaveHeight;
+                float _WaveFrequency;
+                float _WaveSpeed;
+                float _GradientSpread;
             CBUFFER_END
-
-            float hash(float2 p) 
-            {
-                p = frac(p * 0.3183099 + 0.1);
-                p *= 17.0;
-                return frac(p.x * p.y * (p.x + p.y));
-            }
-
-            float noise(float2 x) 
-            {
-                float2 i = floor(x);
-                float2 f = frac(x);
-                f = f * f * (3.0 - 2.0 * f);
-                return lerp(lerp(hash(i + float2(0.0, 0.0)), hash(i + float2(1.0, 0.0)), f.x),
-                            lerp(hash(i + float2(0.0, 1.0)), hash(i + float2(1.0, 1.0)), f.x), f.y);
-            }
 
             Varyings vert(Attributes input)
             {
@@ -68,21 +55,24 @@ Shader "Custom/LavaHazard_StaticMesh_URP"
                 output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
                 output.positionOS = input.positionOS.xyz;
                 
+                // NEU: Wir wandeln die lokale Position in die globale Szenen-Position um
+                output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
+                
                 return output;
             }
 
             half4 frag(Varyings input) : SV_Target
             {
-                float3 posOS = input.positionOS;
+                // WICHTIG: Die Welle nutzt jetzt input.positionWS (Weltkoordinaten) für X und Z
+                float wave = sin(input.positionWS.x * _WaveFrequency + _Time.y * _WaveSpeed) * 0.5 
+                           + cos(input.positionWS.z * _WaveFrequency * 0.8 + _Time.y * _WaveSpeed * 1.1) * 0.5;
                 
-                float n = noise(posOS.xz * _NoiseScale);
+                float currentLavaLevel = _LavaLevel + (wave * _WaveHeight);
                 
-                float animatedZ = posOS.z + (n * _SloshStrength);
+                // WICHTIG: Die Höhe nutzt weiterhin input.positionOS (Objektkoordinaten)
+                float blend = smoothstep(currentLavaLevel - _GradientSpread, currentLavaLevel + _GradientSpread, input.positionOS.y);
                 
-                float sloshValue = sin(_Time.y * _SloshSpeed + (animatedZ * _SloshScale)); 
-                sloshValue = sloshValue * 0.5 + 0.5;
-                
-                half4 finalColor = lerp(_ColorA, _ColorB, sloshValue);
+                half4 finalColor = lerp(_BottomColor, _TopColor, blend);
                 
                 return finalColor;
             }
