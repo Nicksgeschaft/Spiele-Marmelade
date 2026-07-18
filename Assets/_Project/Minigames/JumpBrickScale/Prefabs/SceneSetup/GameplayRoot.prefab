@@ -227,13 +227,35 @@ PrefabInstance:
     - {fileID: 3727235590832226892, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4490122494847977680, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1073581408831715861}
   m_SourcePrefab: {fileID: 100100000, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
 --- !u!4 &596360533163802080 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 753865759864907015, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
   m_PrefabInstance: {fileID: 157896831091185895}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &4350733195918839863 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4490122494847977680, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
+  m_PrefabInstance: {fileID: 157896831091185895}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1073581408831715861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4350733195918839863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c105b5c16cd7234db1e9be549dd8c4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.PlayerHazardResponder
+  damageCooldown: 1
+  logHits: 1
 --- !u!1001 &6440272304432584336
 PrefabInstance:
   m_ObjectHideFlags: 0

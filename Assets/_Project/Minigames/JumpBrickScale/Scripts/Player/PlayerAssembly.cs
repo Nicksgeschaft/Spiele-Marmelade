@@ -36,6 +36,8 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [Header("Detach")]
         [Tooltip("Impulse applied to a fragment as it falls off, pointing away from the assembly's pivot.")]
         [SerializeField] private float outwardImpulseStrength = 1f;
+        [Tooltip("Seconds until a knocked-off brick is removed from the scene. 0 = keep it forever.")]
+        [SerializeField] private float fragmentDespawnDelay = 4f;
 
         [Header("Debug")]
         [SerializeField] private BrickNode testBrickPrefab;
@@ -157,6 +159,10 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             brickTransform.localRotation = Quaternion.identity;
             PlaceBrickAtCell(brickTransform, brick, receiver, direction);
             SetLayerRecursively(brick.gameObject, mainBrick.gameObject.layer);
+            // An attached brick counts as part of the player from here on. UniversalHazard only reports
+            // colliders tagged "Player", so without this a hazard touched by an attached brick - rather
+            // than the main brick itself - would go unnoticed.
+            SetTagRecursively(brick.gameObject, mainBrick.gameObject.tag);
 
             RegisterBrick(brick, targetPosition);
             LinkNeighborsAround(brick);
@@ -332,6 +338,8 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             int worldBrickLayer = LayerMask.NameToLayer("WorldBrick");
             SetLayerRecursively(fragment.gameObject, worldBrickLayer >= 0 ? worldBrickLayer : fragment.gameObject.layer);
+            // No longer part of the player, so it must stop counting as one for hazards and pickups.
+            SetTagRecursively(fragment.gameObject, "Untagged");
 
             // Attach() removed the brick's Rigidbody so it could merge into the assembly's compound
             // collider, so give it a fresh one to fall free again.
@@ -351,6 +359,20 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             fragmentRigidbody.AddForce(outward * outwardImpulseStrength, ForceMode.Impulse);
 
             fragment.GetComponent<WorldBrick>()?.OnDetached();
+
+            if (fragmentDespawnDelay > 0f)
+            {
+                Destroy(fragment.gameObject, fragmentDespawnDelay);
+            }
+        }
+
+        private static void SetTagRecursively(GameObject root, string tag)
+        {
+            root.tag = tag;
+            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            {
+                child.gameObject.tag = tag;
+            }
         }
 
         private void RegisterBrick(BrickNode brick, Vector2Int gridPosition)
