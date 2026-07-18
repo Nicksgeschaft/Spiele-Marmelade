@@ -51,13 +51,48 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
         private void Rebuild()
         {
+            // Ability powers first - the resolved values below are derived from them.
+            float airJumpPower = AggregateRaw(PlayerStatType.AirJumpPower);
+            float dashPower = AggregateRaw(PlayerStatType.DashPower);
+            float wallJumpPower = AggregateRaw(PlayerStatType.WallJumpPower);
+            float jumpHeight = Aggregate(PlayerStatType.JumpHeight, baseStats.jumpHeight);
+            float moveSpeed = Aggregate(PlayerStatType.MoveSpeed, baseStats.moveSpeed);
+
             _current = new PlayerRuntimeStats
             {
-                MoveSpeed = Aggregate(PlayerStatType.MoveSpeed, baseStats.moveSpeed),
-                GroundAcceleration = baseStats.groundAcceleration,
+                AirJumpPower = airJumpPower,
+                DashPower = dashPower,
+                WallJumpPower = wallJumpPower,
+                TimerSecondsPerBrick = AggregateRaw(PlayerStatType.TimerSecondsPerBrick),
+
+                // Each further brick of a kind makes its ability stronger, so one pickup is a small
+                // boost and stacking them is what turns it into a real tool.
+                AirJumpHeight = airJumpPower >= 1f
+                    ? jumpHeight * (baseStats.airJumpHeightFactor + baseStats.airJumpFactorPerPower * (airJumpPower - 1f))
+                    : 0f,
+                DashSpeed = dashPower >= 1f
+                    ? baseStats.dashSpeed + baseStats.dashSpeedPerPower * (dashPower - 1f)
+                    : 0f,
+                DashDuration = baseStats.dashDuration,
+                DashCooldown = baseStats.dashCooldown,
+                DoubleTapWindow = baseStats.doubleTapWindow,
+                WallJumpHeight = wallJumpPower >= 1f
+                    ? jumpHeight * (baseStats.wallJumpHeightFactor + baseStats.wallJumpFactorPerPower * (wallJumpPower - 1f))
+                    : 0f,
+                WallJumpPush = moveSpeed * baseStats.wallJumpPushFactor,
+                WallCheckDistance = baseStats.wallCheckDistance,
+
+                MoveSpeed = moveSpeed,
+                GroundAcceleration = Aggregate(PlayerStatType.GroundAcceleration,
+                    new PlayerMovementStats.ClampedStat
+                    {
+                        baseValue = baseStats.groundAcceleration,
+                        minValue = 1f,
+                        maxValue = 500f,
+                    }),
                 GroundDeceleration = baseStats.groundDeceleration,
                 AirControl = baseStats.airControl,
-                JumpHeight = Aggregate(PlayerStatType.JumpHeight, baseStats.jumpHeight),
+                JumpHeight = jumpHeight,
                 GravityMagnitude = Aggregate(PlayerStatType.GravityMagnitude, baseStats.gravityMagnitude),
                 FallGravityMultiplier = baseStats.fallGravityMultiplier,
                 LowJumpGravityMultiplier = baseStats.lowJumpGravityMultiplier,
@@ -74,6 +109,22 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             };
 
             OnRuntimeStatsChanged?.Invoke(_current);
+        }
+
+        // Abilities have no base value in PlayerMovementStats - they only exist because bricks grant
+        // them - so this is the plain sum of what's attached, with no clamp.
+        private float AggregateRaw(PlayerStatType stat)
+        {
+            float total = 0f;
+            foreach (BrickNode brick in _assembly.ConnectedBricks)
+            {
+                if (brick.Definition == null) continue;
+                foreach (BrickDefinition.BrickStatModifier modifier in brick.Definition.statModifiers)
+                {
+                    if (modifier.stat == stat) total += modifier.value;
+                }
+            }
+            return total;
         }
 
         private float Aggregate(PlayerStatType stat, PlayerMovementStats.ClampedStat clamped)

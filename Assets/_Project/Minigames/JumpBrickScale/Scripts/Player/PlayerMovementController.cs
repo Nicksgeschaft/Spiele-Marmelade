@@ -27,8 +27,24 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         private StatAggregator _statAggregator;
         private bool _rigidbodyConfigured;
 
+        [Tooltip("Layers a wall jump can push off. The PlayerAssembly layer is excluded automatically.")]
+        [SerializeField] private LayerMask wallMask = ~0;
+
         private float _lastJumpPressedTime = float.NegativeInfinity;
         private float _lastGroundedTime = float.NegativeInfinity;
+
+        // Abilities unlocked by bricks. All reset on landing, so they're once-per-airtime.
+        private bool _airJumpUsed;
+        private bool _wallJumpUsed;
+
+        // Dash: double-tapping A/D/S. Tracked per direction so tapping A then D doesn't count.
+        private float _lastTapTime = float.NegativeInfinity;
+        private int _lastTapDirection;
+        private float _dashEndTime;
+        private float _dashReadyTime;
+        private Vector3 _dashVelocity;
+
+        private bool IsDashing => Time.time < _dashEndTime;
 
         // Only ever read from Update/FixedUpdate, never from Awake - StatAggregator.Current
         // depends on PlayerAssembly having already registered the Main-Brick, and Unity doesn't
@@ -51,6 +67,8 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             {
                 _lastJumpPressedTime = Time.time;
             }
+
+            DetectDashInput();
         }
 
         private void FixedUpdate()
@@ -66,6 +84,17 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             if (isGrounded)
             {
                 _lastGroundedTime = Time.time;
+                // Landing restocks the once-per-airtime abilities.
+                _airJumpUsed = false;
+                _wallJumpUsed = false;
+            }
+
+            // A dash overrides normal movement and gravity for its short duration, which is what makes
+            // it read as a dash rather than a nudge.
+            if (IsDashing)
+            {
+                _rigidbody.linearVelocity = _dashVelocity;
+                return;
             }
 
             ApplyHorizontalMovement(isGrounded);
@@ -120,27 +149,146 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         private void TryConsumeBufferedJump(bool isGrounded)
         {
             bool jumpBuffered = Time.time - _lastJumpPressedTime <= Stats.JumpBufferTime;
+            if (!jumpBuffered) return;
+
             bool coyoteActive = Time.time - _lastGroundedTime <= Stats.CoyoteTime;
-            if (!jumpBuffered || !(isGrounded || coyoteActive))
+
+            // Priority: real ground jump, then pushing off a wall, then the mid-air jump. A wall is
+            // worth more than the air jump because it can be repeated by alternating walls.
+            if (isGrounded || coyoteActive)
             {
+                // Consume the coyote window too, so it can't chain into a second jump.
+                _lastGroundedTime = float.NegativeInfinity;
+                PerformJump(Stats.JumpHeight, 0f);
                 return;
             }
 
-            // Consume both so a single press can't trigger twice and coyote time can't chain into a double jump.
-            _lastJumpPressedTime = float.NegativeInfinity;
-            _lastGroundedTime = float.NegativeInfinity;
-
-            Vector3 velocity = _rigidbody.linearVelocity;
-            if (velocity.y < 0f)
+            if (Stats.CanWallJump && !_wallJumpUsed && TryGetWallDirection(out float wallNormalX))
             {
-                velocity.y = 0f;
-                _rigidbody.linearVelocity = velocity;
+                _wallJumpUsed = true;
+                PerformJump(Stats.WallJumpHeight, wallNormalX * Stats.WallJumpPush);
+                return;
             }
 
-            float jumpVelocity = Mathf.Sqrt(2f * Stats.GravityMagnitude * Stats.JumpHeight);
+            if (Stats.CanAirJump && !_airJumpUsed)
+            {
+                _airJumpUsed = true;
+                PerformJump(Stats.AirJumpHeight, 0f);
+            }
+        }
+
+        // horizontalPush is the sideways kick used by a wall jump; 0 for a normal jump.
+        private void PerformJump(float height, float horizontalPush)
+        {
+            if (height <= 0f) return;
+
+            _lastJumpPressedTime = float.NegativeInfinity;
+
+            Vector3 velocity = _rigidbody.linearVelocity;
+            // Wipe any downward speed first, so a jump taken while falling reaches its full height.
+            if (velocity.y < 0f) velocity.y = 0f;
+            if (Mathf.Abs(horizontalPush) > 0.0001f) velocity.x = horizontalPush;
+            _rigidbody.linearVelocity = velocity;
+
+            float jumpVelocity = Mathf.Sqrt(2f * Stats.GravityMagnitude * height);
             Vector3 jumpImpulse = WorldUp * (jumpVelocity * _rigidbody.mass);
             Vector3 worldCenter = mainBrickCenter != null ? mainBrickCenter.position : transform.position;
             _rigidbody.AddForceAtPosition(jumpImpulse, worldCenter, ForceMode.Impulse);
         }
+
+        // Looks for a wall beside any collider of the assembly. Returns the direction to push AWAY
+        // from it (+1 = wall on the left, so push right).
+        private bool TryGetWallDirection(out float pushDirection)
+        {
+            pushDirection = 0f;
+
+            int playerLayer = LayerMask.NameToLayer("PlayerAssembly");
+            int mask = playerLayer >= 0 ? wallMask.value & ~(1 << playerLayer) : wallMask.value;
+
+            foreach (Collider brickCollider in GetComponentsInChildren<Collider>())
+            {
+                if (brickCollider.isTrigger) continue;
+
+                Bounds bounds = brickCollider.bounds;
+                Vector3 halfExtents = new(0.02f, bounds.extents.y * 0.8f, bounds.extents.z * 0.8f);
+                float distance = bounds.extents.x + Stats.WallCheckDistance;
+
+                if (Physics.BoxCast(bounds.center, halfExtents, Vector3.left, out _,
+                        Quaternion.identity, distance, mask, QueryTriggerInteraction.Ignore))
+                {
+                    pushDirection = 1f;
+                    return true;
+                }
+                if (Physics.BoxCast(bounds.center, halfExtents, Vector3.right, out _,
+                        Quaternion.identity, distance, mask, QueryTriggerInteraction.Ignore))
+                {
+                    pushDirection = -1f;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Double-tap A / D / S starts a dash left / right / down. Tracked per direction so tapping two
+        // different keys in quick succession doesn't count as a double-tap.
+        private void DetectDashInput()
+        {
+            if (!Stats.CanDash || Time.time < _dashReadyTime) return;
+
+            int direction = ReadDashTapDirection();
+            if (direction == 0) return;
+
+            bool sameDirection = direction == _lastTapDirection;
+            bool withinWindow = Time.time - _lastTapTime <= Stats.DoubleTapWindow;
+
+            if (sameDirection && withinWindow)
+            {
+                StartDash(direction);
+                _lastTapTime = float.NegativeInfinity;
+                _lastTapDirection = 0;
+                return;
+            }
+
+            _lastTapTime = Time.time;
+            _lastTapDirection = direction;
+        }
+
+        // -1 = left, 1 = right, 2 = down. Only fires on the frame a direction is newly pressed.
+        private int ReadDashTapDirection()
+        {
+            Vector2 move = _input.MoveInput;
+            bool leftHeld = move.x < -0.5f;
+            bool rightHeld = move.x > 0.5f;
+            bool downHeld = move.y < -0.5f;
+
+            int direction = 0;
+            if (leftHeld && !_leftWasHeld) direction = -1;
+            else if (rightHeld && !_rightWasHeld) direction = 1;
+            else if (downHeld && !_downWasHeld) direction = 2;
+
+            _leftWasHeld = leftHeld;
+            _rightWasHeld = rightHeld;
+            _downWasHeld = downHeld;
+            return direction;
+        }
+
+        private void StartDash(int direction)
+        {
+            Vector3 velocity = direction switch
+            {
+                -1 => Vector3.left * Stats.DashSpeed,
+                1 => Vector3.right * Stats.DashSpeed,
+                _ => Vector3.down * Stats.DashSpeed,
+            };
+
+            _dashVelocity = velocity;
+            _dashEndTime = Time.time + Stats.DashDuration;
+            _dashReadyTime = _dashEndTime + Stats.DashCooldown;
+        }
+
+        private bool _leftWasHeld;
+        private bool _rightWasHeld;
+        private bool _downWasHeld;
     }
 }

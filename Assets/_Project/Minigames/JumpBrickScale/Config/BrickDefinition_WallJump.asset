@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c27de0ca6aa64234925ffa5d551d4a86, type: 3}
-  m_Name: BrickDefinition_White
+  m_Name: BrickDefinition_WallJump
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.BrickDefinition
-  color: 1
+  color: 8
   weight: 1
-  material: {fileID: 2100000, guid: bb25df5dd724f264981ea995e7b91032, type: 2}
+  material: {fileID: 2100000, guid: 7dcaf28ac4ef84b49b3d1773371660d5, type: 2}
   statModifiers:
-  - stat: 2
+  - stat: 6
     mode: 0
-    value: 1.55
+    value: 1

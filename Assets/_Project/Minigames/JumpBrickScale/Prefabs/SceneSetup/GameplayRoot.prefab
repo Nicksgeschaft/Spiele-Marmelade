@@ -96,13 +96,16 @@ MonoBehaviour:
   brickRotation: {x: 0, y: 0, z: -90}
   studOverlap: 0.18
   spacingPadding: 0
-  roundDuration: 600
-  secondsPerBrick: 3
+  roundDuration: 30
+  secondsPerBrick: 1
+  maxBricks: 120
   startAutomatically: 1
+  gameOverScreen: {fileID: 0}
+  minigameController: {fileID: 0}
   OnTimeUp:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 11500000, guid: d5a76b61713f4bb4287d40b815d070eb, type: 3}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: 
         m_MethodName: 
         m_Mode: 0
@@ -114,7 +117,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 11400000, guid: 4a9f964c3515790409a89cd60cd86768, type: 2}
+      - m_Target: {fileID: 11500000, guid: d5a76b61713f4bb4287d40b815d070eb, type: 3}
         m_TargetAssemblyTypeName: 
         m_MethodName: 
         m_Mode: 0
@@ -169,11 +172,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 753865759864907015, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 24.34
       objectReference: {fileID: 0}
     - target: {fileID: 753865759864907015, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 44.111
       objectReference: {fileID: 0}
     - target: {fileID: 753865759864907015, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
       propertyPath: m_LocalPosition.z
@@ -213,13 +216,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5549302433268806741, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.47
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5549302433268806741, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.21
+      value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2736715645393569474, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
+    - {fileID: 3727235590832226892, guid: 588fe30188a84919bf55b7b603ff47e4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -239,15 +244,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 32.76
+      value: 46.3
       objectReference: {fileID: 0}
     - target: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 17.73
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -12.14
+      value: -18
       objectReference: {fileID: 0}
     - target: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -287,7 +292,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5416891326591980536, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: offset.z
-      value: -16
+      value: -18
       objectReference: {fileID: 0}
     - target: {fileID: 7550086481216944717, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_Name

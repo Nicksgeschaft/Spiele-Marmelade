@@ -22,6 +22,30 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         public Vector2Int GridPosition { get; internal set; }
         public IReadOnlyDictionary<CardinalDirection, BrickNode> Neighbors => _neighbors;
 
+        [Tooltip("Recolour this brick's renderers from its BrickDefinition on start. Lets every collectable " +
+                 "brick type share one prefab and differ only by its definition. Turn off for bricks whose " +
+                 "look is authored by hand.")]
+        [SerializeField] private bool applyDefinitionMaterial = true;
+
+        private void Awake()
+        {
+            // Never repaint the Main-Brick: the player's visual is hand-built (three separate plates),
+            // and recolouring it from the definition turned the whole character one flat colour.
+            if (isMainBrick || !applyDefinitionMaterial) return;
+
+            ApplyDefinitionMaterial();
+        }
+
+        private void ApplyDefinitionMaterial()
+        {
+            if (definition == null || definition.material == null) return;
+
+            foreach (Renderer brickRenderer in GetComponentsInChildren<Renderer>(true))
+            {
+                brickRenderer.sharedMaterial = definition.material;
+            }
+        }
+
         internal void AssignId(int id) => Id = id;
 
         internal void SetNeighbor(CardinalDirection direction, BrickNode neighbor) => _neighbors[direction] = neighbor;

@@ -61,6 +61,11 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         // last roundDuration, so each remaining brick simply covers more time.
         private float _secondsPerBrickEffective = 5f;
 
+        // Extra seconds per brick granted by purple bricks. Read fresh on every removal so picking one
+        // up mid-round immediately stretches the remaining bricks instead of only counting next round.
+        private float _timerBonusPerBrick;
+        private StatAggregator _playerStats;
+
         /// <summary>Seconds left, derived from the bricks still standing.</summary>
         public float TimeRemaining =>
             (_bricks.Count - 1) * _secondsPerBrickEffective + Mathf.Max(0f, _timeUntilNextRemoval);
@@ -89,11 +94,13 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             _timeUntilNextRemoval -= Time.deltaTime;
             if (_timeUntilNextRemoval > 0f) return;
 
+            RefreshTimerBonus();
+
             // Catch up if a frame hitch swallowed more than one interval.
             while (_timeUntilNextRemoval <= 0f && _bricks.Count > 0)
             {
                 RemoveLeftmostBrick();
-                _timeUntilNextRemoval += _secondsPerBrickEffective;
+                _timeUntilNextRemoval += _secondsPerBrickEffective + _timerBonusPerBrick;
             }
 
             if (_bricks.Count == 0)
@@ -141,6 +148,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             int count = ResolveBrickCount();
             _secondsPerBrickEffective = roundDuration / count;
+            _timerBonusPerBrick = 0f;
             float step = StackStep();
 
             for (int i = 0; i < count; i++)
@@ -152,6 +160,13 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
                 brick.transform.localScale = Vector3.one * brickScale;
                 _bricks.Add(brick);
             }
+        }
+
+        // Purple bricks add seconds to what each timer brick is worth.
+        private void RefreshTimerBonus()
+        {
+            if (_playerStats == null) _playerStats = FindFirstObjectByType<StatAggregator>();
+            _timerBonusPerBrick = _playerStats != null ? Mathf.Max(0f, _playerStats.Current.TimerSecondsPerBrick) : 0f;
         }
 
         private int ResolveBrickCount()

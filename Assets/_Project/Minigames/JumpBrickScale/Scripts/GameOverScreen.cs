@@ -31,11 +31,14 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [SerializeField] private string gameOverScreenTitle = "Time is Over";
 
         [Header("Collected bricks fly-in")]
-        [Tooltip("Where the collected bricks gather, relative to the screen's sign group.")]
-        [SerializeField] private Vector3 bricksAnchor = new(-1.5f, 0.4f, 0f);
-        [SerializeField] private int bricksPerRow = 10;
-        [SerializeField] private float brickSpacing = 0.32f;
-        [SerializeField] private float rowSpacing = 0.36f;
+        [Tooltip("How far above the bottom edge of the screen the stacks stand. Measured from the menu " +
+                 "camera at runtime, so it holds at any aspect ratio.")]
+        [SerializeField] private float bottomMargin = 0.5f;
+        [Tooltip("Bricks per stack before the next stack is started beside it.")]
+        [SerializeField] private int bricksPerColumn = 3;
+        [Tooltip("Spacing between stacks / stacked bricks. Left at 0 it copies the point stack's own " +
+                 "spacing, so the bricks stay packed exactly as they were in the corner.")]
+        [SerializeField] private Vector2 spacingOverride = Vector2.zero;
         [SerializeField] private float flightDuration = 0.35f;
         [Tooltip("Delay between two bricks starting their flight - this is what makes them arrive one by one.")]
         [SerializeField] private float delayBetweenBricks = 0.08f;
@@ -56,6 +59,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         };
 
         private GameObject _runtimeContent;
+        private Vector3 _bricksAnchor;
 
         /// <summary>Wire RoundTimerBar.OnTimeUp here instead of straight to ReturnToMainMenu.</summary>
         public void Show()
@@ -90,6 +94,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             if (_runtimeContent != null) Destroy(_runtimeContent);
             _runtimeContent = new GameObject("RunResult");
             _runtimeContent.transform.SetParent(signs.transform, false);
+            _bricksAnchor = ResolveBricksAnchor(_runtimeContent.transform);
 
             int points = PointStack.Instance != null ? PointStack.Instance.Count : 0;
             BuildRating(points);
@@ -141,11 +146,50 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             }
         }
 
+        // Stacks of bricksPerColumn, filled bottom-up, starting in the middle of the screen and then
+        // alternating outward: centre, right, left, further right, further left, ...
         private Vector3 SlotFor(int index)
         {
-            int row = bricksPerRow > 0 ? index / bricksPerRow : 0;
-            int column = bricksPerRow > 0 ? index % bricksPerRow : index;
-            return bricksAnchor + new Vector3(column * brickSpacing, -row * rowSpacing, 0f);
+            int perColumn = Mathf.Max(1, bricksPerColumn);
+            int columnIndex = index / perColumn;
+            int rowInColumn = index % perColumn;
+
+            // 0 -> 0, 1 -> +1, 2 -> -1, 3 -> +2, 4 -> -2, ...
+            int magnitude = (columnIndex + 1) / 2;
+            int columnOffset = columnIndex % 2 == 1 ? magnitude : -magnitude;
+
+            Vector2 step = ResolveSpacing();
+            return _bricksAnchor + new Vector3(columnOffset * step.x, rowInColumn * step.y, 0f);
+        }
+
+        private Vector2 ResolveSpacing()
+        {
+            if (spacingOverride.x > 0f && spacingOverride.y > 0f) return spacingOverride;
+
+            PointStack stack = PointStack.Instance;
+            if (stack != null)
+            {
+                Vector3 step = stack.SlotStep;
+                if (step.x > 0f && step.y > 0f) return new Vector2(step.x, step.y);
+            }
+
+            return new Vector2(0.24f, 0.29f);
+        }
+
+        // Bottom-centre of the visible area, expressed in the sign group's local space. Derived from the
+        // menu camera rather than a fixed Y, because MenuStageResizer changes the visible height with
+        // the aspect ratio - a hard-coded value would sit correctly at one resolution only.
+        private Vector3 ResolveBricksAnchor(Transform parent)
+        {
+            Camera cam = menuFlow != null ? menuFlow.MenuCamera : null;
+            if (cam == null || !cam.orthographic)
+            {
+                return new Vector3(0f, -2.5f, 0f);
+            }
+
+            float worldBottom = cam.transform.position.y - cam.orthographicSize;
+            Vector3 local = parent.InverseTransformPoint(new Vector3(parent.position.x, worldBottom, parent.position.z));
+            return new Vector3(0f, local.y + bottomMargin, 0f);
         }
 
         private IEnumerator FlyBrick(Transform brick, Vector3 targetLocalPosition)

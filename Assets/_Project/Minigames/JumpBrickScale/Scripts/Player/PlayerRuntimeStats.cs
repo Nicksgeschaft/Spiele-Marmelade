@@ -22,5 +22,28 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         public float JumpBufferTime { get; set; }
         public float GroundNormalThreshold { get; set; }
         public float AttachCooldown { get; set; }
+
+        // Ability powers aggregated from the attached bricks. 0 means the player hasn't picked up a
+        // brick of that kind yet and the ability stays locked.
+        public float AirJumpPower { get; set; }
+        public float DashPower { get; set; }
+        public float WallJumpPower { get; set; }
+
+        /// <summary>Extra seconds each round-timer brick is worth, from purple bricks.</summary>
+        public float TimerSecondsPerBrick { get; set; }
+
+        // Resolved ability values, so the controller doesn't repeat the power maths every frame.
+        public float AirJumpHeight { get; set; }
+        public float DashSpeed { get; set; }
+        public float DashDuration { get; set; }
+        public float DashCooldown { get; set; }
+        public float DoubleTapWindow { get; set; }
+        public float WallJumpHeight { get; set; }
+        public float WallJumpPush { get; set; }
+        public float WallCheckDistance { get; set; }
+
+        public bool CanAirJump => AirJumpPower >= 1f;
+        public bool CanDash => DashPower >= 1f;
+        public bool CanWallJump => WallJumpPower >= 1f;
     }
 }

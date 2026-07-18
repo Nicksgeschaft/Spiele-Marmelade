@@ -78,6 +78,11 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             return slot;
         }
 
+        /// <summary>Distance between neighbouring bricks (x = next column, y = next one up), already
+        /// scaled. Exposed so other screens can lay the same bricks out with matching spacing.</summary>
+        public Vector3 SlotStep => new(_brickUnitSize.x * stackedScale,
+                                       (_brickUnitSize.y - studOverlap) * stackedScale, 0f);
+
         public Vector3 SlotLocalPosition(int index)
         {
             int column = maxPerColumn > 0 ? index / maxPerColumn : 0;

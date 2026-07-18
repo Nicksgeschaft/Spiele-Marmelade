@@ -5,10 +5,13 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
     public enum BrickColor
     {
         None,
-        Green,
-        Red,
-        Blue,
+        Green,      // move speed
+        Red,        // acceleration
+        Blue,       // gravity
         Yellow,
-        Purple,
+        Purple,     // extra round time
+        LightBlue,  // double jump
+        Orange,     // dash
+        Brown,      // wall jump
     }
 }

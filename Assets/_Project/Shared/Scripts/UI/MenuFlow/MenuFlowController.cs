@@ -168,6 +168,10 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         /// runtime content into it and have it show/hide with that screen automatically.</summary>
         public GameObject GetBrickSigns(string screenId) => FindBrickSigns(screenId);
 
+        /// <summary>Camera the brick-sign stage is rendered with. Runtime content can measure the
+        /// visible area from it instead of hard-coding positions that only hold at one aspect ratio.</summary>
+        public Camera MenuCamera => menuCamera;
+
         /// <summary>Resolves a screen's id from its title as typed in the Menu Flow Editor. Ids are
         /// auto-generated GUIDs that the editor never shows, so titles are what gameplay wiring can
         /// realistically refer to.</summary>

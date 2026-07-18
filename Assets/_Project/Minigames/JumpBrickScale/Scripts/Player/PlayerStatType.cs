@@ -1,13 +1,28 @@
 namespace SpieleMarmelade.Minigames.JumpBrickScale
 {
-    // The subset of PlayerMovementStats that bricks can modify (Docs section 1.1: "Move Speed,
-    // Jump Height, Gravity und Weight/Mass sind ... zur Laufzeit aggregierbar"). Weight is handled
-    // separately via BrickNode.Weight/PlayerAssembly mass-and-center-of-mass, not through this
-    // enum (Docs section 3.2). New entries may only be appended at the end.
+    // What a brick can change about the player (Docs section 1.1). Weight is deliberately absent -
+    // the physical brick.weight already drives mass and centre of mass via PlayerAssembly.
+    // New entries may only be appended at the end, so existing BrickDefinition assets keep working.
     public enum PlayerStatType
     {
         MoveSpeed,
         JumpHeight,
         GravityMagnitude,
+
+        // Acceleration toward the target run speed - how snappy the controls feel.
+        GroundAcceleration,
+
+        // 0 = no extra jump. Each point makes the mid-air jump higher (see PlayerMovementStats
+        // airJumpHeightFactor / airJumpFactorPerPower).
+        AirJumpPower,
+
+        // 0 = no dash. Each point makes the dash faster/longer.
+        DashPower,
+
+        // 0 = no wall jump. Each point makes pushing off a wall stronger.
+        WallJumpPower,
+
+        // Seconds added to what one round-timer brick is worth - i.e. straight extra playtime.
+        TimerSecondsPerBrick,
     }
 }

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4931390868305331784
+--- !u!1 &752230235687391754
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,41 +8,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5378731361343311165}
-  - component: {fileID: 8465582845592826167}
-  - component: {fileID: 6847534722232639040}
-  - component: {fileID: 6995336422112782261}
-  - component: {fileID: 7868297340778062906}
+  - component: {fileID: 8790341398168294858}
+  - component: {fileID: 4311702726913715833}
+  - component: {fileID: 5488443285158383578}
+  - component: {fileID: 6066878066157833378}
+  - component: {fileID: 818722680739711254}
   m_Layer: 8
-  m_Name: WorldBrick
+  m_Name: TimeBrick
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5378731361343311165
+--- !u!4 &8790341398168294858
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4931390868305331784}
+  m_GameObject: {fileID: 752230235687391754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6904171345009867165}
+  - {fileID: 5748197581520170590}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &8465582845592826167
+--- !u!54 &4311702726913715833
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4931390868305331784}
+  m_GameObject: {fileID: 752230235687391754}
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
@@ -63,13 +63,13 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &6847534722232639040
+--- !u!65 &5488443285158383578
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4931390868305331784}
+  m_GameObject: {fileID: 752230235687391754}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -84,27 +84,27 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.795, y: 1.1473336, z: 0.79}
   m_Center: {x: 0, y: 0.57764006, z: 0}
---- !u!114 &6995336422112782261
+--- !u!114 &6066878066157833378
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4931390868305331784}
+  m_GameObject: {fileID: 752230235687391754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e396cad9f624a27b66eb3ad1d7018ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.BrickNode
-  definition: {fileID: 11400000, guid: 1c2f0d68b3db437ab18978b7d1210133, type: 2}
+  definition: {fileID: 11400000, guid: 46c46322feef41dbbb7a9278aa26e4c6, type: 2}
   isMainBrick: 0
---- !u!114 &7868297340778062906
+--- !u!114 &818722680739711254
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4931390868305331784}
+  m_GameObject: {fileID: 752230235687391754}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 779b06b16828415abbf4ec093c8d1d9a, type: 3}
@@ -115,14 +115,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   detachGraceTime: 0.25
---- !u!1001 &3300692609612563856
+  cornerRejectRatio: 0.5
+--- !u!1001 &4457246468415967827
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 5378731361343311165}
+    m_TransformParent: {fileID: 8790341398168294858}
     m_Modifications:
+    - target: {fileID: 972102029103486434, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fdf82a28b470eba44a90ca8ac329b456, type: 2}
     - target: {fileID: 5788791348711292769, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
       propertyPath: m_Name
       value: Brick
@@ -188,8 +193,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
---- !u!4 &6904171345009867165 stripped
+--- !u!4 &5748197581520170590 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8223257578432936973, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
-  m_PrefabInstance: {fileID: 3300692609612563856}
+  m_PrefabInstance: {fileID: 4457246468415967827}
   m_PrefabAsset: {fileID: 0}

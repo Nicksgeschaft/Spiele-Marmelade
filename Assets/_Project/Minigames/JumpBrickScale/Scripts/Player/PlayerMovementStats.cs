@@ -56,5 +56,33 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
         [Header("Attachment")]
         public float attachCooldown = 0.10f;
+
+        [Header("Air Jump (light blue bricks)")]
+        [Tooltip("Height of the mid-air jump at power 1, as a fraction of the normal jump. Deliberately " +
+                 "small so one brick is a nudge, not a second full jump.")]
+        public float airJumpHeightFactor = 0.35f;
+        [Tooltip("Added to that fraction for every further air-jump brick.")]
+        public float airJumpFactorPerPower = 0.12f;
+
+        [Header("Dash (orange bricks)")]
+        [Tooltip("Dash speed at power 1.")]
+        public float dashSpeed = 14f;
+        [Tooltip("Added to the dash speed per further dash brick.")]
+        public float dashSpeedPerPower = 3f;
+        public float dashDuration = 0.15f;
+        [Tooltip("Cooldown before the next dash can be triggered.")]
+        public float dashCooldown = 0.6f;
+        [Tooltip("Max time between the two taps of a double-tap for it to count as a dash input.")]
+        public float doubleTapWindow = 0.28f;
+
+        [Header("Wall Jump (brown bricks)")]
+        [Tooltip("Height of a wall jump at power 1, as a fraction of the normal jump.")]
+        public float wallJumpHeightFactor = 0.8f;
+        [Tooltip("Added to that fraction for every further wall-jump brick.")]
+        public float wallJumpFactorPerPower = 0.1f;
+        [Tooltip("Sideways push away from the wall, as a fraction of MoveSpeed.")]
+        public float wallJumpPushFactor = 0.9f;
+        [Tooltip("How far to look sideways for a wall.")]
+        public float wallCheckDistance = 0.15f;
     }
 }
