@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class LavaHazard : MonoBehaviour
+public class UniversalHazard : MonoBehaviour
 {
     // das event musst gecallt werden + Player braucht den tag Player
 
