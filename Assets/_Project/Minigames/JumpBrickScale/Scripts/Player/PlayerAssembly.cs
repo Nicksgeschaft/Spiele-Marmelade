@@ -18,10 +18,17 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         };
 
         [Header("Grid")]
-        [Tooltip("World-space size of one grid step along the jump axis (world Y).")]
-        [SerializeField] private float gridStepVertical = 1.14f;
-        [Tooltip("World-space size of one grid step along the horizontal axis (world X).")]
+        // Actual attach placement measures the bricks' colliders (see PlaceBrickAtCell); these two are
+        // the nominal cell size, used for the grid fallback and the target-cell geometry sweep.
+        [Tooltip("Nominal cell size along the jump axis (world Y).")]
+        [SerializeField] private float gridStepVertical = 0.96f;
+        [Tooltip("Nominal cell size along the horizontal axis (world X).")]
         [SerializeField] private float gridStepHorizontal = 0.795f;
+
+        [Tooltip("How far a brick's studs sink into the brick above it when stacking. At this project's " +
+                 "x10 brick scale the mesh is 1.14 tall but only 0.96 of that is structural, so the studs " +
+                 "are the remaining 0.18. Raise this if studs still peek out, lower it if bricks overlap too much.")]
+        [SerializeField] private float studOverlap = 0.18f;
 
         [Header("Main Brick")]
         [SerializeField] private BrickNode mainBrick;
@@ -160,16 +167,13 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             return true;
         }
 
-        // Edge-to-edge placement: put the new brick's collider centre exactly one brick-size away
-        // from the receiver's collider centre, in the world direction of the touched side. Stepping
-        // by the actual collider size (not a fixed grid constant) lands the faces flush for any brick
-        // dimensions, as long as all bricks share the same size. Works whether the collider sits on
-        // the brick root or a child (e.g. inside the visual). AutoSyncTransforms is off here, so sync
-        // before reading bounds.
+        // Places the brick one cell from the receiver: horizontally by a full brick width, vertically
+        // by the brick's structural height so studs sink into the brick above. AutoSyncTransforms is
+        // off here, so sync before reading bounds.
         private void PlaceBrickAtCell(Transform brickTransform, BrickNode brick, BrickNode receiver, CardinalDirection direction)
         {
-            Collider receiverCollider = receiver.GetComponentInChildren<Collider>();
-            Collider brickCollider = brick.GetComponentInChildren<Collider>();
+            Collider receiverCollider = ResolveBrickCollider(receiver);
+            Collider brickCollider = ResolveBrickCollider(brick);
             if (receiverCollider == null || brickCollider == null)
             {
                 // No collider to align against - fall back to a plain grid transform placement.
@@ -179,34 +183,64 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             Physics.SyncTransforms();
 
-            Vector3 worldDir = (transform.rotation * LocalDirection(direction)).normalized;
-            float stepDistance = BrickExtentAlong(receiverCollider, direction);
-            Vector3 targetCenter = receiverCollider.bounds.center + worldDir * stepDistance;
-            brickTransform.position += targetCenter - brickCollider.bounds.center;
+            // Everything below is computed in assembly-local space. World-space AABB bounds would be
+            // wrong the moment the assembly tips over (the AABB grows and its "bottom" stops being the
+            // brick's bottom face), which showed up as bricks sliding out of line mid-air.
+            Vector3 receiverCenter = transform.InverseTransformPoint(receiverCollider.bounds.center);
+            Vector3 brickCenter = transform.InverseTransformPoint(brickCollider.bounds.center);
+            Vector3 receiverHalf = LocalHalfExtents(receiverCollider);
+            Vector3 brickHalf = LocalHalfExtents(brickCollider);
+
+            // Steps are derived from the two bricks' own half sizes rather than a fixed constant, so
+            // they stay correct even when the main brick's collider differs in size from a world
+            // brick's (which is what left a visible stud gap under the main brick before).
+            //   horizontal: halfA + halfB          -> side faces exactly flush
+            //   vertical:   halfA + halfB - stud   -> the lower brick's studs sink into the one above
+            Vector3 targetCenter = receiverCenter;
+            switch (direction)
+            {
+                case CardinalDirection.Right:
+                case CardinalDirection.Left:
+                    float horizontalStep = receiverHalf.x + brickHalf.x;
+                    targetCenter.x += direction == CardinalDirection.Right ? horizontalStep : -horizontalStep;
+                    // Line the bottom faces up so both bricks stand on the same level.
+                    targetCenter.y = receiverCenter.y - receiverHalf.y + brickHalf.y;
+                    break;
+
+                case CardinalDirection.Up:
+                    targetCenter.y += receiverHalf.y + brickHalf.y - studOverlap;
+                    break;
+
+                case CardinalDirection.Down:
+                    targetCenter.y -= receiverHalf.y + brickHalf.y - studOverlap;
+                    break;
+            }
+            targetCenter.z = receiverCenter.z;
+
+            // Move the transform by however far its collider centre currently sits from the target.
+            Vector3 colliderOffset = brickCenter - brickTransform.localPosition;
+            brickTransform.localPosition = targetCenter - colliderOffset;
         }
 
-        public static Vector3 LocalDirection(CardinalDirection direction) => direction switch
+        // Half size of the collider box along the brick's own axes. Since every brick is a direct
+        // child of the assembly with identity local rotation, these axes are the assembly's axes -
+        // so unlike bounds.extents this stays correct while the assembly is rotated.
+        private static Vector3 LocalHalfExtents(Collider collider)
         {
-            CardinalDirection.Up => Vector3.up,
-            CardinalDirection.Down => Vector3.down,
-            CardinalDirection.Right => Vector3.right,
-            CardinalDirection.Left => Vector3.left,
-            _ => Vector3.zero,
-        };
-
-        // Actual world-space size of the collider box along the given cardinal axis. Uses the box's
-        // own local size * scale (aligned with the brick, which shares the assembly's rotation), so
-        // it stays correct even when the assembly is rotated - unlike the AABB bounds.size.
-        private static float BrickExtentAlong(Collider collider, CardinalDirection direction)
-        {
-            bool vertical = direction == CardinalDirection.Up || direction == CardinalDirection.Down;
             if (collider is BoxCollider box)
             {
-                Vector3 worldSize = Vector3.Scale(box.size, collider.transform.lossyScale);
-                return vertical ? worldSize.y : worldSize.x;
+                return Vector3.Scale(box.size, collider.transform.lossyScale) * 0.5f;
             }
-            Vector3 aabb = collider.bounds.size;
-            return vertical ? aabb.y : aabb.x;
+            return collider.bounds.extents;
+        }
+
+        // A rebuilt brick can carry several colliders (e.g. a sizing "physic brick" inside the visual
+        // plus a nested brick prefab). Prefer the one on the BrickNode's own GameObject so the choice
+        // is predictable, and only fall back to searching children.
+        private static Collider ResolveBrickCollider(BrickNode brick)
+        {
+            Collider own = brick.GetComponent<Collider>();
+            return own != null ? own : brick.GetComponentInChildren<Collider>();
         }
 
         // Removes brick and anything left disconnected from the Main-Brick as a result (Docs
