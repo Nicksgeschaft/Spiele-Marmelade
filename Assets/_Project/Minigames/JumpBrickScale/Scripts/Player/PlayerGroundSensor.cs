@@ -7,18 +7,22 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
     // every collider currently under PlayerRoot and looks for a hit whose normal points enough
     // along world-up (+Y) to count as standable ground. Works for any number of attached bricks
     // without extra wiring, and never reports the assembly's own colliders as ground.
+    [RequireComponent(typeof(StatAggregator))]
     public class PlayerGroundSensor : MonoBehaviour
     {
         private static readonly Vector3 WorldUp = Vector3.up;
         private const float CastSkin = 0.05f;
 
-        [SerializeField] private PlayerMovementStats stats;
         [SerializeField] private LayerMask groundMask = ~0;
+
+        private StatAggregator _statAggregator;
 
         public bool IsGrounded { get; private set; }
 
         private void Awake()
         {
+            _statAggregator = GetComponent<StatAggregator>();
+
             int playerAssemblyLayer = LayerMask.NameToLayer("PlayerAssembly");
             if (playerAssemblyLayer >= 0)
             {
@@ -28,7 +32,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
         private void FixedUpdate()
         {
-            float threshold = stats != null ? stats.groundNormalThreshold : 0.6f;
+            float threshold = _statAggregator.Current.GroundNormalThreshold;
             bool grounded = false;
 
             foreach (Collider brickCollider in GetComponentsInChildren<Collider>())

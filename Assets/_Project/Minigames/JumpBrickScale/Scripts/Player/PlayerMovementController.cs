@@ -8,6 +8,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
     // prefab. See Docs/BrickMovementController_Anforderungen_v0.2.md section 4 for the exact
     // rules this implements.
     [RequireComponent(typeof(Rigidbody), typeof(PlayerInputReader), typeof(PlayerGroundSensor))]
+    [RequireComponent(typeof(StatAggregator))]
     public class PlayerMovementController : MonoBehaviour
     {
         private static readonly Vector3 WorldUp = Vector3.up;
@@ -17,31 +18,29 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         // is what caused the random diagonal drift on multi-piece ground).
         private const float GroundedStickSpeed = 0.5f;
 
-        [SerializeField] private PlayerMovementStats baseStats;
-
         [Tooltip("Jump impulse and future assembly torque are applied here. Defaults to this transform if left empty.")]
         [SerializeField] private Transform mainBrickCenter;
 
         private Rigidbody _rigidbody;
         private PlayerInputReader _input;
         private PlayerGroundSensor _groundSensor;
-        private PlayerRuntimeStats _stats;
+        private StatAggregator _statAggregator;
+        private bool _rigidbodyConfigured;
 
         private float _lastJumpPressedTime = float.NegativeInfinity;
         private float _lastGroundedTime = float.NegativeInfinity;
+
+        // Only ever read from Update/FixedUpdate, never from Awake - StatAggregator.Current
+        // depends on PlayerAssembly having already registered the Main-Brick, and Unity doesn't
+        // guarantee Awake() order between sibling components.
+        private PlayerRuntimeStats Stats => _statAggregator.Current;
 
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
             _input = GetComponent<PlayerInputReader>();
             _groundSensor = GetComponent<PlayerGroundSensor>();
-
-            // Placeholder until the StatAggregator (implementation step 8) starts rebuilding this
-            // from PlayerAssembly's connected bricks - for now it's just the base stats verbatim.
-            _stats = PlayerRuntimeStats.FromBaseStats(baseStats);
-
-            _rigidbody.maxAngularVelocity = _stats.MaxAngularVelocity;
-            _rigidbody.angularDamping = _stats.AngularDrag;
+            _statAggregator = GetComponent<StatAggregator>();
         }
 
         private void Update()
@@ -56,6 +55,13 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
         private void FixedUpdate()
         {
+            if (!_rigidbodyConfigured)
+            {
+                _rigidbody.maxAngularVelocity = Stats.MaxAngularVelocity;
+                _rigidbody.angularDamping = Stats.AngularDrag;
+                _rigidbodyConfigured = true;
+            }
+
             bool isGrounded = _groundSensor.IsGrounded;
             if (isGrounded)
             {
@@ -71,12 +77,12 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         {
             // W/S (MoveInput.y) are intentionally ignored - MVP has no vertical/depth translation.
             float inputX = Mathf.Clamp(_input.MoveInput.x, -1f, 1f);
-            float desiredVelocityX = inputX * _stats.MoveSpeed;
+            float desiredVelocityX = inputX * Stats.MoveSpeed;
 
-            float acceleration = Mathf.Abs(inputX) > 0.0001f ? _stats.GroundAcceleration : _stats.GroundDeceleration;
+            float acceleration = Mathf.Abs(inputX) > 0.0001f ? Stats.GroundAcceleration : Stats.GroundDeceleration;
             if (!isGrounded)
             {
-                acceleration *= _stats.AirControl;
+                acceleration *= Stats.AirControl;
             }
 
             Vector3 velocity = _rigidbody.linearVelocity;
@@ -97,24 +103,24 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
                 return;
             }
 
-            float gravity = _stats.GravityMagnitude;
+            float gravity = Stats.GravityMagnitude;
             if (velocity.y < 0f)
             {
-                gravity *= _stats.FallGravityMultiplier;
+                gravity *= Stats.FallGravityMultiplier;
             }
             else if (velocity.y > 0f && !_input.JumpHeld)
             {
-                gravity *= _stats.LowJumpGravityMultiplier;
+                gravity *= Stats.LowJumpGravityMultiplier;
             }
 
-            velocity.y = Mathf.Max(velocity.y - gravity * Time.fixedDeltaTime, -_stats.MaxFallSpeed);
+            velocity.y = Mathf.Max(velocity.y - gravity * Time.fixedDeltaTime, -Stats.MaxFallSpeed);
             _rigidbody.linearVelocity = velocity;
         }
 
         private void TryConsumeBufferedJump(bool isGrounded)
         {
-            bool jumpBuffered = Time.time - _lastJumpPressedTime <= _stats.JumpBufferTime;
-            bool coyoteActive = Time.time - _lastGroundedTime <= _stats.CoyoteTime;
+            bool jumpBuffered = Time.time - _lastJumpPressedTime <= Stats.JumpBufferTime;
+            bool coyoteActive = Time.time - _lastGroundedTime <= Stats.CoyoteTime;
             if (!jumpBuffered || !(isGrounded || coyoteActive))
             {
                 return;
@@ -131,7 +137,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
                 _rigidbody.linearVelocity = velocity;
             }
 
-            float jumpVelocity = Mathf.Sqrt(2f * _stats.GravityMagnitude * _stats.JumpHeight);
+            float jumpVelocity = Mathf.Sqrt(2f * Stats.GravityMagnitude * Stats.JumpHeight);
             Vector3 jumpImpulse = WorldUp * (jumpVelocity * _rigidbody.mass);
             Vector3 worldCenter = mainBrickCenter != null ? mainBrickCenter.position : transform.position;
             _rigidbody.AddForceAtPosition(jumpImpulse, worldCenter, ForceMode.Impulse);

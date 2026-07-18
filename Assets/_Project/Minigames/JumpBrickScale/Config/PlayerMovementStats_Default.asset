@@ -35,7 +35,7 @@ MonoBehaviour:
     minValue: 0.1
     maxValue: 1000
   weightPerStandardBrick: 1
-  maxAngularVelocity: 8
+  maxAngularVelocity: 3
   angularDrag: 1.4
   coyoteTime: 0.12
   jumpBufferTime: 0.12

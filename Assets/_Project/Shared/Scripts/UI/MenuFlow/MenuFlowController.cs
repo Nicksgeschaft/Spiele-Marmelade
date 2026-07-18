@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace SpieleMarmelade.Shared.UI.MenuFlow
 {
@@ -49,6 +50,11 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         private string _pauseScreenId;
         private bool   _isPaused;
         private bool   _gameActive;
+
+        // Survives the scene reload used to restart a level (statics persist across LoadScene within
+        // a play session). Lets "Restart" drop straight back into a fresh game, while "Main Menu"
+        // reloads and stops at the menu.
+        private static bool _enterGameAfterReload;
 
         public void RegisterPanel(string screenId, GameObject panel) =>
             SetBinding(screenId, panel: panel);
@@ -100,6 +106,14 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
 
             if (gameplayRoot != null) gameplayRoot.SetActive(false);
 
+            // Came back from a "Restart" scene reload - skip the menu and start playing immediately.
+            if (_enterGameAfterReload)
+            {
+                _enterGameAfterReload = false;
+                EnterGame();
+                return;
+            }
+
             if (graph != null && !string.IsNullOrEmpty(graph.startScreenId))
                 ShowScreen(graph.startScreenId);
         }
@@ -112,6 +126,17 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
             if (node.kind == MenuScreenKind.Game)
             {
                 EnterGame();
+                return;
+            }
+
+            // Leaving a running game back to the start screen ends the run: reload the scene so the
+            // next Play begins a fresh level instead of resuming the half-played one. Panels alone
+            // can't do this - the gameplay root keeps its full state (player position, attached
+            // bricks, collected pickups). Other screens (Pause, Options) are just panel swaps and
+            // deliberately keep the session alive.
+            if (_gameActive && graph != null && screenId == graph.startScreenId)
+            {
+                ReloadScene(enterGameAfterwards: false);
                 return;
             }
 
@@ -147,11 +172,32 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
                     break;
 
                 case MenuSpecialAction.RestartGame:
-                    _isPaused = false;
-                    Time.timeScale = 1f;
-                    EnterGame();
+                    // Re-entering without a reload would just un-pause the same half-played level,
+                    // so reload and jump straight back into a fresh one.
+                    ReloadScene(enterGameAfterwards: true);
                     break;
             }
+        }
+
+        // Restarts the level by reloading the active scene - the only reliable way to reset all
+        // gameplay state (player, attached bricks, collected pickups, timers) without every minigame
+        // having to implement its own teardown.
+        private void ReloadScene(bool enterGameAfterwards)
+        {
+            _isPaused = false;
+            _gameActive = false;
+            Time.timeScale = 1f;
+
+            Scene active = SceneManager.GetActiveScene();
+            if (active.buildIndex < 0)
+            {
+                Debug.LogWarning($"[MenuFlowController] Scene '{active.name}' is not in the Build Settings, " +
+                                 "so the level can't be reloaded to restart it. Add it under File > Build Settings.", this);
+                return;
+            }
+
+            _enterGameAfterReload = enterGameAfterwards;
+            SceneManager.LoadScene(active.buildIndex);
         }
 
         private void EnterGame()

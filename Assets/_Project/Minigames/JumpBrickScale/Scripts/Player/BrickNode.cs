@@ -25,5 +25,9 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         internal void AssignId(int id) => Id = id;
 
         internal void SetNeighbor(CardinalDirection direction, BrickNode neighbor) => _neighbors[direction] = neighbor;
+
+        internal void ClearNeighbor(CardinalDirection direction) => _neighbors.Remove(direction);
+
+        internal void ClearAllNeighbors() => _neighbors.Clear();
     }
 }

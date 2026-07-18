@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c27de0ca6aa64234925ffa5d551d4a86, type: 3}
-  m_Name: BrickDefinition_Green
+  m_Name: BrickDefinition_Blue
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.BrickDefinition
   color: 1
   weight: 1

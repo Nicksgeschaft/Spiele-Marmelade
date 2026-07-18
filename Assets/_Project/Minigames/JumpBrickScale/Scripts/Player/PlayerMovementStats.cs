@@ -40,7 +40,11 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         public float weightPerStandardBrick = 1.0f;
 
         [Header("Rotation")]
-        public float maxAngularVelocity = 8f;
+        // Lowered from the documented 8 rad/s MVP-default: a jump on a single right-attached
+        // brick (equal weight, one grid step over) works out to roughly 30 rad/s of raw angular
+        // impulse before clamping - 8 rad/s still reads as a wild spin, 3 reads as a visible but
+        // controlled lean. Re-tune after playtesting (Right-Heavy-Test, Docs section 12 T02).
+        public float maxAngularVelocity = 3f;
         public float angularDrag = 1.4f;
 
         [Header("Jump Feel")]
