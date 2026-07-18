@@ -29,6 +29,16 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         [SerializeField] private string pauseSfxId;
         [SerializeField] private string resumeSfxId;
 
+        [Header("Music")]
+        // Ids from the AudioLibrary's Music list. Playback runs on the AudioManager's dedicated music
+        // channel, so the Options music slider already controls it. Leave an id empty to not switch
+        // music for that state. Pausing deliberately does NOT change track - the pause panel is a
+        // panel swap, and cutting the music for it would be jarring.
+        [Tooltip("Music id played on every menu screen (main menu, options, ...).")]
+        [SerializeField] private string menuMusicId;
+        [Tooltip("Music id played while the game itself is running.")]
+        [SerializeField] private string gameMusicId;
+
         // Filled in by the Menu Flow Editor's Generate step: screenId -> its panel/sign-group
         // GameObject. Must be a serialized list, not a plain Dictionary — Generate() calls
         // RegisterPanel/RegisterBrickSigns on the live component at EDITOR time, and a
@@ -148,6 +158,10 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
             if (signGroup != null) signGroup.SetActive(true);
 
             SetMenuCameraActive(true);
+
+            // Not restarted if it's already the current track, so moving between menu screens
+            // (main menu -> options -> back) keeps one continuous piece playing.
+            SfxPlayer.PlayMusic(menuMusicId);
         }
 
         // Bound as a persistent BrickTextButton.OnClicked listener by MenuFlowGenerator, with
@@ -214,6 +228,8 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
             _gameActive = true;
             _isPaused = false;
             Time.timeScale = 1f;
+
+            SfxPlayer.PlayMusic(gameMusicId);
         }
 
         private void Resume()

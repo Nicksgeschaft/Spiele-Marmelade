@@ -27,6 +27,9 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         [Header("Options-Slider")]
         public Color sliderFilledColor = Color.white;
         public Color sliderUnfilledColor = new(0.15f, 0.15f, 0.15f);
+        [Tooltip("Farbe des Griffs. Bewusst eine eigene Farbe, damit der Griff sich vom Track abhebt - " +
+                 "vorher teilte er sich die Farbe mit dem ungefüllten Track und war kaum zu sehen.")]
+        public Color sliderHandleColor = new(0.95f, 0.35f, 0.15f);
 
         public MenuScreenNode FindScreen(string id) =>
             string.IsNullOrEmpty(id) ? null : screens.Find(s => s.id == id);

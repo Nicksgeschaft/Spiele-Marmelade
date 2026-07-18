@@ -13,10 +13,18 @@ namespace SpieleMarmelade.Shared.World
     // alternative to a uGUI Slider. Assumes a flat, camera-facing layout (built for the Menu
     // Flow stage): drag tracking raycasts against the plane through this transform (normal =
     // transform.forward) rather than general 3D closest-point-on-line math.
+    //
+    // Everything is computed in this transform's LOCAL space, which is what makes it survive being
+    // scaled (the Options rows scale the slider twice over). An earlier version positioned the
+    // handle in world space via TransformDirection - that ignores scale, so the handle drifted out
+    // of the track as soon as any parent scaling was involved, and the generator had to bake the
+    // scale factors into trackLength by hand to compensate.
     public class BrickSliderTrack : MonoBehaviour
     {
         [SerializeField] private Transform handle;
         [SerializeField] private Vector3 axis = Vector3.right;
+        [Tooltip("Length of the track in LOCAL units. Ignored when Segments are assigned - the real " +
+                 "length is measured from the first and last segment instead.")]
         [SerializeField] private float trackLength = 1f;
         [Tooltip("Muss zugewiesen werden (z. B. die MenuCamera) — sonst fällt es auf Camera.main zurück.")]
         [SerializeField] private Camera raycastCamera;
@@ -36,14 +44,29 @@ namespace SpieleMarmelade.Shared.World
         public BrickSliderValueChanged OnValueChanged = new();
 
         private bool _dragging;
-        private Vector3 _axisWorld;
 
         public float Value => value;
+
+        // Measured from the actual track bricks so it always matches what's on screen, whatever the
+        // slider is scaled by. Falls back to the serialized value only for hand-built sliders that
+        // have no segments assigned.
+        private float LocalTrackLength
+        {
+            get
+            {
+                if (segments == null || segments.Length < 2) return trackLength;
+
+                Transform first = segments[0] != null ? segments[0].transform : null;
+                Transform last = segments[^1] != null ? segments[^1].transform : null;
+                if (first == null || last == null) return trackLength;
+
+                return Mathf.Abs(Vector3.Dot(last.localPosition - first.localPosition, axis.normalized));
+            }
+        }
 
         private void Awake()
         {
             if (raycastCamera == null) raycastCamera = Camera.main;
-            _axisWorld = transform.TransformDirection(axis.normalized);
             SetValue(value, notify: false);
         }
 
@@ -73,9 +96,11 @@ namespace SpieleMarmelade.Shared.World
             var plane = new Plane(transform.forward, transform.position);
             if (!plane.Raycast(ray, out float enter)) return;
 
-            Vector3 hitPoint = ray.GetPoint(enter);
-            float distance = Vector3.Dot(hitPoint - transform.position, _axisWorld);
-            float t = trackLength > 0f ? Mathf.Clamp01(distance / trackLength) : 0f;
+            // Convert the hit into local space first, so the same maths works at any scale.
+            Vector3 localHit = transform.InverseTransformPoint(ray.GetPoint(enter));
+            float distance = Vector3.Dot(localHit, axis.normalized);
+            float length = LocalTrackLength;
+            float t = length > 0f ? Mathf.Clamp01(distance / length) : 0f;
             SetValue(Mathf.Lerp(minValue, maxValue, t));
         }
 
@@ -83,7 +108,18 @@ namespace SpieleMarmelade.Shared.World
         {
             value = Mathf.Clamp(newValue, minValue, maxValue);
             float t = maxValue > minValue ? (value - minValue) / (maxValue - minValue) : 0f;
-            if (handle != null) handle.position = transform.position + _axisWorld * (t * trackLength);
+
+            if (handle != null)
+            {
+                // Replace only the along-axis component, so the handle keeps whatever offset it was
+                // authored with on the other axes (it sits slightly in front to avoid z-fighting
+                // with the track brick underneath - overwriting the full position lost that).
+                Vector3 axisN = axis.normalized;
+                Vector3 local = handle.localPosition;
+                float currentAlongAxis = Vector3.Dot(local, axisN);
+                handle.localPosition = local + axisN * (t * LocalTrackLength - currentAlongAxis);
+            }
+
             ApplySegmentColors(t);
             if (notify) OnValueChanged?.Invoke(value);
         }

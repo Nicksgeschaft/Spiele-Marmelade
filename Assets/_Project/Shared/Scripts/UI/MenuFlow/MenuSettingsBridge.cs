@@ -1,6 +1,7 @@
 using System;
 using SpieleMarmelade.Core.Managers;
 using SpieleMarmelade.Core.SaveSystem;
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
 namespace SpieleMarmelade.Shared.UI.MenuFlow
@@ -68,11 +69,24 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
             }
             else
             {
-                // No AudioManager to route separate Music/SFX buses through standalone — the
-                // values are still saved so they take effect once this runs under GameManager.
                 PlayerPrefs.SetFloat(prefsKey, value);
                 PlayerPrefs.Save();
-                AudioListener.volume = GetMasterVolume();
+
+                // If a StandaloneAudioBootstrap spun up a stand-in AudioManager, route through it so
+                // the individual Music/SFX buses respond exactly like they do under GameManager.
+                // Without it only AudioListener.volume is available, which is master-only - that's why
+                // the master slider worked standalone while Music/SFX appeared dead.
+                SettingsData standalone = StandaloneAudioBootstrap.StandaloneSettings;
+                AudioManager standaloneManager = StandaloneAudioBootstrap.StandaloneAudioManager;
+                if (standalone != null && standaloneManager != null)
+                {
+                    setter(standalone);
+                    standaloneManager.ApplyVolumes();
+                }
+                else
+                {
+                    AudioListener.volume = GetMasterVolume();
+                }
             }
         }
     }

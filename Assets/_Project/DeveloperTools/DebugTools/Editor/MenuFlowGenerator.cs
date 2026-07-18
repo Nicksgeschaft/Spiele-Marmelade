@@ -128,6 +128,11 @@ namespace SpieleMarmelade.DevTools.Editor
                 // widgets) — computing them twice risked the two drifting apart, which was the
                 // root of the original overlap bug.
                 float topButtonY = node.buttons.Count > 0 ? (node.buttons.Count - 1) * ButtonSpacing * 0.5f : 0f;
+                // The Options rows stack upward from the button row, so with the buttons centred on
+                // stage-Y 0 the whole screen ends up crowded into the top half with dead space below.
+                // Drop the anchor to re-centre the block; the title stays pinned to the top edge and
+                // is nudged separately via OptionsTitleTopMargin.
+                if (node.kind == MenuScreenKind.Options) topButtonY += OptionsContentOffsetY;
                 // Only meaningful for non-Options screens — the Options title is pinned near the
                 // top of the screen independently (see BuildBrickButtonGroup), since it needs to
                 // clear 4 extra rows below it rather than just sitting above the button stack.
@@ -286,7 +291,11 @@ namespace SpieleMarmelade.DevTools.Editor
         // correctly via StageAlignedElement at any aspect ratio). Only takes effect when there's
         // room for it — see the Mathf.Max against the rows' own minimum clearance requirement in
         // BuildBrickButtonGroup.
-        private const float OptionsTitleTopMargin = 0.35f;
+        private const float OptionsTitleTopMargin = 0.75f;
+
+        // Shifts the whole Options block (rows + buttons) down the stage. Negative = lower. Tune this
+        // single value to re-balance the screen vertically rather than nudging rows and buttons apart.
+        private const float OptionsContentOffsetY = -0.75f;
 
         private static float BrickRowStep => BrickShapeInfo.HeightInPlates(BrickType.Brick) * WorldConstants.PlateHeight;
         private static float BrickTextHalfHeight => BrickFont.GlyphHeight * BrickRowStep * 0.5f; // title/button half-height
@@ -336,6 +345,7 @@ namespace SpieleMarmelade.DevTools.Editor
         {
             Material filledMat   = CreateColorMaterial(graph.sliderFilledColor);
             Material unfilledMat = CreateColorMaterial(graph.sliderUnfilledColor);
+            Material handleMat   = CreateColorMaterial(graph.sliderHandleColor);
 
             BrickSliderTrack masterSlider = null, musicSlider = null, sfxSlider = null;
             IconToggleButton fullscreenButton = null;
@@ -382,7 +392,7 @@ namespace SpieleMarmelade.DevTools.Editor
 
                 if (brickPrefab != null)
                 {
-                    var slider = BuildBrickSlider(rowGo.transform, brickPrefab, filledMat, unfilledMat, menuCam);
+                    var slider = BuildBrickSlider(rowGo.transform, brickPrefab, filledMat, unfilledMat, handleMat, menuCam);
                     if (i == 0) masterSlider = slider;
                     else if (i == 1) musicSlider = slider;
                     else sfxSlider = slider;
@@ -452,7 +462,7 @@ namespace SpieleMarmelade.DevTools.Editor
         // slider track built out of bricks instead of a 2D Image fill. Built at local (0,0,0) —
         // its parent's BrickStackLayout (see BuildOptionsWidgets) positions it alongside the icon.
         private static BrickSliderTrack BuildBrickSlider(Transform parent, GameObject brickPrefab,
-            Material filledMat, Material unfilledMat, Camera menuCam)
+            Material filledMat, Material unfilledMat, Material handleMat, Camera menuCam)
         {
             var root = new GameObject("Slider");
             root.transform.SetParent(parent, false);
@@ -478,7 +488,9 @@ namespace SpieleMarmelade.DevTools.Editor
             handleGo.name = "Handle";
             // Offset back a touch so it doesn't z-fight with whichever track brick it's over.
             handleGo.transform.localPosition = new Vector3(0f, 0f, -WorldConstants.PlateDepth);
-            ApplyMaterial(handleGo, unfilledMat);
+            // Its own colour, not the track's: sharing unfilledMat made the handle vanish into the
+            // unfilled part of the track it sits on.
+            ApplyMaterial(handleGo, handleMat);
 
             // The Brick prefab's default collider is sized for grid-stacking (includes the stud
             // bump on top, taller than the visible brick body) — tighten it to just the handle's
@@ -493,12 +505,10 @@ namespace SpieleMarmelade.DevTools.Editor
             var so = new SerializedObject(track);
             so.FindProperty("handle").objectReferenceValue = handleGo.transform;
             so.FindProperty("axis").vector3Value = Vector3.right;
-            // BrickSliderTrack works in world units (handle.position, Vector3.Dot against
-            // _axisWorld) — TransformDirection ignores scale, so BOTH the slider's own
-            // OptionsSliderScale AND the parent row's additional OptionsRowScale must be folded
-            // in here explicitly, or the handle would visually undershoot the track's actual
-            // (now scaled twice over) length and dragging would hit max value early.
-            so.FindProperty("trackLength").floatValue = (SliderSegmentCount - 1) * spacing * OptionsSliderScale * OptionsRowScale;
+            // Plain local length — no scale factors folded in. BrickSliderTrack measures the real
+            // track from the segments below and works in local space, so it handles OptionsSliderScale
+            // and the parent row's OptionsRowScale by itself.
+            so.FindProperty("trackLength").floatValue = (SliderSegmentCount - 1) * spacing;
             so.FindProperty("raycastCamera").objectReferenceValue = menuCam;
             so.FindProperty("filledMaterial").objectReferenceValue = filledMat;
             so.FindProperty("unfilledMaterial").objectReferenceValue = unfilledMat;
