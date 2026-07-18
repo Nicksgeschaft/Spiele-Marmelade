@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8051674039677322439}
   - component: {fileID: 2839539335728914269}
   - component: {fileID: 3652825039199194664}
+  - component: {fileID: 3446067724975197976}
   m_Layer: 0
   m_Name: LavaHazard 1
   m_TagString: Untagged
@@ -27,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 1964487740901250087}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 75.93811, y: 0.0000006091673, z: -233.63011}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -61,6 +62,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 101c3b474bd9b4a4c9947ada6764490a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::LavaHazard
+--- !u!65 &3446067724975197976
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964487740901250087}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.77, y: 0.56, z: 0.79}
+  m_Center: {x: 0, y: 0.41, z: 0}
 --- !u!1 &8043113484948078464
 GameObject:
   m_ObjectHideFlags: 0
@@ -182,6 +204,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 8051674039677322439}
     m_Modifications:
     - target: {fileID: 373979501978179594, guid: 37e2d7734599a5842af304ba7fd8cbb4, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.4408
+      objectReference: {fileID: 0}
+    - target: {fileID: 373979501978179594, guid: 37e2d7734599a5842af304ba7fd8cbb4, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0
       objectReference: {fileID: 0}
@@ -236,6 +262,14 @@ PrefabInstance:
     - target: {fileID: 9134131487703850991, guid: 37e2d7734599a5842af304ba7fd8cbb4, type: 3}
       propertyPath: ShapeModule.m_Scale.z
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9134131487703850991, guid: 37e2d7734599a5842af304ba7fd8cbb4, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 9134131487703850991, guid: 37e2d7734599a5842af304ba7fd8cbb4, type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.01
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
