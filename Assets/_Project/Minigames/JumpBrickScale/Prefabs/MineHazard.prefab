@@ -84,6 +84,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::UniversalHazard
   explosionPrefab: {fileID: 4776498833083501132}
+  hitSfxId: hazard_mine
 --- !u!1 &8043113484948078464
 GameObject:
   m_ObjectHideFlags: 0

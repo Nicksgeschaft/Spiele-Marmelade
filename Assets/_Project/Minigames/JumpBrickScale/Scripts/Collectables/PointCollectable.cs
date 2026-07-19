@@ -1,4 +1,5 @@
 using System.Collections;
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
 namespace SpieleMarmelade.Minigames.JumpBrickScale
@@ -31,6 +32,9 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [SerializeField] private AnimationCurve flightEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
         [Tooltip("Extra scale at the midpoint of the flight, for a little pop.")]
         [SerializeField] private float midFlightScalePunch = 1.25f;
+
+        [Tooltip("Id aus der AudioLibrary (sfx-Liste), gespielt beim Einsammeln.")]
+        [SerializeField] private string collectSfxId = "collect";
 
         [Header("Debug")]
         [Tooltip("Logs every collider that touches this pickup and whether it was recognised as the player.")]
@@ -92,6 +96,9 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             }
 
             _state = State.Flying;
+
+            // On the SFX bus, so the Options SFX slider controls it.
+            SfxPlayer.Play(collectSfxId);
 
             // Stop blocking/re-triggering the moment it's claimed.
             foreach (Collider ownCollider in GetComponentsInChildren<Collider>())

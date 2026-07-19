@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
 namespace SpieleMarmelade.Minigames.JumpBrickScale
@@ -20,8 +23,13 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [SerializeField] private bool logHits;
 
         private PlayerAssembly _assembly;
-        private UniversalHazard[] _hazards;
         private float _invulnerableUntil;
+
+        // The event only reports the collider that entered, not the hazard it entered - but each
+        // hazard carries its own hit sound, so the handler has to know which one fired. Subscribing
+        // through a per-hazard closure supplies that; the delegate is kept here because unsubscribing
+        // needs the exact same instance back.
+        private readonly Dictionary<UniversalHazard, Action<GameObject>> _subscriptions = new();
 
         /// <summary>True while the player can't take another hit.</summary>
         public bool IsInvulnerable => Time.time < _invulnerableUntil;
@@ -31,31 +39,32 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         private void Start()
         {
             // Subscribed in Start rather than Awake so hazards created during scene load exist by now.
-            _hazards = FindObjectsByType<UniversalHazard>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (UniversalHazard hazard in _hazards)
+            foreach (UniversalHazard hazard in FindObjectsByType<UniversalHazard>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                hazard.OnLavaCollision += HandleHazardHit;
+                Register(hazard);
             }
         }
 
         private void OnDestroy()
         {
-            if (_hazards == null) return;
-            foreach (UniversalHazard hazard in _hazards)
+            foreach (KeyValuePair<UniversalHazard, Action<GameObject>> subscription in _subscriptions)
             {
-                if (hazard != null) hazard.OnLavaCollision -= HandleHazardHit;
+                if (subscription.Key != null) subscription.Key.OnLavaCollision -= subscription.Value;
             }
+            _subscriptions.Clear();
         }
 
         /// <summary>Hook for hazards spawned after Start (moving/pooled ones).</summary>
         public void Register(UniversalHazard hazard)
         {
-            if (hazard == null) return;
-            hazard.OnLavaCollision -= HandleHazardHit;
-            hazard.OnLavaCollision += HandleHazardHit;
+            if (hazard == null || _subscriptions.ContainsKey(hazard)) return;
+
+            Action<GameObject> handler = touched => HandleHazardHit(hazard, touched);
+            _subscriptions[hazard] = handler;
+            hazard.OnLavaCollision += handler;
         }
 
-        private void HandleHazardHit(GameObject touched)
+        private void HandleHazardHit(UniversalHazard hazard, GameObject touched)
         {
             if (touched == null || IsInvulnerable) return;
 
@@ -76,6 +85,11 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             }
 
             _invulnerableUntil = Time.time + damageCooldown;
+
+            // Played here rather than in UniversalHazard so it fires once per hit that actually costs
+            // a brick - a lava pool is five separate triggers, and sounding each one would stack five
+            // copies of the same hiss on top of each other.
+            if (hazard != null) SfxPlayer.Play(hazard.hitSfxId);
 
             if (logHits) Debug.Log($"[PlayerHazardResponder] Hazard knocked off '{brick.name}'.", this);
 

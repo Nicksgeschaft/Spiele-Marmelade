@@ -63,6 +63,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::LavaHazard
   explosionPrefab: {fileID: 0}
+  hitSfxId: hazard_lava
 --- !u!65 &3446067724975197976
 BoxCollider:
   m_ObjectHideFlags: 0

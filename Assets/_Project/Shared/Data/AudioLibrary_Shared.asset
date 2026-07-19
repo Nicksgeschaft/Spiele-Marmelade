@@ -19,7 +19,19 @@ MonoBehaviour:
   - id: game
     clip: {fileID: 8300000, guid: 84576af739b7c7c4c83f89602c167bd7, type: 3}
     volume: 0.284
-  sfx: []
+  sfx:
+  - id: collect
+    clip: {fileID: 8300000, guid: 07dfa2b187945a149acf9f186d4c603f, type: 3}
+    volume: 1
+  - id: brick_attach
+    clip: {fileID: 8300000, guid: dca4f6d841407aa448624e4a07b31bb9, type: 3}
+    volume: 1
+  - id: hazard_lava
+    clip: {fileID: 8300000, guid: ccc511ab14fd93b4e8546b2b48fe0995, type: 3}
+    volume: 1
+  - id: hazard_mine
+    clip: {fileID: 8300000, guid: ea539224c24311c46833dff0d4014f1a, type: 3}
+    volume: 1
   ui:
   - id: click
     clip: {fileID: 8300000, guid: e04c4384e87607c4e9e8927767ef7440, type: 3}

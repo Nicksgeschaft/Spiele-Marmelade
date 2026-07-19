@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SpieleMarmelade.Shared.Audio;
 using UnityEngine;
 
 namespace SpieleMarmelade.Minigames.JumpBrickScale
@@ -50,6 +51,9 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [SerializeField] private float detachDepthImpulse = -1.5f;
         [Tooltip("Seconds until a knocked-off brick is removed from the scene. 0 = keep it forever.")]
         [SerializeField] private float fragmentDespawnDelay = 4f;
+
+        [Tooltip("Id aus der AudioLibrary (sfx-Liste), gespielt wenn ein Brick andockt.")]
+        [SerializeField] private string attachSfxId = "brick_attach";
 
         [Header("Debug")]
         [SerializeField] private BrickNode testBrickPrefab;
@@ -182,6 +186,9 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             RegisterBrick(brick, targetPosition);
             LinkNeighborsAround(brick);
             RecomputeMassAndCenter();
+
+            // Only after the cell-occupied and placement checks above, so a rejected attach stays silent.
+            SfxPlayer.Play(attachSfxId);
 
             OnBrickAttached?.Invoke(brick);
             OnAssemblyChanged?.Invoke();
