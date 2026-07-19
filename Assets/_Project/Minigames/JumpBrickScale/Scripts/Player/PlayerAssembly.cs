@@ -284,6 +284,12 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             foreach (BrickNode fragment in detachSet)
             {
+                // brick was already unlinked above; collateral fragments swept in by the flood fill
+                // still hold neighbor links to each other. Left uncleared, a brick that stays attached
+                // can end up with a dangling pointer to one of these once its GameObject is gone, which
+                // a later Detach() then walks into and crashes on.
+                if (fragment != brick) UnlinkFromNeighbors(fragment);
+
                 _connectedBricks.Remove(fragment);
                 _grid.Remove(fragment.GridPosition);
                 ReleaseFragment(fragment);
@@ -330,6 +336,8 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         // readable. WorldBrick.OnDetached() (if present) handles the re-attach grace period.
         private void ReleaseFragment(BrickNode fragment)
         {
+            if (fragment == null) return;
+
             Transform fragmentTransform = fragment.transform;
             Vector3 worldCenter = fragmentTransform.position;
             Vector3 pointVelocity = _rigidbody != null ? _rigidbody.GetPointVelocity(worldCenter) : Vector3.zero;

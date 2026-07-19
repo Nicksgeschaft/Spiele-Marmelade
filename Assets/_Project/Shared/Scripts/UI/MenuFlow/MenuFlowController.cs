@@ -61,6 +61,13 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         private bool   _isPaused;
         private bool   _gameActive;
 
+        // True after navigating from Pause into some other screen (Options, ...) without resuming
+        // or quitting. That screen's own "Back" button is hardcoded to the Main Menu id in the
+        // generated graph - it's shared with the non-paused flow and has no way to know it was
+        // reached via Pause - so without this flag, Pause -> Options -> Back looks identical to
+        // actually quitting to the main menu and would wrongly end the run.
+        private bool _returningFromPausedSubmenu;
+
         // Survives the scene reload used to restart a level (statics persist across LoadScene within
         // a play session). Lets "Restart" drop straight back into a fresh game, while "Main Menu"
         // reloads and stops at the menu.
@@ -135,20 +142,36 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
 
             if (node.kind == MenuScreenKind.Game)
             {
+                _returningFromPausedSubmenu = false;
                 EnterGame();
                 return;
             }
 
-            // Leaving a running game back to the start screen ends the run: reload the scene so the
-            // next Play begins a fresh level instead of resuming the half-played one. Panels alone
-            // can't do this - the gameplay root keeps its full state (player position, attached
-            // bricks, collected pickups). Other screens (Pause, Options) are just panel swaps and
-            // deliberately keep the session alive.
-            if (_gameActive && graph != null && screenId == graph.startScreenId)
+            bool isMainMenuTarget = graph != null && screenId == graph.startScreenId;
+
+            if (_gameActive && isMainMenuTarget)
             {
+                if (_returningFromPausedSubmenu)
+                {
+                    // Not a real quit - this is "Back" from a screen that was only reachable via
+                    // Pause, so return there instead of ending the run.
+                    _returningFromPausedSubmenu = false;
+                    ShowScreen(_pauseScreenId);
+                    return;
+                }
+
+                // Leaving a running game back to the start screen ends the run: reload the scene so
+                // the next Play begins a fresh level instead of resuming the half-played one. Panels
+                // alone can't do this - the gameplay root keeps its full state (player position,
+                // attached bricks, collected pickups). Other screens (Pause, Options) are just panel
+                // swaps and deliberately keep the session alive.
                 ReloadScene(enterGameAfterwards: false);
                 return;
             }
+
+            // Remember whether we're leaving Pause into some other screen, so a later "Back" to Main
+            // Menu from there gets redirected here instead of ending the run.
+            _returningFromPausedSubmenu = _isPaused && screenId != _pauseScreenId;
 
             HideAllScreens();
 
@@ -256,6 +279,8 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
 
         private void Resume()
         {
+            _returningFromPausedSubmenu = false;
+
             if (_pauseScreenId != null)
             {
                 var pausePanel = FindPanel(_pauseScreenId);

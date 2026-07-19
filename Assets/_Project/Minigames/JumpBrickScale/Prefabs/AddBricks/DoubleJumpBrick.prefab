@@ -98,6 +98,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.BrickNode
   definition: {fileID: 11400000, guid: 24dd355cda1942b79b51ff1abab4c8f3, type: 2}
   isMainBrick: 0
+  applyDefinitionMaterial: 1
 --- !u!114 &6808976763959568014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,7 +128,7 @@ PrefabInstance:
     - target: {fileID: 972102029103486434, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 49e387118767ca447805ccee6650da25, type: 2}
+      objectReference: {fileID: 2100000, guid: 62e595eaaafa7ac4abb0c82d90cb4a8c, type: 2}
     - target: {fileID: 5788791348711292769, guid: c427ccd15cbbc174fa6f3151a40e391f, type: 3}
       propertyPath: m_Name
       value: Brick

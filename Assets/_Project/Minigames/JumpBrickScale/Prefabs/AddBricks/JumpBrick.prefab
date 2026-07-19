@@ -96,8 +96,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e396cad9f624a27b66eb3ad1d7018ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.BrickNode
-  definition: {fileID: 11400000, guid: 1c2f0d68b3db437ab18978b7d1210133, type: 2}
+  definition: {fileID: 11400000, guid: 650fbf6c120d49a418a12ca930c54c97, type: 2}
   isMainBrick: 0
+  applyDefinitionMaterial: 1
 --- !u!114 &7868297340778062906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,6 +116,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   detachGraceTime: 0.25
+  cornerRejectRatio: 0.5
 --- !u!1001 &3300692609612563856
 PrefabInstance:
   m_ObjectHideFlags: 0
