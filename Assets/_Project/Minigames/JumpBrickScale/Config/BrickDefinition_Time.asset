@@ -15,7 +15,4 @@ MonoBehaviour:
   color: 5
   weight: 1
   material: {fileID: 2100000, guid: fdf82a28b470eba44a90ca8ac329b456, type: 2}
-  statModifiers:
-  - stat: 7
-    mode: 0
-    value: 1.5
+  statModifiers: []

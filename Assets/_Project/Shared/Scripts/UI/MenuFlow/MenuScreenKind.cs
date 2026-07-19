@@ -10,5 +10,9 @@ namespace SpieleMarmelade.Shared.UI.MenuFlow
         Options,
         Pause,
         Game,
+
+        // Character Creator: a large player preview in the middle with arrow buttons beside it to
+        // recolour head/body/feet. Appended last so existing graph assets keep their kind values.
+        CharacterCreator,
     }
 }

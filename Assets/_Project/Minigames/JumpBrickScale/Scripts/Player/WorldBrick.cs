@@ -18,9 +18,6 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [Tooltip("Layers checked for the pre-snap overlap safety check. PlayerAssembly and WorldBrick are excluded automatically.")]
         [SerializeField] private LayerMask levelGeometryMask = ~0;
 
-        [Tooltip("Blocks re-attaching for this long after being detached, so a freshly-dropped fragment doesn't immediately re-stick.")]
-        [SerializeField] private float detachGraceTime = 0.25f;
-
         [Tooltip("Corner rejection: if the weaker contact axis is at least this fraction of the stronger one, " +
                  "the hit is treated as a diagonal/corner touch and no attach happens. 0 = only perfectly axis-aligned " +
                  "hits attach, 1 = corners attach too. ~0.5 means one side must clearly dominate.")]
@@ -30,7 +27,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         private BrickNode _brickNode;
         private Collider _collider;
         private bool _isAttached;
-        private float _reattachBlockedUntil = float.NegativeInfinity;
+        private bool _lost;
 
         private void Awake()
         {
@@ -44,17 +41,19 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             if (worldBrickLayer >= 0) levelGeometryMask &= ~(1 << worldBrickLayer);
         }
 
-        // Called by PlayerAssembly.Detach() when this brick falls off (Docs section 6.3) - resets
-        // it back to a free, attachable brick after a short grace period.
+        // Called by PlayerAssembly.Detach() when this brick falls off (Docs section 6.3). Losing a
+        // brick is meant to hurt, so it's gone for good rather than becoming collectable again -
+        // otherwise a player could simply run into the fragment on its way down and undo the hit.
+        // The fragment is despawned by PlayerAssembly shortly afterwards either way.
         public void OnDetached()
         {
             _isAttached = false;
-            _reattachBlockedUntil = Time.time + detachGraceTime;
+            _lost = true;
         }
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (_isAttached || Time.time < _reattachBlockedUntil)
+            if (_isAttached || _lost)
             {
                 return;
             }

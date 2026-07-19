@@ -33,9 +33,21 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [Header("Main Brick")]
         [SerializeField] private BrickNode mainBrick;
 
+        [Tooltip("Applied to every attached brick's colliders. Horizontal movement is entirely " +
+                 "velocity-driven (see PlayerMovementController), so ground friction only gets in the " +
+                 "way - at worst it catches the assembly on the seam between two adjacent, perfectly " +
+                 "flush floor colliders. A near-zero, Minimum-combine material sidesteps that: it wins " +
+                 "the combine against whatever material the floor piece has, so friction drops to ~0 " +
+                 "regardless of what the level geometry is set to.")]
+        [SerializeField] private PhysicsMaterial frictionlessMaterial;
+
         [Header("Detach")]
         [Tooltip("Impulse applied to a fragment as it falls off, pointing away from the assembly's pivot.")]
         [SerializeField] private float outwardImpulseStrength = 1f;
+        [Tooltip("Impulse along Z given to a knocked-off brick. Negative pushes it toward the camera, " +
+                 "off the play plane, so it drops past the level instead of landing back on it and " +
+                 "getting in the way. Gameplay stays on a fixed Z, so this axis is free for effects.")]
+        [SerializeField] private float detachDepthImpulse = -1.5f;
         [Tooltip("Seconds until a knocked-off brick is removed from the scene. 0 = keep it forever.")]
         [SerializeField] private float fragmentDespawnDelay = 4f;
 
@@ -81,6 +93,8 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
                 Debug.LogError($"[PlayerAssembly] No Main-Brick assigned on '{name}'.", this);
                 return;
             }
+
+            SetColliderMaterialRecursively(mainBrick.gameObject, frictionlessMaterial);
 
             RegisterBrick(mainBrick, Vector2Int.zero);
             RecomputeMassAndCenter();
@@ -163,6 +177,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             // colliders tagged "Player", so without this a hazard touched by an attached brick - rather
             // than the main brick itself - would go unnoticed.
             SetTagRecursively(brick.gameObject, mainBrick.gameObject.tag);
+            SetColliderMaterialRecursively(brick.gameObject, frictionlessMaterial);
 
             RegisterBrick(brick, targetPosition);
             LinkNeighborsAround(brick);
@@ -349,6 +364,18 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             // No longer part of the player, so it must stop counting as one for hazards and pickups.
             SetTagRecursively(fragment.gameObject, "Untagged");
 
+            // From here the fragment is pure decoration on its way off screen, so it loses its
+            // colliders. That covers three things at once: it can't be picked up again on the way
+            // down, it can't land on the level or shove the player around - and, less obviously, it
+            // stops PhysX from depenetrating it. The fragment starts out overlapping the player's
+            // compound collider (it was part of it a moment ago), and that separation push lands in
+            // the same physics step as the impulses below, easily swamping them - which is why the
+            // depth impulse looked like it did nothing.
+            foreach (Collider fragmentCollider in fragment.GetComponentsInChildren<Collider>(true))
+            {
+                fragmentCollider.enabled = false;
+            }
+
             // Attach() removed the brick's Rigidbody so it could merge into the assembly's compound
             // collider, so give it a fresh one to fall free again.
             Rigidbody fragmentRigidbody = fragment.GetComponent<Rigidbody>();
@@ -364,7 +391,11 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             Vector3 outward = worldCenter - transform.position;
             outward = outward.sqrMagnitude > 0.0001f ? outward.normalized : Vector3.up;
-            fragmentRigidbody.AddForce(outward * outwardImpulseStrength, ForceMode.Impulse);
+
+            // World Z, not the assembly's local forward: the assembly tips over as it rolls, so a
+            // local direction would fling fragments into the level as often as out of it.
+            Vector3 impulse = outward * outwardImpulseStrength + Vector3.forward * detachDepthImpulse;
+            fragmentRigidbody.AddForce(impulse, ForceMode.Impulse);
 
             fragment.GetComponent<WorldBrick>()?.OnDetached();
 
@@ -380,6 +411,16 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
             {
                 child.gameObject.tag = tag;
+            }
+        }
+
+        private static void SetColliderMaterialRecursively(GameObject root, PhysicsMaterial material)
+        {
+            if (material == null) return;
+
+            foreach (Collider brickCollider in root.GetComponentsInChildren<Collider>(true))
+            {
+                brickCollider.sharedMaterial = material;
             }
         }
 

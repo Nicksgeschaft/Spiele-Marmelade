@@ -200,10 +200,11 @@ namespace SpieleMarmelade.DevTools.Editor
         {
             Color c = kind switch
             {
-                MenuScreenKind.Options => new Color(0.55f, 0.75f, 1f),
-                MenuScreenKind.Pause   => new Color(1f, 0.7f, 0.4f),
-                MenuScreenKind.Game    => new Color(0.55f, 0.9f, 0.6f),
-                _                      => Color.white,
+                MenuScreenKind.Options          => new Color(0.55f, 0.75f, 1f),
+                MenuScreenKind.Pause            => new Color(1f, 0.7f, 0.4f),
+                MenuScreenKind.Game             => new Color(0.55f, 0.9f, 0.6f),
+                MenuScreenKind.CharacterCreator => new Color(0.85f, 0.6f, 1f),
+                _                               => Color.white,
             };
             return selected ? c : Color.Lerp(c, new Color(0.6f, 0.6f, 0.6f), 0.35f);
         }
@@ -340,7 +341,9 @@ namespace SpieleMarmelade.DevTools.Editor
         {
             EditorGUILayout.LabelField("Screen bearbeiten", EditorStyles.boldLabel);
             node.title = EditorGUILayout.TextField("Titel", node.title);
-            EditorGUILayout.LabelField("Art", node.kind.ToString());
+            // Editable rather than a read-only label: new screens are always created as Generic, so
+            // without this there was no way to make one an Options/Pause/Character-Creator screen.
+            node.kind = (MenuScreenKind)EditorGUILayout.EnumPopup("Art", node.kind);
 
             if (node.kind == MenuScreenKind.Generic || node.kind == MenuScreenKind.Pause)
                 node.bodyText = EditorGUILayout.TextField("Text (optional)", node.bodyText);
@@ -348,6 +351,19 @@ namespace SpieleMarmelade.DevTools.Editor
             if (node.kind == MenuScreenKind.Options)
                 EditorGUILayout.HelpBox("Options-Screens bekommen automatisch Lautstärke-Regler " +
                                         "+ Vollbild-Schalter beim Generieren.", MessageType.None);
+
+            if (node.kind == MenuScreenKind.CharacterCreator)
+                EditorGUILayout.HelpBox("Character-Creator-Screens bekommen automatisch die Charakter-" +
+                                        "Vorschau + 6 Pfeil-Knöpfe (Kopf/Körper/Füße) beim Generieren. " +
+                                        "Einen Button zum Spiel-Screen selbst hinzufügen.", MessageType.None);
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Titel-Darstellung", EditorStyles.boldLabel);
+            node.titleScale = EditorGUILayout.Slider("Größe", node.titleScale <= 0f ? 1f : node.titleScale, 0.5f, 4f);
+            node.titleRandomBrickColors = EditorGUILayout.ToggleLeft(
+                "Jeder Brick eigene Zufallsfarbe (für den Spieltitel)", node.titleRandomBrickColors);
+            node.titleBricksFall = EditorGUILayout.ToggleLeft(
+                "Bricks lassen sich anklicken und fallen ab", node.titleBricksFall);
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Buttons", EditorStyles.boldLabel);

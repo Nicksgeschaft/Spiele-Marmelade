@@ -11,6 +11,19 @@ namespace SpieleMarmelade.World
     // Brick.prefab (fine for static signs; unavoidable for anything built at runtime).
     public static class BrickTextBuilder
     {
+        // How a multi-material palette is spread across the text.
+        public enum ColorMode
+        {
+            // Strict round-robin: letter 0 takes colour 0, letter 1 colour 1, and so on. Predictable,
+            // but with a short palette every word ends up with the identical colour sequence.
+            Cycle,
+            // One random colour per letter, so the same palette reads differently on every sign.
+            RandomPerLetter,
+            // A random colour per individual brick — a confetti look, meant for a big logo rather
+            // than body-sized text where it would make letters hard to read.
+            RandomPerBrick,
+        }
+
         public struct Result
         {
             public GameObject Root;
@@ -22,10 +35,11 @@ namespace SpieleMarmelade.World
             Material backgroundMaterial, string objectName = "BrickText", bool includeBackground = true) =>
             Build(brickPrefab, text, new[] { letterMaterial }, backgroundMaterial, objectName, includeBackground);
 
-        // Cycles through letterMaterials one per character (e.g. a rainbow effect across a
-        // title) — a single-entry array behaves exactly like the single-material overload above.
+        // Spreads letterMaterials across the text according to `mode` — a single-entry array always
+        // behaves like the single-material overload above, whatever the mode.
         public static Result Build(GameObject brickPrefab, string text, Material[] letterMaterials,
-            Material backgroundMaterial, string objectName = "BrickText", bool includeBackground = true)
+            Material backgroundMaterial, string objectName = "BrickText", bool includeBackground = true,
+            ColorMode mode = ColorMode.Cycle)
         {
             var root = new GameObject(objectName);
 
@@ -34,6 +48,10 @@ namespace SpieleMarmelade.World
 
             int cursorCol      = 0;
             int highestColUsed = 0;
+            // Which palette entry the previous letter (or brick, in RandomPerBrick) used, so the next
+            // pick can rule it out - random alone happily produces "yellow yellow blue", which reads
+            // as one wide blob instead of two letters.
+            int lastColorIndex = -1;
 
             for (int i = 0; i < text.Length; i++)
             {
@@ -56,15 +74,21 @@ namespace SpieleMarmelade.World
                     continue;
                 }
 
-                Material letterMaterial = letterMaterials != null && letterMaterials.Length > 0
-                    ? letterMaterials[i % letterMaterials.Length]
-                    : null;
+                lastColorIndex = PickColorIndex(letterMaterials, mode, i, lastColorIndex);
+                Material letterMaterial = MaterialAt(letterMaterials, lastColorIndex);
 
                 for (int row = 0; row < BrickFont.GlyphHeight; row++)
                 for (int col = 0; col < BrickFont.GlyphWidth; col++)
                 {
                     bool isLetter = glyph[row][col] == '#';
                     if (!isLetter && !includeBackground) continue;
+                    // RandomPerBrick re-rolls for every brick; the other modes reuse the one colour
+                    // picked for this letter above.
+                    if (isLetter && mode == ColorMode.RandomPerBrick)
+                    {
+                        lastColorIndex = PickColorIndex(letterMaterials, mode, i, lastColorIndex);
+                        letterMaterial = MaterialAt(letterMaterials, lastColorIndex);
+                    }
                     var  mat      = isLetter ? letterMaterial : backgroundMaterial;
 
                     int gridCol = cursorCol + col;
@@ -104,6 +128,29 @@ namespace SpieleMarmelade.World
                 Width  = (highestColUsed + 1) * colStep,
                 Height = BrickFont.GlyphHeight * rowStep,
             };
+        }
+
+        private static Material MaterialAt(Material[] letterMaterials, int index) =>
+            letterMaterials != null && index >= 0 && index < letterMaterials.Length ? letterMaterials[index] : null;
+
+        // Returns the palette index to use next. The random modes draw from every entry EXCEPT
+        // `excludedIndex` (the one just used), so neighbours are always visibly different - rolling
+        // freely and retrying would be both slower and still able to repeat.
+        private static int PickColorIndex(Material[] letterMaterials, ColorMode mode, int letterIndex, int excludedIndex)
+        {
+            if (letterMaterials == null || letterMaterials.Length == 0) return -1;
+
+            int count = letterMaterials.Length;
+            if (mode == ColorMode.Cycle) return letterIndex % count;
+
+            // With a single colour there's nothing to vary, and with none excluded any entry is fair game.
+            if (count == 1) return 0;
+            if (excludedIndex < 0 || excludedIndex >= count) return Random.Range(0, count);
+
+            // Draw from the count-1 remaining entries, then shift past the excluded one - this stays
+            // uniform across all allowed colours.
+            int roll = Random.Range(0, count - 1);
+            return roll >= excludedIndex ? roll + 1 : roll;
         }
 
         // Fills one full-height column with background bricks — used for the 1-column gap

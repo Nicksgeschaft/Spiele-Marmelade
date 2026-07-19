@@ -114,7 +114,6 @@ MonoBehaviour:
   levelGeometryMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  detachGraceTime: 0.25
   cornerRejectRatio: 0.5
 --- !u!1001 &2036518169177382314
 PrefabInstance:

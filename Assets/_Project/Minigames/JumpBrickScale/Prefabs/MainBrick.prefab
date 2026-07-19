@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 5561628550324794398}
   - component: {fileID: 6768318212883154290}
   - component: {fileID: 7879825556989150510}
+  - component: {fileID: 4562062916771776415}
+  - component: {fileID: 843159133289872054}
   m_Layer: 0
   m_Name: MainBrick
   m_TagString: Untagged
@@ -124,7 +126,9 @@ MonoBehaviour:
   gridStepHorizontal: 0.795
   studOverlap: 0.18
   mainBrick: {fileID: 4078033683378210842}
+  frictionlessMaterial: {fileID: 895011522835143894, guid: ecabbfc90a4241ba83e37d1a85782862, type: 2}
   outwardImpulseStrength: 1
+  detachDepthImpulse: -1.5
   fragmentDespawnDelay: 4
   testBrickPrefab: {fileID: 6559507825950811485, guid: 99ae7427f2e647b1bb343e2f68b1cf72, type: 3}
 --- !u!114 &7879825556989150510
@@ -140,6 +144,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.StatAggregator
   baseStats: {fileID: 11400000, guid: 38a7d0193a094ebaa32f48ef03fcccc5, type: 2}
+--- !u!114 &4562062916771776415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4490122494847977680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58478e63265b4ad4930a4e6c946f4a55, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.TimeBrickBonus
+  secondsPerBrick: 15
+--- !u!114 &843159133289872054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4490122494847977680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a83d3505aaaf4f2caa895d98482c621d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.CharacterAppearance
 --- !u!1 &5445793030649741255
 GameObject:
   m_ObjectHideFlags: 0

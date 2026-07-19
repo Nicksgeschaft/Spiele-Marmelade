@@ -61,11 +61,6 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         // last roundDuration, so each remaining brick simply covers more time.
         private float _secondsPerBrickEffective = 5f;
 
-        // Extra seconds per brick granted by purple bricks. Read fresh on every removal so picking one
-        // up mid-round immediately stretches the remaining bricks instead of only counting next round.
-        private float _timerBonusPerBrick;
-        private StatAggregator _playerStats;
-
         /// <summary>Seconds left, derived from the bricks still standing.</summary>
         public float TimeRemaining =>
             (_bricks.Count - 1) * _secondsPerBrickEffective + Mathf.Max(0f, _timeUntilNextRemoval);
@@ -94,13 +89,11 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             _timeUntilNextRemoval -= Time.deltaTime;
             if (_timeUntilNextRemoval > 0f) return;
 
-            RefreshTimerBonus();
-
             // Catch up if a frame hitch swallowed more than one interval.
             while (_timeUntilNextRemoval <= 0f && _bricks.Count > 0)
             {
                 RemoveLeftmostBrick();
-                _timeUntilNextRemoval += _secondsPerBrickEffective + _timerBonusPerBrick;
+                _timeUntilNextRemoval += _secondsPerBrickEffective;
             }
 
             if (_bricks.Count == 0)
@@ -148,25 +141,39 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             int count = ResolveBrickCount();
             _secondsPerBrickEffective = roundDuration / count;
-            _timerBonusPerBrick = 0f;
             float step = StackStep();
 
+            // Index 0 sits at the anchor on the right; later ones extend to the left.
             for (int i = 0; i < count; i++)
             {
-                GameObject brick = Instantiate(brickPrefab, transform);
-                // Index 0 sits at the anchor on the right; later ones extend to the left.
-                brick.transform.localPosition = new Vector3(-i * step, 0f, 0f);
-                brick.transform.localRotation = Quaternion.Euler(brickRotation);
-                brick.transform.localScale = Vector3.one * brickScale;
-                _bricks.Add(brick);
+                _bricks.Add(SpawnBrick(i, step));
             }
         }
 
-        // Purple bricks add seconds to what each timer brick is worth.
-        private void RefreshTimerBonus()
+        /// <summary>Extends the round by the given number of seconds, appending that many extra bricks
+        /// to the far end of the bar. Both TimeRemaining and BricksRemaining are derived straight from
+        /// the brick list, so this alone keeps the actual time and the visual bar in sync - call it from
+        /// a pickup that should grant time immediately (e.g. a Time Brick attaching).</summary>
+        public void AddSeconds(float seconds)
         {
-            if (_playerStats == null) _playerStats = FindFirstObjectByType<StatAggregator>();
-            _timerBonusPerBrick = _playerStats != null ? Mathf.Max(0f, _playerStats.Current.TimerSecondsPerBrick) : 0f;
+            if (seconds <= 0f || _secondsPerBrickEffective <= 0f) return;
+
+            int bricksToAdd = Mathf.Max(1, Mathf.RoundToInt(seconds / _secondsPerBrickEffective));
+            float step = StackStep();
+
+            for (int i = 0; i < bricksToAdd; i++)
+            {
+                _bricks.Add(SpawnBrick(_bricks.Count, step));
+            }
+        }
+
+        private GameObject SpawnBrick(int index, float step)
+        {
+            GameObject brick = Instantiate(brickPrefab, transform);
+            brick.transform.localPosition = new Vector3(-index * step, 0f, 0f);
+            brick.transform.localRotation = Quaternion.Euler(brickRotation);
+            brick.transform.localScale = Vector3.one * brickScale;
+            return brick;
         }
 
         private int ResolveBrickCount()

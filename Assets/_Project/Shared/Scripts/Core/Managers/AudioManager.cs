@@ -59,7 +59,12 @@ namespace SpieleMarmelade.Core.Managers
             _music.volume = _settings.masterVolume * _settings.musicVolume * _musicClipVolume;
             _ambient.volume = _settings.masterVolume * _settings.ambientVolume * _ambientClipVolume;
             _sfx.volume = _settings.masterVolume * _settings.sfxVolume;
-            _ui.volume = _settings.masterVolume * _settings.uiVolume;
+
+            // UI hangs off the SFX bus rather than sitting beside it: to a player, a button click and a
+            // brick clattering apart are both "sound effects", and the in-game Options screen only
+            // offers Master/Music/SFX. uiVolume stays in as a trim on top (the Hub's settings tab has
+            // its own slider for it) and defaults to 1, so this only ever adds control.
+            _ui.volume = _settings.masterVolume * _settings.sfxVolume * _settings.uiVolume;
         }
 
         public void PlayMusic(string id, bool restartIfAlreadyPlaying = false)

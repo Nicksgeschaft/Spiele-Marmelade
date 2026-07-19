@@ -18,4 +18,4 @@ MonoBehaviour:
   statModifiers:
   - stat: 0
     mode: 1
-    value: 1.15
+    value: 1.55

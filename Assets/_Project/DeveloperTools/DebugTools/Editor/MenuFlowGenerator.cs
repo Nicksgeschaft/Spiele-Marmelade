@@ -1,9 +1,11 @@
+using SpieleMarmelade.Shared.UI;
 using SpieleMarmelade.Shared.UI.MenuFlow;
 using SpieleMarmelade.Shared.World;
 using SpieleMarmelade.World;
 using UnityEditor;
 using UnityEditor.Events;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
@@ -133,6 +135,10 @@ namespace SpieleMarmelade.DevTools.Editor
                 // Drop the anchor to re-centre the block; the title stays pinned to the top edge and
                 // is nudged separately via OptionsTitleTopMargin.
                 if (node.kind == MenuScreenKind.Options) topButtonY += OptionsContentOffsetY;
+                // The Creator's middle is taken up by the character preview and its arrows, so its
+                // buttons are pinned near the bottom edge instead of centred like every other screen.
+                else if (node.kind == MenuScreenKind.CharacterCreator)
+                    topButtonY = CreatorButtonY + (node.buttons.Count - 1) * ButtonSpacing * 0.5f;
                 // Only meaningful for non-Options screens — the Options title is pinned near the
                 // top of the screen independently (see BuildBrickButtonGroup), since it needs to
                 // clear 4 extra rows below it rather than just sitting above the button stack.
@@ -210,10 +216,36 @@ namespace SpieleMarmelade.DevTools.Editor
             Material[] letterMats = ResolveLetterMaterials(graph);
             Material   bgMat      = ResolveBackgroundMaterial(graph);
 
-            var titleResult = BrickTextBuilder.Build(brickPrefab, node.title, letterMats, bgMat, "Title", graph.buttonHasBackground);
+            // A big logo reads best with every brick its own colour; normal screen titles stay one
+            // colour per letter so they're still legible.
+            var titleColorMode = node.titleRandomBrickColors
+                ? BrickTextBuilder.ColorMode.RandomPerBrick
+                : BrickTextBuilder.ColorMode.RandomPerLetter;
+
+            var titleResult = BrickTextBuilder.Build(brickPrefab, node.title, letterMats, bgMat, "Title",
+                graph.buttonHasBackground, titleColorMode);
             titleResult.Root.transform.SetParent(groupGo.transform, false);
 
-            if (node.kind == MenuScreenKind.Options)
+            // Guarded rather than used raw: graph assets written before titleScale existed deserialize
+            // without it, and a 0 there would collapse the title to nothing.
+            float titleScale = node.titleScale <= 0f ? 1f : node.titleScale;
+            titleResult.Root.transform.localScale = Vector3.one * titleScale;
+            float titleWidth  = titleResult.Width * titleScale;
+            float titleHeight = titleResult.Height * titleScale;
+
+            if (node.titleBricksFall)
+            {
+                var faller = titleResult.Root.AddComponent<FallingTitleBricks>();
+                var fallerSo = new SerializedObject(faller);
+                fallerSo.FindProperty("raycastCamera").objectReferenceValue = menuCam;
+                fallerSo.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            // Both of these fill their middle with content, so their title hangs from the top edge
+            // instead of sitting just above a centred button stack.
+            bool pinTitleToTop = node.kind == MenuScreenKind.Options || node.kind == MenuScreenKind.CharacterCreator;
+
+            if (pinTitleToTop)
             {
                 // The Options screen has enough extra content (4 rows) that centering the title
                 // just above them (like every other screen) reads as cramped — instead pin it a
@@ -228,28 +260,34 @@ namespace SpieleMarmelade.DevTools.Editor
                 // means the title always sits above the rows no matter how those get tuned, only
                 // "wasting" some of its top margin on tall content instead of overlapping it.
                 float titleTopPinnedY = BaselineOrthographicSize - OptionsTitleTopMargin;
-                float titleMinAboveRowsY = OptionsRowStageY(topButtonY, 0, OptionsRowNames.Length) + OptionsEdgeGap;
-                float titleCenterY = Mathf.Max(titleTopPinnedY, titleMinAboveRowsY);
+                // Only the Options screen stacks rows under its title; the Creator's preview sits
+                // well below, so it just takes the top-pinned position as-is.
+                float titleCenterY = node.kind == MenuScreenKind.Options
+                    ? Mathf.Max(titleTopPinnedY, OptionsRowStageY(topButtonY, 0, OptionsRowNames.Length) + OptionsEdgeGap)
+                    : titleTopPinnedY;
 
-                float titleAnchoredY = StageYToCanvasY(titleCenterY - titleResult.Height * 0.5f);
-                float titleAnchoredX = -titleResult.Width * 0.5f / MenuStageResizer.UnitsPerReferencePixel;
+                float titleAnchoredY = StageYToCanvasY(titleCenterY - titleHeight * 0.5f);
+                float titleAnchoredX = -titleWidth * 0.5f / MenuStageResizer.UnitsPerReferencePixel;
                 titleResult.Root.AddComponent<StageAlignedElement>().SetAnchored(titleAnchoredX, titleAnchoredY, menuCam);
             }
             else
             {
                 titleResult.Root.transform.localPosition =
-                    new Vector3(-titleResult.Width * 0.5f, titleY - titleResult.Height * 0.5f, 0f);
+                    new Vector3(-titleWidth * 0.5f, titleY - titleHeight * 0.5f, 0f);
             }
 
             if (node.kind == MenuScreenKind.Options)
                 BuildOptionsWidgets(groupGo.transform, topButtonY, menuCam, brickPrefab, graph, optionsController);
+            else if (node.kind == MenuScreenKind.CharacterCreator)
+                BuildCharacterCreator(groupGo, menuCam);
 
             if (node.buttons.Count == 0) return groupGo;
 
             float y = topButtonY;
             foreach (var btn in node.buttons)
             {
-                var result = BrickTextBuilder.Build(brickPrefab, btn.label, letterMats, bgMat, $"Btn_{btn.label}", graph.buttonHasBackground);
+                var result = BrickTextBuilder.Build(brickPrefab, btn.label, letterMats, bgMat, $"Btn_{btn.label}",
+                    graph.buttonHasBackground, BrickTextBuilder.ColorMode.RandomPerLetter);
                 BrickTextBuilder.MakeClickable(result);
 
                 result.Root.transform.SetParent(groupGo.transform, false);
@@ -519,6 +557,133 @@ namespace SpieleMarmelade.DevTools.Editor
             so.ApplyModifiedPropertiesWithoutUndo();
 
             return track;
+        }
+
+        // ── Character Creator ────────────────────────────────────────────────
+
+        private const string PlayerVisualPath = "Assets/_Project/Shared/Prefabs/Player/Player_Platformer.prefab";
+        private const string ArrowIconPath = "Assets/_Project/Shared/Prefabs/UI/IconRoot_Arrow.prefab";
+
+        // Stage-Y the Creator's button stack is centred on — low enough to clear the preview above it.
+        private const float CreatorButtonY = -2.5f;
+        // Overrides the prefab's own scale (10) rather than multiplying it: the character is authored
+        // at gameplay size, and the Creator wants it filling the middle of the screen instead.
+        private const float CreatorCharacterScale = 25f;
+        // One row per part. At CreatorCharacterScale the character's own parts happen to sit exactly
+        // this far apart, so aligning its Body with the middle row lines Head and Feet up with theirs.
+        private static readonly float[] CreatorRowY = { 0.8f, 0f, -0.8f }; // Head, Body, Feet
+        private const float CreatorArrowX = 1.75f;
+        // Same on-screen size as the Options icons (their own scale times their row scale).
+        private const float CreatorArrowScale = OptionsIconScale * OptionsRowScale;
+        // Z-rotation that mirrors the arrow horizontally. If the arrows end up pointing the wrong
+        // way, swap these two values - the icon prefab's own direction decides which is which.
+        private const float CreatorRightArrowZ = 0f;
+        private const float CreatorLeftArrowZ = 180f;
+
+        // Builds the middle of a Character Creator screen: the player preview, plus three pairs of
+        // arrows (head/body/feet) that recolour it. Everything lands under the screen's sign group, so
+        // it shows and hides with the screen like any other content.
+        private static void BuildCharacterCreator(GameObject groupGo, Camera menuCam)
+        {
+            var visualPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerVisualPath);
+            if (visualPrefab == null)
+            {
+                Debug.LogWarning($"[MenuFlowGenerator] Charakter-Prefab fehlt: {PlayerVisualPath} — " +
+                                  "Character Creator bleibt leer.");
+                return;
+            }
+
+            var preview = (GameObject)PrefabUtility.InstantiatePrefab(visualPrefab, groupGo.transform);
+            preview.name = "CharacterPreview";
+            preview.transform.localScale = Vector3.one * CreatorCharacterScale;
+
+            // Player_Platformer's root carries the "Player" tag. Left on, this preview becomes a second
+            // object answering to it - and SideScrollCameraRig picks its target with
+            // FindGameObjectWithTag, whose order is undefined. It would sometimes latch onto this copy
+            // sitting on the menu stage 500 units up and hang at the level's top edge instead of
+            // following the real player. Nothing here needs the tag.
+            UntagRecursively(preview);
+            // Aligned by the Body part, not by overall bounds: the googly eyes stick out well past the
+            // bricks, so a bounds-based centre would sit noticeably off its arrow row.
+            PlaceCentered(preview, groupGo.transform, new Vector3(0f, CreatorRowY[1], 0f),
+                CharacterLook.FindPart(preview.transform, CharacterPart.Body));
+
+            var customizer = groupGo.AddComponent<CharacterCustomizer>();
+            var customizerSo = new SerializedObject(customizer);
+            customizerSo.FindProperty("preview").objectReferenceValue = preview.transform;
+            customizerSo.ApplyModifiedPropertiesWithoutUndo();
+
+            var arrowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ArrowIconPath);
+            if (arrowPrefab == null)
+            {
+                Debug.LogWarning($"[MenuFlowGenerator] Pfeil-Prefab fehlt: {ArrowIconPath} — " +
+                                  "Character Creator bekommt keine Knöpfe.");
+                return;
+            }
+
+            // Index matches CreatorRowY / CharacterPart order: 0 Head, 1 Body, 2 Feet.
+            UnityAction[] previousActions = { customizer.PrevHead, customizer.PrevBody, customizer.PrevFeet };
+            UnityAction[] nextActions     = { customizer.NextHead, customizer.NextBody, customizer.NextFeet };
+            string[] rowNames = { "Head", "Body", "Feet" };
+
+            for (int row = 0; row < CreatorRowY.Length; row++)
+            {
+                BuildCreatorArrow(groupGo.transform, arrowPrefab, menuCam,
+                    $"Arrow_{rowNames[row]}_Prev", -CreatorArrowX, CreatorRowY[row], CreatorLeftArrowZ, previousActions[row]);
+                BuildCreatorArrow(groupGo.transform, arrowPrefab, menuCam,
+                    $"Arrow_{rowNames[row]}_Next", CreatorArrowX, CreatorRowY[row], CreatorRightArrowZ, nextActions[row]);
+            }
+        }
+
+        private static void BuildCreatorArrow(Transform parent, GameObject arrowPrefab, Camera menuCam,
+            string name, float x, float y, float rotationZ, UnityAction action)
+        {
+            var arrow = (GameObject)PrefabUtility.InstantiatePrefab(arrowPrefab, parent);
+            arrow.name = name;
+            arrow.transform.localScale = Vector3.one * CreatorArrowScale;
+            arrow.transform.localRotation = Quaternion.Euler(0f, 0f, rotationZ);
+            PlaceCentered(arrow, parent, new Vector3(x, y, 0f));
+
+            var button = arrow.AddComponent<IconClickButton>();
+            var so = new SerializedObject(button);
+            so.FindProperty("raycastCamera").objectReferenceValue = menuCam;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            UnityEventTools.AddVoidPersistentListener(button.OnClicked, action);
+        }
+
+        private static void UntagRecursively(GameObject root)
+        {
+            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            {
+                child.gameObject.tag = "Untagged";
+            }
+        }
+
+        // Positions an object so its VISUAL centre lands on localTarget. Icon Painter icons and the
+        // character prefab both have their pivot at a corner of their content rather than in the
+        // middle, so setting localPosition directly would leave them visibly off-centre.
+        //
+        // Pass `alignTo` to centre on one specific renderer instead of everything combined - useful
+        // when part of the object (googly eyes) sticks out and would skew the overall bounds.
+        private static void PlaceCentered(GameObject go, Transform parent, Vector3 localTarget,
+            Renderer alignTo = null)
+        {
+            go.transform.localPosition = Vector3.zero;
+
+            var renderers = alignTo != null ? new[] { alignTo } : go.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                go.transform.localPosition = localTarget;
+                return;
+            }
+
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+
+            // With localPosition at zero this is exactly how far the content sits from the pivot.
+            Vector3 centerOffset = parent.InverseTransformPoint(bounds.center);
+            go.transform.localPosition = localTarget - centerOffset;
         }
 
         private static void ApplyMaterial(GameObject go, Material mat)

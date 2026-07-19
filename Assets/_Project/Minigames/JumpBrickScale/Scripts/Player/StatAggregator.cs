@@ -63,7 +63,6 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
                 AirJumpPower = airJumpPower,
                 DashPower = dashPower,
                 WallJumpPower = wallJumpPower,
-                TimerSecondsPerBrick = AggregateRaw(PlayerStatType.TimerSecondsPerBrick),
 
                 // Each further brick of a kind makes its ability stronger, so one pickup is a small
                 // boost and stacking them is what turns it into a real tool.

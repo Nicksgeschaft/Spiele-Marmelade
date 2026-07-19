@@ -18,7 +18,7 @@ namespace SpieleMarmelade.Shared.World
     {
         [SerializeField] private Camera raycastCamera;
         [SerializeField] private float  maxDistance = 100f;
-        [SerializeField] private string clickSfxId;
+        [SerializeField] private string clickSfxId = "click";
 
         [Tooltip("Gezeigt, solange der Zustand AUS ist (Klick schaltet EIN).")]
         [SerializeField] private GameObject offIcon;

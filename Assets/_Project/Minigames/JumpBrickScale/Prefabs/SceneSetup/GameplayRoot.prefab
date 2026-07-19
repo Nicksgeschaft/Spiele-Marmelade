@@ -135,6 +135,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 9098094829707392622}
     m_Modifications:
+    - target: {fileID: 1809209879006052017, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
+      propertyPath: maxBricks
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 1809209879006052017, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
+      propertyPath: roundDuration
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 1809209879006052017, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
+      propertyPath: secondsPerBrick
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 2238723802177040792, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 46.3
@@ -178,6 +190,10 @@ PrefabInstance:
     - target: {fileID: 7550086481216944717, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
       propertyPath: m_Name
       value: Camera_SideScroll
+      objectReference: {fileID: 0}
+    - target: {fileID: 8123576155599763648, guid: 398cb9006f734a89befe0d570b12a34c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

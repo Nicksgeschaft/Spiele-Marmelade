@@ -21,7 +21,10 @@ namespace SpieleMarmelade.Shared.World
     {
         [SerializeField] private Camera raycastCamera;
         [SerializeField] private float  maxDistance = 100f;
-        [SerializeField] private string clickSfxId;
+        [Tooltip("Sofort beim Klick. Ids aus der AudioLibrary (ui-Liste).")]
+        [SerializeField] private string clickSfxId = "click";
+        [Tooltip("Wenn die Bricks auseinanderfliegen - direkt nach dem Klick-Sound.")]
+        [SerializeField] private string shatterSfxId = "brick_break";
 
         [Header("── Hover ──────────────────────────────")]
         [SerializeField] private float hoverScale = 1.15f;
@@ -108,6 +111,8 @@ namespace SpieleMarmelade.Shared.World
         // screen (Time.timeScale = 0) instead of animating.
         private IEnumerator ShatterAndInvoke()
         {
+            SfxPlayer.PlayUi(shatterSfxId);
+
             var velocities = new Vector3[_bricks.Count];
             var spins = new Vector3[_bricks.Count];
 

@@ -29,9 +29,6 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         public float DashPower { get; set; }
         public float WallJumpPower { get; set; }
 
-        /// <summary>Extra seconds each round-timer brick is worth, from purple bricks.</summary>
-        public float TimerSecondsPerBrick { get; set; }
-
         // Resolved ability values, so the controller doesn't repeat the power maths every frame.
         public float AirJumpHeight { get; set; }
         public float DashSpeed { get; set; }

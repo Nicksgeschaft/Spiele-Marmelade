@@ -20,5 +20,11 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 84576af739b7c7c4c83f89602c167bd7, type: 3}
     volume: 0.284
   sfx: []
-  ui: []
+  ui:
+  - id: click
+    clip: {fileID: 8300000, guid: e04c4384e87607c4e9e8927767ef7440, type: 3}
+    volume: 1
+  - id: brick_break
+    clip: {fileID: 8300000, guid: ebae8edf23e44db4da5d705ea7516914, type: 3}
+    volume: 1
   ambient: []

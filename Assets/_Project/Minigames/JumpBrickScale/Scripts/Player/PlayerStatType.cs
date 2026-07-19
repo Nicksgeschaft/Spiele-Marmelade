@@ -21,8 +21,5 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
         // 0 = no wall jump. Each point makes pushing off a wall stronger.
         WallJumpPower,
-
-        // Seconds added to what one round-timer brick is worth - i.e. straight extra playtime.
-        TimerSecondsPerBrick,
     }
 }

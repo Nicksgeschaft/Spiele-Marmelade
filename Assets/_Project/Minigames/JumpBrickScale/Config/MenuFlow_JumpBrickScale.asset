@@ -15,11 +15,14 @@ MonoBehaviour:
   screens:
   - id: 416cd3cb4b7749b889d6a6162310a4c1
     kind: 0
-    title: Main Menu
+    title: Brixale
     bodyText: 
+    titleScale: 2
+    titleRandomBrickColors: 1
+    titleBricksFall: 1
     buttons:
     - label: Play
-      targetScreenId: ec1de1e70caf4fdda0034dfdfca93c6a
+      targetScreenId: 9f2c7a41d5b04e6c8a3f1e7b2d604c95
       specialAction: 0
     - label: Options
       targetScreenId: 4b33e3ecb5fd4db8b39323b1ba75ba9c
@@ -35,6 +38,9 @@ MonoBehaviour:
     kind: 1
     title: Options
     bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
     buttons:
     - label: Back
       targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
@@ -44,21 +50,42 @@ MonoBehaviour:
     kind: 0
     title: Credits
     bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
     buttons:
     - label: Back
       targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
       specialAction: 0
     editorPosition: {x: 340, y: 180}
+  - id: 9f2c7a41d5b04e6c8a3f1e7b2d604c95
+    kind: 4
+    title: Character Creator
+    bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
+    buttons:
+    - label: Start
+      targetScreenId: ec1de1e70caf4fdda0034dfdfca93c6a
+      specialAction: 0
+    editorPosition: {x: 40, y: 180}
   - id: ec1de1e70caf4fdda0034dfdfca93c6a
     kind: 3
     title: Game
     bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
     buttons: []
-    editorPosition: {x: 40, y: 180}
+    editorPosition: {x: 40, y: 260}
   - id: 773050dfc0b247e7b014b9a500d01d5b
     kind: 2
     title: Pause
     bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
     buttons:
     - label: Resume
       targetScreenId: 
@@ -77,6 +104,9 @@ MonoBehaviour:
     kind: 0
     title: Time is Over
     bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
     buttons:
     - label: Main Menu
       targetScreenId: 416cd3cb4b7749b889d6a6162310a4c1
@@ -89,9 +119,11 @@ MonoBehaviour:
   buttonLetterMaterial: {fileID: 0}
   buttonLetterColors:
   - {r: 0.990566, g: 0.9417935, b: 0.378471, a: 1}
-  - {r: 0.30660388, g: 0.3066038, b: 1, a: 1}
+  - {r: 0.30588233, g: 0.43662658, b: 1, a: 1}
   - {r: 0.990566, g: 0.3317462, b: 0.3317462, a: 1}
   - {r: 0.30081883, g: 0.9811321, b: 0.30081886, a: 1}
+  - {r: 1, g: 0.52359486, b: 0, a: 1}
+  - {r: 0.7544991, g: 0.2688679, b: 1, a: 1}
   sliderFilledColor: {r: 1, g: 0.675526, b: 0.2688679, a: 1}
-  sliderUnfilledColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+  sliderUnfilledColor: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
   sliderHandleColor: {r: 0.95, g: 0.35, b: 0.15, a: 1}
