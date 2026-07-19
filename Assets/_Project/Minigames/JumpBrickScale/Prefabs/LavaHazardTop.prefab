@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3652825039199194664}
   - component: {fileID: 3446067724975197976}
   m_Layer: 0
-  m_Name: LavaHazard 1
+  m_Name: LavaHazardTop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

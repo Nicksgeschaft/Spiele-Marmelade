@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MAT_Lava
+  m_Name: MAT_Lava_Top
   m_Shader: {fileID: 4800000, guid: 275b2bed2d75a8f4cb9a261d1319c2b9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
