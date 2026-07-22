@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cbd108963ef4a0f997e449f80bfc7d8, type: 3}
+  m_Name: MenuFlow_Brickrot
+  m_EditorClassIdentifier: SpieleMarmelade.Shared::SpieleMarmelade.Shared.UI.MenuFlow.MenuFlowGraph
+  screens:
+  - id: 5c307c8691e2470296a6d117f3dd3ce6
+    kind: 0
+    title: Main Menu
+    bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
+    buttons:
+    - label: Play
+      targetScreenId: 2ceef9b5efff40a1a2a1ab022b50d71f
+      specialAction: 0
+    - label: Options
+      targetScreenId: 63c53e442a4c492ca3ec516ec61d906e
+      specialAction: 0
+    - label: Credits
+      targetScreenId: 4537d65cd4734b619ee58ea83d327d76
+      specialAction: 0
+    - label: Quit
+      targetScreenId: 
+      specialAction: 1
+    editorPosition: {x: 40, y: 40}
+  - id: 63c53e442a4c492ca3ec516ec61d906e
+    kind: 1
+    title: Options
+    bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
+    buttons:
+    - label: Back
+      targetScreenId: 5c307c8691e2470296a6d117f3dd3ce6
+      specialAction: 0
+    editorPosition: {x: 340, y: 40}
+  - id: 4537d65cd4734b619ee58ea83d327d76
+    kind: 0
+    title: Credits
+    bodyText: Made during a game jam with Spiele Marmelade.
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
+    buttons:
+    - label: Back
+      targetScreenId: 5c307c8691e2470296a6d117f3dd3ce6
+      specialAction: 0
+    editorPosition: {x: 340, y: 180}
+  - id: 2ceef9b5efff40a1a2a1ab022b50d71f
+    kind: 3
+    title: Game
+    bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
+    buttons: []
+    editorPosition: {x: 40, y: 180}
+  - id: 88283a8b0c2e409184033967d4955597
+    kind: 2
+    title: Pause
+    bodyText: 
+    titleScale: 1
+    titleRandomBrickColors: 0
+    titleBricksFall: 0
+    buttons:
+    - label: Resume
+      targetScreenId: 
+      specialAction: 2
+    - label: Options
+      targetScreenId: 63c53e442a4c492ca3ec516ec61d906e
+      specialAction: 0
+    - label: Main Menu
+      targetScreenId: 5c307c8691e2470296a6d117f3dd3ce6
+      specialAction: 0
+    - label: Quit
+      targetScreenId: 
+      specialAction: 1
+    editorPosition: {x: 40, y: 320}
+  startScreenId: 5c307c8691e2470296a6d117f3dd3ce6
+  buttonHasBackground: 1
+  buttonBackgroundMaterial: {fileID: 0}
+  buttonBackgroundColor: {r: 0.05, g: 0.05, b: 0.05, a: 1}
+  buttonLetterMaterial: {fileID: 0}
+  buttonLetterColors: []
+  sliderFilledColor: {r: 1, g: 1, b: 1, a: 1}
+  sliderUnfilledColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+  sliderHandleColor: {r: 0.95, g: 0.35, b: 0.15, a: 1}
