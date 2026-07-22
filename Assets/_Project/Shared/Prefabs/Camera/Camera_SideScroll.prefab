@@ -49,6 +49,7 @@ MonoBehaviour:
   brickRotation: {x: 0, y: 0, z: -90}
   studOverlap: 0.18
   spacingPadding: 0
+  bonusBrickMaterial: {fileID: 2100000, guid: fdf82a28b470eba44a90ca8ac329b456, type: 2}
   roundDuration: 600
   secondsPerBrick: 1
   maxBricks: 300

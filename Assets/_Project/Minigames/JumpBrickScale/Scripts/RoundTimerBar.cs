@@ -28,6 +28,10 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [Tooltip("Extra gap between bricks, as a fraction of one step. 0 = fully interlocked.")]
         [SerializeField] private float spacingPadding;
 
+        [Tooltip("Material für Bonus-Bricks, also die Zeit aus lila Time-Bricks. Hebt geschenkte Zeit " +
+                 "von der Grundzeit der Runde ab. Leer lassen = sehen aus wie normale Timer-Bricks.")]
+        [SerializeField] private Material bonusBrickMaterial;
+
         [Header("Timing")]
         [Tooltip("How long a full round lasts, in seconds. 300 = 5 minutes.")]
         [SerializeField] private float roundDuration = 300f;
@@ -60,6 +64,12 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         // May differ from secondsPerBrick when the brick count hits maxBricks - the round still has to
         // last roundDuration, so each remaining brick simply covers more time.
         private float _secondsPerBrickEffective = 5f;
+
+        // Bonus bricks (time granted by purple Time-Bricks) always occupy the first _bonusCount
+        // entries, which is the right-hand end at the anchor. Tracked as a count rather than a flag
+        // per brick because the invariant is purely positional: bonus time is inserted at index 0 and
+        // the countdown only ever eats from the opposite end, so the two can't interleave.
+        private int _bonusCount;
 
         /// <summary>Seconds left, derived from the bricks still standing.</summary>
         public float TimeRemaining =>
@@ -141,39 +151,87 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             int count = ResolveBrickCount();
             _secondsPerBrickEffective = roundDuration / count;
-            float step = StackStep();
+            _bonusCount = 0;
 
-            // Index 0 sits at the anchor on the right; later ones extend to the left.
             for (int i = 0; i < count; i++)
             {
-                _bricks.Add(SpawnBrick(i, step));
+                _bricks.Add(SpawnBrick());
             }
+            RelayoutBricks();
         }
 
-        /// <summary>Extends the round by the given number of seconds, appending that many extra bricks
-        /// to the far end of the bar. Both TimeRemaining and BricksRemaining are derived straight from
-        /// the brick list, so this alone keeps the actual time and the visual bar in sync - call it from
-        /// a pickup that should grant time immediately (e.g. a Time Brick attaching).</summary>
+        /// <summary>Extends the round by the given number of seconds as bonus bricks, added at the
+        /// right-hand (anchor) end so the rest of the bar visibly slides left to make room. Because
+        /// the countdown consumes from the opposite end, that also makes granted time the last thing
+        /// spent. Both TimeRemaining and BricksRemaining derive from the brick list, so this alone
+        /// keeps the clock and the bar in sync.</summary>
         public void AddSeconds(float seconds)
         {
-            if (seconds <= 0f || _secondsPerBrickEffective <= 0f) return;
-
-            int bricksToAdd = Mathf.Max(1, Mathf.RoundToInt(seconds / _secondsPerBrickEffective));
-            float step = StackStep();
+            int bricksToAdd = BricksForSeconds(seconds);
+            if (bricksToAdd <= 0) return;
 
             for (int i = 0; i < bricksToAdd; i++)
             {
-                _bricks.Add(SpawnBrick(_bricks.Count, step));
+                GameObject brick = SpawnBrick();
+                ApplyBonusLook(brick);
+                _bricks.Insert(0, brick);
+                _bonusCount++;
             }
+            RelayoutBricks();
         }
 
-        private GameObject SpawnBrick(int index, float step)
+        /// <summary>Takes granted time back off the bar - for when the player loses the Time-Brick that
+        /// gave it. Only ever removes bonus bricks that are still standing: time a purple brick granted
+        /// is the only time it can reclaim, and anything beyond that would eat into the round the
+        /// player started with.</summary>
+        public void RemoveSeconds(float seconds)
+        {
+            int wanted = BricksForSeconds(seconds);
+            int toRemove = Mathf.Min(wanted, _bonusCount);
+            if (toRemove <= 0) return;
+
+            for (int i = 0; i < toRemove; i++)
+            {
+                GameObject brick = _bricks[0];
+                _bricks.RemoveAt(0);
+                _bonusCount--;
+                if (brick != null) Destroy(brick);
+            }
+            RelayoutBricks();
+        }
+
+        private int BricksForSeconds(float seconds) =>
+            seconds <= 0f || _secondsPerBrickEffective <= 0f
+                ? 0
+                : Mathf.Max(1, Mathf.RoundToInt(seconds / _secondsPerBrickEffective));
+
+        private GameObject SpawnBrick()
         {
             GameObject brick = Instantiate(brickPrefab, transform);
-            brick.transform.localPosition = new Vector3(-index * step, 0f, 0f);
             brick.transform.localRotation = Quaternion.Euler(brickRotation);
             brick.transform.localScale = Vector3.one * brickScale;
             return brick;
+        }
+
+        private void ApplyBonusLook(GameObject brick)
+        {
+            if (bonusBrickMaterial == null) return;
+
+            foreach (Renderer brickRenderer in brick.GetComponentsInChildren<Renderer>(true))
+            {
+                brickRenderer.sharedMaterial = bonusBrickMaterial;
+            }
+        }
+
+        // Index 0 sits at the anchor on the right; later ones extend to the left. Re-run after any
+        // insertion or removal at the front, since those shift every brick behind them.
+        private void RelayoutBricks()
+        {
+            float step = StackStep();
+            for (int i = 0; i < _bricks.Count; i++)
+            {
+                if (_bricks[i] != null) _bricks[i].transform.localPosition = new Vector3(-i * step, 0f, 0f);
+            }
         }
 
         private int ResolveBrickCount()
@@ -208,6 +266,9 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
 
             GameObject brick = _bricks[last];
             _bricks.RemoveAt(last);
+            // Once the countdown has eaten its way into the bonus stretch at the anchor end, that time
+            // is spent - losing the Time-Brick later can't reclaim seconds that have already run out.
+            _bonusCount = Mathf.Min(_bonusCount, _bricks.Count);
             if (brick != null) Destroy(brick);
         }
 
@@ -218,6 +279,7 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
                 if (brick != null) Destroy(brick);
             }
             _bricks.Clear();
+            _bonusCount = 0;
         }
 
         // Size of one brick at scale 1, read off the prefab's meshes so the spacing can't drift out of

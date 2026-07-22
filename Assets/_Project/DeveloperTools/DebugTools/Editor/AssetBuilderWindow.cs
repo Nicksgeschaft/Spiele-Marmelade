@@ -13,8 +13,8 @@ namespace SpieleMarmelade.DevTools.Editor
     public class AssetBuilderWindow : EditorWindow
     {
         // ── Enums ──────────────────────────────────────────────────────────
-        private enum BrushMode  { Paint, Erase, RaiseWall }
-        private enum StackMode  { Stack, Replace, ReplaceOnly, ReplaceStack }
+        private enum BrushMode  { Paint, Erase, RaiseWall, SelectColor }
+        private enum PlaceMode  { Stack, Side, Replace }
         private enum BrushShape { Single, Rect, Circle, Line }
         private enum LineAxis   { X, Y, Z }
 
@@ -29,10 +29,9 @@ namespace SpieleMarmelade.DevTools.Editor
         // ── State ──────────────────────────────────────────────────────────
         private BrickType _tileType   = BrickType.Plate;
         private BrushMode  _brushMode  = BrushMode.Paint;
-        private StackMode  _stackMode  = StackMode.Stack;
+        private PlaceMode  _placeMode  = PlaceMode.Stack;
         private BrushShape _brushShape = BrushShape.Single;
         private int        _brushRadius  = 0;
-        private int        _replaceDepth = 3;
         private LineAxis   _lineAxis     = LineAxis.X;
         private int        _lineLength   = 10;
         private float      _gridStep    = 0.0795f;
@@ -60,13 +59,36 @@ namespace SpieleMarmelade.DevTools.Editor
         private Transform _lastRoot;
         private float     _lastStep    = -1f;
 
-        // Cached result of the last PickGameObject call for precision Replace/Erase — only
-        // re-picked on Mouse* events (see HandlePrecisionTarget) and reused on Layout/
-        // Repaint, since PickGameObject does a real render pass and calling it on every
-        // single event (incl. Layout) corrupts Unity's GUI window stack.
-        private GameObject _replaceHoverTile;
+        // The brick under the cursor plus WHICH of its faces the cursor is on — every
+        // single-brick placement decision (above/below/beside/replace) is derived from this
+        // instead of from the old Y=0 ground-plane projection, which was only ever accurate
+        // while painting the very first layer.
+        //
+        // Only re-picked on Mouse* events (see UpdateHover) and reused on Layout/Repaint,
+        // since PickGameObject does a real render pass and calling it on every single event
+        // (incl. Layout) corrupts Unity's GUI window stack.
+        private struct Hover
+        {
+            public GameObject tile;
+            public Bounds     box;     // the brick's logical grid cell (studs excluded)
+            public Vector3    point;   // where the cursor ray entered that cell
+            public Vector3    normal;  // which face it entered through
+            public bool Valid => tile != null;
+        }
+        private Hover _hover;
 
-        // Raise Wall: same event-guarded pick as _replaceHoverTile, but the flood-fill result
+        // Select-Same-Colour: like RaiseWall, the flood fill is only redone when the hovered
+        // brick actually changes — it walks the whole level, too expensive per repaint.
+        private GameObject       _colorHoverTile;
+        private List<GameObject> _colorGroup;
+
+        // Bricks already built against during the current click-drag, plus the ones that drag
+        // created. Without this, dragging in Stack mode runs away: the brick just placed is
+        // what the next pick lands on, so one twitchy stroke over a single tile grows a tower.
+        // Cleared on mouse-up — one stroke gets one new brick per existing brick.
+        private readonly HashSet<GameObject> _strokeUsed = new();
+
+        // Raise Wall: same event-guarded pick as _hover, but the flood-fill result
         // (the whole connected same-height group) is only recomputed when the hovered tile
         // actually changes — it's an O(n) scan per cell, too expensive to redo every repaint.
         private GameObject       _raiseWallHoverTile;
@@ -75,6 +97,9 @@ namespace SpieleMarmelade.DevTools.Editor
 
         // ── Assets ─────────────────────────────────────────────────────────
         private readonly Dictionary<BrickType, GameObject> _prefabs   = new();
+        // Unity renders each brick prefab to a real 3D thumbnail for us (async — see
+        // BrickPreview/OnGUI), so the type buttons show the actual part instead of an ASCII glyph.
+        private readonly Dictionary<BrickType, Texture2D>  _previews  = new();
         private List<Material> _mats      = new();
         private List<Color>    _matColors = new();
         private List<string>   _matNames  = new();
@@ -82,6 +107,8 @@ namespace SpieleMarmelade.DevTools.Editor
         // ── Styles ─────────────────────────────────────────────────────────
         private GUIStyle _segBtn;
         private GUIStyle _segBtnSel;
+        private GUIStyle _tileBtn;
+        private GUIStyle _tileBtnSel;
         private GUIStyle _paintBtn;
         private GUIStyle _warnBtn;
         private bool     _stylesReady;
@@ -126,6 +153,7 @@ namespace SpieleMarmelade.DevTools.Editor
         void LoadAssets()
         {
             _prefabs.Clear();
+            _previews.Clear();
             LoadPrefab(BrickType.Plate,      "Assets/_Project/Shared/Prefabs/Bricks/Plate.prefab");
             LoadPrefab(BrickType.Brick,      "Assets/_Project/Shared/Prefabs/Bricks/Brick.prefab");
             LoadPrefab(BrickType.PlateRound, "Assets/_Project/Shared/Prefabs/Bricks/PlateRound.prefab");
@@ -163,6 +191,9 @@ namespace SpieleMarmelade.DevTools.Editor
                 normal      = { textColor = new Color(0.70f, 0.70f, 0.70f) }
             };
             _segBtnSel = new GUIStyle(_segBtn) { normal = { textColor = Color.black } };
+            // Brick-type buttons are taller than the rest — they carry a 3D preview thumbnail.
+            _tileBtn    = new GUIStyle(_segBtn) { fixedHeight = 58 };
+            _tileBtnSel = new GUIStyle(_tileBtn) { normal = { textColor = Color.black } };
             _paintBtn  = new GUIStyle(GUI.skin.button)
             { fixedHeight = 46, fontSize = 14, fontStyle = FontStyle.Bold, normal = { textColor = Color.white } };
             _warnBtn   = new GUIStyle(_paintBtn) { fontSize = 13 };
@@ -172,6 +203,11 @@ namespace SpieleMarmelade.DevTools.Editor
         void OnGUI()
         {
             EnsureStyles();
+
+            // Prefab thumbnails trickle in over the next few frames — keep redrawing until
+            // they've all arrived, otherwise the type buttons stay iconless until the next
+            // unrelated repaint.
+            if (AssetPreview.IsLoadingAssetPreviews()) Repaint();
 
             // Detect changes that invalidate the spatial index
             if (_root != _lastRoot || !Mathf.Approximately(_gridStep, _lastStep))
@@ -196,16 +232,27 @@ namespace SpieleMarmelade.DevTools.Editor
                 if (_brushMode == BrushMode.RaiseWall)
                 {
                     GUILayout.Label(
-                        "Mauer erhöhen ignoriert Stacking-Modus und Brush Shape — es wird immer " +
+                        "Mauer erhöhen ignoriert Platzier-Modus und Brush Shape — es wird immer " +
                         "die ganze zusammenhängende Mauer auf der angeklickten Höhe um eine " +
                         "Reihe erhöht (aktueller Baustein/Farbe wird verwendet).",
                         new GUIStyle(EditorStyles.wordWrappedMiniLabel)
                         { normal = { textColor = new Color(0.50f, 0.50f, 0.65f) } });
                     GUILayout.Space(8);
                 }
+                else if (_brushMode == BrushMode.SelectColor)
+                {
+                    GUILayout.Label(
+                        "Klick auf einen Baustein wählt alle aus, die direkt mit ihm verbunden " +
+                        "sind UND dieselbe Farbe haben — die Gruppe landet in der normalen " +
+                        "Unity-Selection, du kannst sie also direkt verschieben, färben oder löschen. " +
+                        "Platziert und löscht nichts.",
+                        new GUIStyle(EditorStyles.wordWrappedMiniLabel)
+                        { normal = { textColor = new Color(0.50f, 0.50f, 0.65f) } });
+                    GUILayout.Space(8);
+                }
                 else
                 {
-                    DrawSectionTitle("STACKING");      DrawStackModeRow();    GUILayout.Space(8);
+                    DrawSectionTitle("PLATZIEREN");    DrawPlaceModeRow();    GUILayout.Space(8);
                     DrawSectionTitle("BRUSH SHAPE");   DrawBrushShapeRow();   GUILayout.Space(8);
                 }
                 DrawSectionTitle("GRID STEP");     DrawGridStepRow();     GUILayout.Space(8);
@@ -245,8 +292,10 @@ namespace SpieleMarmelade.DevTools.Editor
             using (new GUILayout.HorizontalScope()) { GUILayout.Space(10);
                 GUILayout.Label(
                     "So geht's: Baustein wählen → Farbe wählen → \"Start Painting\" → im Scene-View klicken.\n" +
-                    "Boden-Platte & Wand-Baustein sind stapelbar und werden ins Spiel exportiert. " +
-                    "Die runden Teile sind reine Deko und bleiben nur in der Szene.",
+                    "Gezielt wird immer auf den Baustein unter der Maus (weiß markiert) — die grüne " +
+                    "Box zeigt vorher an, wo der neue landet. Boden-Platte & Wand-Baustein sind " +
+                    "stapelbar und werden ins Spiel exportiert. Die runden Teile sind reine Deko " +
+                    "und bleiben nur in der Szene.",
                     new GUIStyle(EditorStyles.wordWrappedMiniLabel)
                     { normal = { textColor = new Color(0.60f, 0.60f, 0.75f) } });
             GUILayout.Space(10); }
@@ -262,30 +311,57 @@ namespace SpieleMarmelade.DevTools.Editor
             GUILayout.Space(2);
             using (new GUILayout.HorizontalScope())
             {
-                TileBtn("▭  Boden-Platte", BrickType.Plate, Accent,
-                    "Flach, eckig. Strukturell: stapelbar und wird ins Spiel exportiert.");
+                TileBtn("Boden-Platte", BrickType.Plate, Accent,
+                    "Flach, eckig (1 Plate hoch). Strukturell: stapelbar und wird ins Spiel exportiert.");
                 GUILayout.Space(4);
-                TileBtn("▮  Wand-Baustein", BrickType.Brick, AccentB,
-                    "Hoch, eckig. Strukturell: stapelbar und wird ins Spiel exportiert.");
+                TileBtn("Wand-Baustein", BrickType.Brick, AccentB,
+                    "Hoch, eckig (3 Plates hoch). Strukturell: stapelbar und wird ins Spiel exportiert.");
             }
             GUILayout.Space(3);
             using (new GUILayout.HorizontalScope())
             {
-                TileBtn("●  Runde Platte", BrickType.PlateRound, PurpleC,
+                TileBtn("Runde Platte", BrickType.PlateRound, PurpleC,
                     "Flach, rund. Nur Deko — bleibt in der Szene, wird nicht ins Spiel exportiert.");
                 GUILayout.Space(4);
-                TileBtn("⬤  Runder Baustein", BrickType.BrickRound, OrangeC,
+                TileBtn("Runder Baustein", BrickType.BrickRound, OrangeC,
                     "Hoch, rund. Nur Deko — bleibt in der Szene, wird nicht ins Spiel exportiert.");
             }
         }
 
+        // Draws the button empty, then overlays Unity's rendered 3D thumbnail of the prefab on
+        // the left and the label on the right. The thumbnail can't go through GUIContent.image
+        // — GUILayout would size the button to the full 128px texture.
         void TileBtn(string label, BrickType t, Color col, string tooltip)
         {
             bool sel = _tileType == t;
             var  old = GUI.backgroundColor;
             GUI.backgroundColor = sel ? col : Color.Lerp(col, Color.black, 0.65f);
-            if (GUILayout.Button(new GUIContent(label, tooltip), sel ? _segBtnSel : _segBtn)) _tileType = t;
+            if (GUILayout.Button(new GUIContent("", tooltip), sel ? _tileBtnSel : _tileBtn)) _tileType = t;
             GUI.backgroundColor = old;
+
+            var r    = GUILayoutUtility.GetLastRect();
+            var icon = BrickPreview(t);
+            var iconR = new Rect(r.x + 3f, r.y + 3f, r.height - 6f, r.height - 6f);
+            if (icon != null) GUI.DrawTexture(iconR, icon, ScaleMode.ScaleToFit, true);
+
+            GUI.Label(new Rect(iconR.xMax + 3f, r.y, r.xMax - iconR.xMax - 6f, r.height), label,
+                new GUIStyle(EditorStyles.miniBoldLabel)
+                {
+                    alignment = TextAnchor.MiddleLeft, wordWrap = true,
+                    normal    = { textColor = sel ? Color.black : new Color(0.72f, 0.72f, 0.72f) }
+                });
+        }
+
+        // Unity generates prefab thumbnails asynchronously — GetAssetPreview returns null for
+        // the first few frames, so nothing is cached until it actually hands one over (OnGUI
+        // keeps repainting while any preview is still loading).
+        Texture2D BrickPreview(BrickType t)
+        {
+            if (_previews.TryGetValue(t, out var cached) && cached != null) return cached;
+            if (!_prefabs.TryGetValue(t, out var prefab) || prefab == null) return null;
+            var tex = AssetPreview.GetAssetPreview(prefab);
+            if (tex != null) _previews[t] = tex;
+            return tex;
         }
 
         void DrawBrushBar()
@@ -305,7 +381,14 @@ namespace SpieleMarmelade.DevTools.Editor
                 ModeBtn("⬆  Mauer erhöhen", BrushMode.RaiseWall, new Color(0.35f, 0.75f, 1.0f),
                     "Klick auf eine Mauer: findet alle direkt verbundenen Bausteine auf derselben " +
                     "Höhe und packt auf jeden davon eine weitere Reihe obendrauf. Ignoriert Brush " +
-                    "Shape/Stacking-Modus.");
+                    "Shape/Platzier-Modus.");
+            }
+            GUILayout.Space(3);
+            using (new GUILayout.HorizontalScope())
+            {
+                ModeBtn("⬚  Gleiche Farbe wählen", BrushMode.SelectColor, new Color(0.95f, 0.80f, 0.35f),
+                    "Klick auf einen Baustein: wählt alle direkt verbundenen Bausteine mit " +
+                    "derselben Farbe aus (normale Unity-Selection). Platziert und löscht nichts.");
             }
         }
 
@@ -318,67 +401,54 @@ namespace SpieleMarmelade.DevTools.Editor
             GUI.backgroundColor = old;
         }
 
-        void DrawStackModeRow()
+        void DrawPlaceModeRow()
         {
             GUILayout.Space(2);
             using (new GUILayout.HorizontalScope())
             {
-                StackBtn("↕ Stack",        StackMode.Stack,        YellowC,
-                    "Baut einfach oben drauf, ohne etwas zu löschen. 3 flache Platten sind " +
-                    "genauso hoch wie 1 hoher Baustein — 'aufbauen' heißt hier stapeln, nicht ersetzen.");
+                PlaceBtn("↕ Stack",  PlaceMode.Stack, YellowC,
+                    "Oben drauf ODER drunter — je nachdem, auf welche Seite des Bausteins du " +
+                    "zeigst. Schaust du von oben drauf, wird oben gestapelt; schaust du von " +
+                    "unten dagegen, wird drunter gehängt. Bei Seitenansicht entscheidet die " +
+                    "obere/untere Hälfte des Bausteins.");
                 GUILayout.Space(3);
-                StackBtn("↔ Replace",      StackMode.Replace,      PurpleC,
-                    "Ersetzt genau den Baustein unter deiner Maus (wird pink markiert, egal ob " +
-                    "er oben liegt oder unter einem anderen hervorschaut). Steht dort noch " +
-                    "nichts, wird stattdessen neu platziert.");
-            }
-            GUILayout.Space(3);
-            using (new GUILayout.HorizontalScope())
-            {
-                StackBtn("→ Only",         StackMode.ReplaceOnly,  new Color(0.6f, 0.4f, 1.0f),
-                    "Wie Replace, aber nur wenn dort schon ein Baustein steht — leere Zellen " +
-                    "werden komplett übersprungen (nichts Neues wird platziert).");
+                PlaceBtn("↔ Daneben", PlaceMode.Side, GreenC,
+                    "Setzt den neuen Baustein neben den, auf den du zeigst — auf der Seite, die " +
+                    "du anvisierst. Die Höhe rastet auf die Plate-Drittel des Wand-Bausteins: " +
+                    "eine schmale Platte landet auf dem Drittel, das deiner Maus am nächsten ist.");
                 GUILayout.Space(3);
-                StackBtn("⬡ Stack N",      StackMode.ReplaceStack, new Color(1.0f, 0.5f, 0.8f),
-                    "Ersetzt die obersten N Bausteine EINES bestehenden Stapels an dieser Stelle " +
-                    "(N über den Tiefe-Regler unten). Braucht einen echten Stapel — auf einer " +
-                    "einzelnen flachen Fliese ersetzt es nur die eine, sieht also wie normales " +
-                    "Replace aus.");
+                PlaceBtn("⟳ Ersetzen", PlaceMode.Replace, PurpleC,
+                    "Ersetzt genau den Baustein unter deiner Maus (pink markiert), egal ob er " +
+                    "oben liegt oder unter einem anderen hervorschaut.");
             }
 
             GUILayout.Space(3);
             string hint = _brushMode == BrushMode.Erase
-                ? "Erase zielt immer exakt auf den Baustein unter der Maus — Stacking-Modus hat beim Löschen keine Wirkung"
-                : _stackMode switch
+                ? "Erase zielt immer exakt auf den Baustein unter der Maus — der Platzier-Modus hat beim Löschen keine Wirkung"
+                : _placeMode switch
                 {
-                    StackMode.Stack        => "Baut oben drauf, ohne zu löschen (3 Platten = 1 Baustein in der Höhe)",
-                    StackMode.Replace      => "Ersetzt genau den Baustein unter der Maus (pink markiert)",
-                    StackMode.ReplaceOnly  => "Wie Replace, aber überspringt leere Zellen komplett",
-                    StackMode.ReplaceStack => "Ersetzt die obersten N Bausteine eines Stapels (braucht einen echten Stapel!)",
-                    _                     => ""
+                    PlaceMode.Stack   => "Drüber/drunter, gesteuert über die anvisierte Seite (3 Platten = 1 Baustein hoch)",
+                    PlaceMode.Side    => "Daneben auf der anvisierten Seite, Höhe rastet auf Plate-Drittel",
+                    PlaceMode.Replace => "Ersetzt genau den Baustein unter der Maus (pink markiert)",
+                    _                 => ""
                 };
             GUILayout.Label(hint, new GUIStyle(EditorStyles.wordWrappedMiniLabel)
             { normal = { textColor = new Color(0.50f, 0.50f, 0.65f) } });
 
-            if (_stackMode == StackMode.ReplaceStack)
-            {
-                GUILayout.Space(3);
-                using (new GUILayout.HorizontalScope())
-                {
-                    GUILayout.Label("Tiefe:", GUILayout.Width(42));
-                    _replaceDepth = EditorGUILayout.IntSlider(_replaceDepth, 1, 20);
-                    GUILayout.Label($"({_replaceDepth})", new GUIStyle(EditorStyles.miniLabel)
-                    { normal = { textColor = new Color(0.7f, 0.6f, 0.9f) } }, GUILayout.Width(32));
-                }
-            }
+            if (_brushShape != BrushShape.Single)
+                GUILayout.Label(
+                    "Hinweis: Der Platzier-Modus zielt auf einen einzelnen Baustein. Rect/Circle/Line " +
+                    "füllen mehrere Zellen auf einmal und stapeln weiter spaltenweise von oben.",
+                    new GUIStyle(EditorStyles.wordWrappedMiniLabel)
+                    { normal = { textColor = new Color(0.65f, 0.55f, 0.35f) } });
         }
 
-        void StackBtn(string label, StackMode m, Color col, string tooltip)
+        void PlaceBtn(string label, PlaceMode m, Color col, string tooltip)
         {
-            bool sel = _stackMode == m;
+            bool sel = _placeMode == m;
             var  old = GUI.backgroundColor;
             GUI.backgroundColor = sel ? col : Color.Lerp(col, Color.black, 0.65f);
-            if (GUILayout.Button(new GUIContent(label, tooltip), sel ? _segBtnSel : _segBtn)) _stackMode = m;
+            if (GUILayout.Button(new GUIContent(label, tooltip), sel ? _segBtnSel : _segBtn)) _placeMode = m;
             GUI.backgroundColor = old;
         }
 
@@ -609,20 +679,15 @@ namespace SpieleMarmelade.DevTools.Editor
 
             Event e = Event.current;
 
-            if (_brushMode == BrushMode.RaiseWall) { HandleRaiseWall(e, sv); return; }
+            if (_brushMode == BrushMode.RaiseWall)   { HandleRaiseWall(e, sv);   return; }
+            if (_brushMode == BrushMode.SelectColor) { HandleSelectColor(e, sv); return; }
 
-            // Replace (single tile) and Erase (single tile) both target whatever brick is
-            // actually under the cursor — including a lower tile whose edge peeks out from
-            // under a shorter/narrower one on top — instead of always the topmost tile in the
-            // XZ column (Erase never used Stack-Mode anyway, so it always gets this precision
-            // targeting regardless of which Stack-Mode button happens to be selected).
-            // Everything else keeps the ground-plane/column-based flow (brush shapes paint
-            // multiple new cells at once and have no single "picked object" to target).
-            bool precisionTarget = _brushShape == BrushShape.Single &&
-                                    (_brushMode == BrushMode.Erase ||
-                                     (_brushMode == BrushMode.Paint && _stackMode == StackMode.Replace));
-
-            if (precisionTarget) { HandlePrecisionTarget(e, sv); return; }
+            // Every single-brick action targets whatever brick is really under the cursor —
+            // including a lower tile whose edge peeks out from under a shorter/narrower one on
+            // top — and which FACE of it the cursor is on. Only the multi-cell brush shapes
+            // keep the old ground-plane/column flow: they paint many new cells at once, so
+            // there's no single picked brick to derive a face from.
+            if (_brushShape == BrushShape.Single) { HandleSingleBrick(e, sv); return; }
 
             var center = GetBaseCell(e);
             bool verticalLine = _brushShape == BrushShape.Line && _lineAxis == LineAxis.Y;
@@ -679,93 +744,335 @@ namespace SpieleMarmelade.DevTools.Editor
             sv.Repaint();
         }
 
-        // Picks the exact brick GameObject under the mouse (real geometry, not the XZ column's
-        // topmost tile) and highlights it — pink for Replace (destroys + reinstates exactly
-        // that one with the currently selected type/material), red for Erase (just destroys
-        // it, nothing is placed back). Replace still falls back to the normal empty-cell ghost
-        // preview and places a new tile when nothing is under the cursor; Erase does nothing
-        // when there's no tile to target.
-        void HandlePrecisionTarget(Event e, SceneView sv)
+        // Single-brick painting/erasing. Highlights the exact brick under the cursor (white
+        // outline, or red/pink when it's about to be destroyed) and, for Paint, previews the
+        // resolved target cell in green so it's always visible whether the next click lands
+        // above, below or beside the hovered brick before committing to it.
+        void HandleSingleBrick(Event e, SceneView sv)
         {
             bool erasing = _brushMode == BrushMode.Erase;
 
-            // PickGameObject triggers a real render pass — only safe to call on Mouse*
-            // events. Calling it on every event (incl. Layout) corrupts Unity's GUI window
-            // stack ("GUI Window tried to begin rendering while something else had not
-            // finished rendering"). Layout/Repaint/etc. just reuse the last pick result.
-            bool wantsPick = e.type == EventType.MouseMove || e.type == EventType.MouseDown ||
-                              e.type == EventType.MouseDrag;
-            if (wantsPick)
+            UpdateHover(e);
+            bool replacing = !erasing && _placeMode == PlaceMode.Replace;
+
+            // What a click would do right now — resolved once here and reused for both the
+            // preview and the click itself so the two can never disagree.
+            Vector3 target    = default;
+            bool    hasTarget = !erasing && ResolvePlacement(out target);
+
+            if (_hover.Valid)
             {
-                GameObject picked = HandleUtility.PickGameObject(e.mousePosition, false);
-                _replaceHoverTile = TryResolveTile(picked, out GameObject resolved) ? resolved : null;
+                Handles.color = erasing    ? new Color(1.00f, 0.25f, 0.25f, 0.90f)
+                              : replacing  ? new Color(1.00f, 0.35f, 0.95f, 0.90f)
+                                           : new Color(1.00f, 1.00f, 1.00f, 0.55f);
+                Handles.DrawWireCube(_hover.box.center, _hover.box.size * 1.03f);
             }
 
-            GameObject tile = _replaceHoverTile;
-            bool validPick = tile != null;
-
-            if (validPick)
+            if (hasTarget && !replacing)
             {
-                Bounds b = TileBounds(tile);
-                Handles.color = erasing ? new Color(1f, 0.25f, 0.25f, 0.9f) : new Color(1f, 0.35f, 0.95f, 0.9f);
-                Handles.DrawWireCube(b.center, b.size * 1.03f);
-            }
-            else if (!erasing)
-            {
-                var center = GetBaseCell(e);
-                if (center.HasValue)
-                {
-                    float hh = TileHeightFor(_tileType);
-                    Handles.color = new Color(0.4f, 0.9f, 1f, 0.55f);
-                    Handles.DrawWireCube(center.Value + new Vector3(0f, hh * 0.5f, 0f), new Vector3(TileWidthX, hh, TileWidthZ));
-                }
+                float hh = TileHeightFor(_tileType);
+                Handles.color = new Color(0.35f, 1f, 0.55f, 0.95f);
+                Handles.DrawWireCube(target + new Vector3(0f, hh * 0.5f, 0f),
+                                     new Vector3(TileWidthX, hh, TileWidthZ));
             }
 
             DrawSceneHUD(sv);
 
             if (e.type == EventType.MouseUp && e.button == 0)
+            {
                 _lastCenter = Vector3.positiveInfinity;
+                _strokeUsed.Clear();
+            }
 
             bool lmb = (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
                        && e.button == 0 && !e.alt;
+            if (!lmb) { sv.Repaint(); return; }
+            if (e.type == EventType.MouseDown) _strokeUsed.Clear();
 
-            if (lmb)
+            if (erasing)
             {
-                if (erasing)
+                if (_hover.Valid && _hover.tile.transform.position != _lastCenter)
                 {
-                    if (validPick && tile.transform.position != _lastCenter)
-                    {
-                        Vector3 pos = tile.transform.position;
-                        _lastCenter = pos;
-                        Undo.DestroyObjectImmediate(tile);
-                        _replaceHoverTile = null;
-                        IndexRemove(pos.x, pos.z);
-                        e.Use();
-                    }
+                    Vector3 pos = _hover.tile.transform.position;
+                    _lastCenter = pos;
+                    Undo.DestroyObjectImmediate(_hover.tile);
+                    _hover = default;
+                    IndexRemove(pos.x, pos.z);
+                    e.Use();
                 }
-                else
+            }
+            else if (hasTarget && target != _lastCenter &&
+                     !(_hover.Valid && _strokeUsed.Contains(_hover.tile)))
+            {
+                _lastCenter = target;
+                GameObject host = _hover.Valid ? _hover.tile : null;
+
+                // Replace clears the hovered brick out of the way first; Stack/Side place into
+                // a free cell, so an occupied one is simply a no-op (dragging over a wall
+                // shouldn't bury duplicates inside it).
+                GameObject placed = null;
+                if (replacing && host != null)
                 {
-                    Vector3? targetCenter = validPick ? tile.transform.position : GetBaseCell(e);
-                    if (targetCenter.HasValue && targetCenter.Value != _lastCenter)
+                    Vector3 pos = host.transform.position;
+                    Undo.DestroyObjectImmediate(host);
+                    host   = null;
+                    _hover = default;
+                    IndexRemove(pos.x, pos.z);
+                    placed = InstantiateTile(target);
+                }
+                else if (!TileExistsAt(target))
+                {
+                    placed = InstantiateTile(target);
+                }
+
+                if (host   != null) _strokeUsed.Add(host);
+                if (placed != null) _strokeUsed.Add(placed);
+                e.Use();
+            }
+            sv.Repaint();
+        }
+
+        // PickGameObject triggers a real render pass — only safe to call on Mouse* events.
+        // Calling it on every event (incl. Layout) corrupts Unity's GUI window stack ("GUI
+        // Window tried to begin rendering while something else had not finished rendering"),
+        // so Layout/Repaint/etc. just reuse the last result.
+        void UpdateHover(Event e)
+        {
+            if (e.type != EventType.MouseMove && e.type != EventType.MouseDown &&
+                e.type != EventType.MouseDrag) return;
+
+            if (!TryResolveTile(HandleUtility.PickGameObject(e.mousePosition, false), out GameObject tile))
+            { _hover = default; return; }
+
+            var ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            var box = LogicalBounds(tile);
+            if (!RayBounds(ray, box, out Vector3 point, out Vector3 normal))
+            {
+                // Picking is done against the rendered mesh, so the cursor can legitimately sit
+                // on a stud poking out above the logical cell and miss the box. Treat that as
+                // the top face, which is where those studs are.
+                point  = box.ClosestPoint(ray.origin);
+                normal = Vector3.up;
+            }
+            _hover = new Hover { tile = tile, box = box, point = point, normal = normal };
+        }
+
+        // Turns "this brick, this face, this exact spot on it" into the world position the new
+        // brick should be instantiated at. Returns false when there's nothing to place against
+        // and no ground cell under the cursor either.
+        bool ResolvePlacement(out Vector3 pos)
+        {
+            pos = default;
+
+            // Nothing hovered → fall back to the ground plane and the column's top, which is
+            // what the tool did everywhere before faces existed.
+            if (!_hover.Valid)
+            {
+                var cell = GetBaseCell(Event.current);
+                if (!cell.HasValue) return false;
+                pos = new Vector3(cell.Value.x, GetTopY(cell.Value.x, cell.Value.z), cell.Value.z);
+                return true;
+            }
+
+            Vector3 host   = _hover.tile.transform.position;
+            float   hostH  = TileHeight(_hover.tile);
+            float   newH   = TileHeightFor(_tileType);
+
+            switch (_placeMode)
+            {
+                case PlaceMode.Replace:
+                    pos = host;
+                    return true;
+
+                case PlaceMode.Stack:
+                {
+                    // Top/bottom face → unambiguous. A side face (which is *all* you ever hit in
+                    // a locked side-scroll view) falls back to which half of the brick the
+                    // cursor sits in, so "aim low → build under it" works from the front too.
+                    bool above = Mathf.Abs(_hover.normal.y) > 0.5f
+                        ? _hover.normal.y > 0f
+                        : _hover.point.y >= _hover.box.center.y;
+
+                    pos = above ? new Vector3(host.x, host.y + hostH, host.z)
+                                : new Vector3(host.x, host.y - newH,  host.z);
+                    return true;
+                }
+
+                case PlaceMode.Side:
+                {
+                    // The horizontal step normally comes straight from the hit face. But a face
+                    // you're looking at head-on says nothing about which way "beside" is — and
+                    // in a locked side-scroll view the near face is ALWAYS the one you hit, so
+                    // following its normal would shove the brick out of the level plane towards
+                    // the camera. There, and on the flat top/bottom caps, the cursor's offset
+                    // inside the face picks the side instead.
+                    var   sceneCam = SceneView.currentDrawingSceneView != null
+                                   ? SceneView.currentDrawingSceneView.camera : null;
+                    Vector3 fwd    = sceneCam != null ? sceneCam.transform.forward : Vector3.forward;
+                    bool  headOn   = Mathf.Abs(Vector3.Dot(_hover.normal, fwd)) > 0.85f;
+
+                    int sx = 0, sz = 0;
+                    if (!headOn)
                     {
-                        _lastCenter = targetCenter.Value;
-                        if (validPick)
-                        {
-                            Vector3 pos = tile.transform.position;
-                            Undo.DestroyObjectImmediate(tile);
-                            _replaceHoverTile = null;
-                            IndexRemove(pos.x, pos.z);
-                            InstantiateTile(pos);
-                        }
-                        else
-                        {
-                            InstantiateTile(targetCenter.Value);
-                        }
-                        e.Use();
+                        sx = _hover.normal.x >  0.5f ?  1 : _hover.normal.x < -0.5f ? -1 : 0;
+                        sz = _hover.normal.z >  0.5f ?  1 : _hover.normal.z < -0.5f ? -1 : 0;
+                    }
+                    if (sx == 0 && sz == 0)
+                    {
+                        float dx = _hover.point.x - _hover.box.center.x;
+                        float dz = _hover.point.z - _hover.box.center.z;
+                        // On a ±Z face "left/right" is X, on a ±X face it's Z; on a cap, whichever
+                        // way the cursor leans furthest.
+                        bool useX = Mathf.Abs(_hover.normal.z) > 0.5f ||
+                                    (Mathf.Abs(_hover.normal.x) < 0.5f && Mathf.Abs(dx) >= Mathf.Abs(dz));
+                        if (useX) sx = dx >= 0f ? 1 : -1;
+                        else      sz = dz >= 0f ? 1 : -1;
+                    }
+
+                    // Vertical: snap the new brick's BOTTOM to the plate grid of the brick we're
+                    // placing against, clamped so it stays within that brick's own span. A
+                    // 1-plate tile next to a 3-plate wall brick therefore has three legal
+                    // heights — its thirds — and the cursor picks the nearest one.
+                    float ph    = WorldConstants.PlateHeight;
+                    int   slack = Mathf.Max(0, TileHeightPlates(_hover.tile) -
+                                               BrickShapeInfo.HeightInPlates(_tileType));
+                    int   k     = Mathf.Clamp(Mathf.RoundToInt((_hover.point.y - host.y) / ph), 0, slack);
+
+                    pos = new Vector3(host.x + sx * StepX, host.y + k * ph, host.z + sz * StepZ);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Slab-method ray/AABB intersection. Also reports which axis-aligned face the ray
+        // entered through — that face is the whole basis for above/below/beside.
+        static bool RayBounds(Ray ray, Bounds b, out Vector3 point, out Vector3 normal)
+        {
+            point  = default;
+            normal = Vector3.up;
+
+            Vector3 min = b.min, max = b.max;
+            float tMin = float.NegativeInfinity, tMax = float.PositiveInfinity;
+            int   axis = 1;
+            float sign = 1f;
+
+            for (int i = 0; i < 3; i++)
+            {
+                float o = ray.origin[i], d = ray.direction[i];
+                if (Mathf.Abs(d) < 1e-8f)
+                {
+                    if (o < min[i] || o > max[i]) return false; // parallel and outside the slab
+                    continue;
+                }
+                float inv = 1f / d;
+                float t1  = (min[i] - o) * inv;
+                float t2  = (max[i] - o) * inv;
+                float s   = -1f;                                 // entering through the min face
+                if (t1 > t2) { (t1, t2) = (t2, t1); s = 1f; }    // ray runs -axis → max face
+                if (t1 > tMin) { tMin = t1; axis = i; sign = s; }
+                if (t2 < tMax) tMax = t2;
+                if (tMin > tMax) return false;
+            }
+            if (tMax < 0f) return false;
+
+            point       = ray.GetPoint(Mathf.Max(tMin, 0f));      // tMin < 0 → origin is inside
+            normal      = Vector3.zero;
+            normal[axis] = sign;
+            return true;
+        }
+
+        // Click a brick → select it and every brick reachable from it through touching faces
+        // that carries the same material. Read-only: it only drives Unity's own Selection.
+        void HandleSelectColor(Event e, SceneView sv)
+        {
+            if (e.type == EventType.MouseMove || e.type == EventType.MouseDown ||
+                e.type == EventType.MouseDrag)
+            {
+                TryResolveTile(HandleUtility.PickGameObject(e.mousePosition, false), out GameObject tile);
+                if (tile != _colorHoverTile)
+                {
+                    _colorHoverTile = tile;
+                    _colorGroup     = tile != null ? FloodFillSameColor(tile) : null;
+                }
+            }
+
+            if (_colorGroup is { Count: > 0 })
+            {
+                Handles.color = new Color(1f, 0.85f, 0.3f, 0.9f);
+                foreach (var go in _colorGroup)
+                {
+                    var b = LogicalBounds(go);
+                    Handles.DrawWireCube(b.center, b.size * 1.03f);
+                }
+            }
+
+            DrawSceneHUD(sv);
+
+            // MouseDown only — dragging shouldn't keep re-selecting whatever it sweeps over.
+            if (e.type == EventType.MouseDown && e.button == 0 && !e.alt && _colorGroup is { Count: > 0 })
+            {
+                Selection.objects = _colorGroup.ToArray();
+                e.Use();
+            }
+            sv.Repaint();
+        }
+
+        // Flood fill over touching bricks of one material. Bricks are bucketed by XZ cell first
+        // so each step only tests its own column and the four neighbouring ones, instead of the
+        // whole level (this runs on every hover change).
+        List<GameObject> FloodFillSameColor(GameObject start)
+        {
+            Material mat = MaterialOf(start);
+
+            var buckets = new Dictionary<Vector2Int, List<GameObject>>();
+            foreach (var go in AllTiles())
+            {
+                var k = ToKey(go.transform.position.x, go.transform.position.z);
+                if (!buckets.TryGetValue(k, out var list)) buckets[k] = list = new List<GameObject>();
+                list.Add(go);
+            }
+
+            float eps    = WorldConstants.PlateHeight * 0.1f; // stacked bricks touch exactly — nudge past float error
+            var   result = new List<GameObject>();
+            var   seen   = new HashSet<GameObject> { start };
+            var   queue  = new Queue<GameObject>();
+            queue.Enqueue(start);
+
+            while (queue.Count > 0)
+            {
+                var go = queue.Dequeue();
+                result.Add(go);
+
+                var box = LogicalBounds(go);
+                box.Expand(eps);
+                var key = ToKey(go.transform.position.x, go.transform.position.z);
+
+                foreach (var d in ColumnOffsets)
+                {
+                    if (!buckets.TryGetValue(key + d, out var candidates)) continue;
+                    foreach (var other in candidates)
+                    {
+                        if (seen.Contains(other))                  continue;
+                        if (MaterialOf(other) != mat)              continue;
+                        if (!box.Intersects(LogicalBounds(other))) continue;
+                        seen.Add(other);
+                        queue.Enqueue(other);
                     }
                 }
             }
-            sv.Repaint();
+            return result;
+        }
+
+        // Own column + the 4 face-adjacent ones. Diagonals are deliberately excluded — bricks
+        // that only meet at a corner aren't "connected".
+        static readonly Vector2Int[] ColumnOffsets =
+            { new(0, 0), new(1, 0), new(-1, 0), new(0, 1), new(0, -1) };
+
+        static Material MaterialOf(GameObject go)
+        {
+            var mr = go.GetComponentInChildren<MeshRenderer>();
+            return mr != null ? mr.sharedMaterial : null;
         }
 
         // Hover a brick that's part of a wall → highlights the whole connected group of tiles
@@ -917,13 +1224,51 @@ namespace SpieleMarmelade.DevTools.Editor
             return false;
         }
 
-        Bounds TileBounds(GameObject go)
+        // The grid cell a brick occupies, derived from the grid rather than from its renderers:
+        // renderer bounds include the studs sticking out of the top, which would skew both the
+        // above/below split and the plate-thirds snapping by a fraction of a plate.
+        Bounds LogicalBounds(GameObject go)
         {
-            var rends = go.GetComponentsInChildren<Renderer>();
-            if (rends.Length == 0) return new Bounds(go.transform.position, new Vector3(TileWidthX, TileWidthX, TileWidthZ));
-            var b = rends[0].bounds;
-            foreach (var r in rends) b.Encapsulate(r.bounds);
-            return b;
+            var   p = go.transform.position;
+            float h = TileHeight(go);
+            return new Bounds(new Vector3(p.x, p.y + h * 0.5f, p.z),
+                              new Vector3(TileWidthX, h, TileWidthZ));
+        }
+
+        // Height in plate units — the resolution the Side mode snaps to (Brick = 3, Plate = 1).
+        int TileHeightPlates(GameObject go)
+        {
+            var marker = go.GetComponent<PlacedBrick>();
+            if (marker != null) return BrickShapeInfo.HeightInPlates(marker.shape);
+            return Mathf.Max(1, Mathf.RoundToInt(TileHeight(go) / WorldConstants.PlateHeight));
+        }
+
+        // Spells out what the next click actually resolved to — which way Stack decided to go,
+        // and which plate-third Side snapped onto — so the green ghost box never has to be
+        // guessed at from the geometry alone.
+        string PlacementLabel()
+        {
+            if (_brushMode == BrushMode.Erase)     return "Erase";
+            if (_placeMode == PlaceMode.Replace)   return "Ersetzen";
+
+            bool single = _brushShape == BrushShape.Single;
+            if (!single || !_hover.Valid)
+                return _placeMode == PlaceMode.Side ? "Daneben (frei)" : "Stack (Spalte)";
+
+            if (_placeMode == PlaceMode.Stack)
+            {
+                bool above = Mathf.Abs(_hover.normal.y) > 0.5f
+                    ? _hover.normal.y > 0f
+                    : _hover.point.y >= _hover.box.center.y;
+                return above ? "Stack ↑ oben" : "Stack ↓ drunter";
+            }
+
+            int slack = Mathf.Max(0, TileHeightPlates(_hover.tile) -
+                                     BrickShapeInfo.HeightInPlates(_tileType));
+            int k = Mathf.Clamp(
+                Mathf.RoundToInt((_hover.point.y - _hover.tile.transform.position.y) / WorldConstants.PlateHeight),
+                0, slack);
+            return slack > 0 ? $"Daneben ({k + 1}/{slack + 1})" : "Daneben";
         }
 
         void DrawSceneHUD(SceneView sv)
@@ -945,15 +1290,20 @@ namespace SpieleMarmelade.DevTools.Editor
                     ? "[Mauer erhöhen] Blockiert — Bereich ist an einer Stelle voll umschlossen (keine dünne Mauer)"
                     : $"[Mauer erhöhen] {tile}  Gruppe: {_raiseWallGroup?.Count ?? 0}  |  {mat}";
             }
+            else if (_brushMode == BrushMode.SelectColor)
+            {
+                text = _colorGroup is { Count: > 0 }
+                    ? $"[Gleiche Farbe] {_colorGroup.Count} verbundene Bausteine — Klick wählt sie aus"
+                    : "[Gleiche Farbe] Zeig auf einen Baustein";
+            }
             else
             {
-                string mode  = _brushMode == BrushMode.Paint ? "Paint"  : "Erase";
-                string stack = _stackMode == StackMode.Stack  ? "Stack"  : "Replace";
+                string mode  = _brushMode == BrushMode.Paint ? "Paint" : "Erase";
                 string shape = _brushShape == BrushShape.Single ? "1×1"
                              : _brushShape == BrushShape.Rect   ? $"Rect r{_brushRadius}"
                              : _brushShape == BrushShape.Circle ? $"Circle r{_brushRadius}"
                              :                                    $"Line {_lineAxis} x{_lineLength}";
-                text = $"[{mode}] {tile}  {stack}  {shape}  |  {mat}";
+                text = $"[{mode}] {tile}  {PlacementLabel()}  {shape}  |  {mat}";
             }
             float  w     = Mathf.Min(sv.position.width - 20f, 420f), h = 26f;
             var    r     = new Rect(10f, sv.position.height - h - 36f, w, h);
@@ -1065,7 +1415,6 @@ namespace SpieleMarmelade.DevTools.Editor
         // ── Stack logic — O(1) via index ───────────────────────────────────
         float GetTopY(float x, float z)
         {
-            if (_stackMode == StackMode.Replace) return 0f;
             var key = ToKey(x, z);
             return _topYIndex.TryGetValue(key, out float top) ? top : 0f;
         }
@@ -1086,50 +1435,27 @@ namespace SpieleMarmelade.DevTools.Editor
         }
 
         // ── Tile ops ───────────────────────────────────────────────────────
+        // Column-based placement used by the multi-cell brush shapes (Rect/Circle/Line). The
+        // single-brick path doesn't come through here — it resolves an exact position from the
+        // hovered face instead (see ResolvePlacement).
         void PlaceTile(Vector3 cell)
         {
             if (!_prefabs.ContainsKey(_tileType) || _prefabs[_tileType] == null)
             { Debug.LogWarning("[LevelPainter] Prefab not found."); return; }
 
-            switch (_stackMode)
+            if (_placeMode == PlaceMode.Replace)
             {
-                case StackMode.Stack:
-                    if (TileExistsAt(cell)) return;
-                    InstantiateTile(cell);
-                    break;
-
-                case StackMode.Replace:
-                {
-                    var top = FindTopTile(cell.x, cell.z);
-                    float y = top != null ? top.transform.position.y : 0f;
-                    if (top != null) { Undo.DestroyObjectImmediate(top); IndexRemove(cell.x, cell.z); }
-                    InstantiateTile(new Vector3(cell.x, y, cell.z));
-                    break;
-                }
-
-                case StackMode.ReplaceOnly:
-                {
-                    var top = FindTopTile(cell.x, cell.z);
-                    if (top == null) return;
-                    float y = top.transform.position.y;
-                    Undo.DestroyObjectImmediate(top);
-                    IndexRemove(cell.x, cell.z);
-                    InstantiateTile(new Vector3(cell.x, y, cell.z));
-                    break;
-                }
-
-                case StackMode.ReplaceStack:
-                {
-                    var all = FindAllTilesAt(cell.x, cell.z);
-                    if (all.Count == 0) return;
-                    var targets   = all.Take(_replaceDepth).ToList();
-                    var positions = targets.Select(go => go.transform.position).ToList();
-                    foreach (var go in targets) Undo.DestroyObjectImmediate(go);
-                    _topYIndex.Remove(ToKey(cell.x, cell.z));
-                    foreach (var pos in positions) InstantiateTile(pos);
-                    break;
-                }
+                var top = FindTopTile(cell.x, cell.z);
+                float y = top != null ? top.transform.position.y : 0f;
+                if (top != null) { Undo.DestroyObjectImmediate(top); IndexRemove(cell.x, cell.z); }
+                InstantiateTile(new Vector3(cell.x, y, cell.z));
+                return;
             }
+
+            // Stack and Side both mean "add a brick" for a multi-cell brush — there's no single
+            // hovered face to step sideways from, so both stack onto the column's top.
+            if (TileExistsAt(cell)) return;
+            InstantiateTile(cell);
         }
 
         // Line brush, Y axis: stacks _lineLength tiles on top of each other at one XZ spot.
@@ -1148,10 +1474,12 @@ namespace SpieleMarmelade.DevTools.Editor
             for (int i = 0; i < count; i++) EraseAt(x, z);
         }
 
-        void InstantiateTile(Vector3 position)
+        // Returns the new brick so callers can track it (see _strokeUsed), null if it couldn't
+        // be created.
+        GameObject InstantiateTile(Vector3 position)
         {
             if (!_prefabs.TryGetValue(_tileType, out var prefab) || prefab == null)
-            { Debug.LogWarning("[LevelPainter] Prefab not found."); return; }
+            { Debug.LogWarning("[LevelPainter] Prefab not found."); return null; }
 
             var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             go.transform.position = position;
@@ -1165,6 +1493,7 @@ namespace SpieleMarmelade.DevTools.Editor
 
             IndexAdd(position, TileHeightFor(_tileType));
             Undo.RegisterCreatedObjectUndo(go, "Paint Tile");
+            return go;
         }
 
         void EraseAt(float x, float z)
@@ -1215,18 +1544,6 @@ namespace SpieleMarmelade.DevTools.Editor
                 if (top > bestTop) { bestTop = top; result = go; }
             }
             return result;
-        }
-
-        // All tiles at XZ sorted top → bottom
-        List<GameObject> FindAllTilesAt(float x, float z)
-        {
-            float snapX = StepX * 0.5f;
-            float snapZ = StepZ * 0.5f;
-            return AllTiles()
-                .Where(go => Mathf.Abs(go.transform.position.x - x) < snapX &&
-                             Mathf.Abs(go.transform.position.z - z) < snapZ)
-                .OrderByDescending(go => go.transform.position.y + TileHeight(go))
-                .ToList();
         }
 
         bool TileExistsAt(Vector3 cell)

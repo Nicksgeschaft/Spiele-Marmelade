@@ -17,13 +17,13 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Project/Minigames/Brick_Dungeon/Scenes/Brick_Dungeon.unity
     guid: d79216b0e5f0fa74eb41b56efe0c7785
-  - enabled: 0
+  - enabled: 1
     path: Assets/_Project/Minigames/JumpBrickScale/Scenes/JumpBrickScale.unity
-    guid: e8c67ffdea0e90747b53c7dd5f872b0e
+    guid: e3bda64df4288a94a9961ec4363a509e
   - enabled: 0
     path: Assets/_Project/Minigames/JumpBrickScale/Scenes/JumpBrickScale_Nick.unity
     guid: 555c16076abb47543af8dcab93756cc2
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Minigames/JumpBrickScale/Scenes/JumpBrickScale_Build.unity
     guid: deb5dee409b90cb4b8cc1f04de45d70c
   m_configObjects:

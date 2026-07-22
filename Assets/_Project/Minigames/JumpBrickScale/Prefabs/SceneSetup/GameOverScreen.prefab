@@ -46,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SpieleMarmelade.Minigames.JumpBrickScale::SpieleMarmelade.Minigames.JumpBrickScale.GameOverScreen
   menuFlow: {fileID: 0}
   gameOverScreenTitle: Time is Over
+  characterPrefab: {fileID: 615575990988327968, guid: ac81bb079ca3470897318b69fd70e5ac, type: 3}
   bricksAnchor: {x: -1.5, y: 0.4, z: 0}
   bricksPerRow: 10
   brickSpacing: 0.32

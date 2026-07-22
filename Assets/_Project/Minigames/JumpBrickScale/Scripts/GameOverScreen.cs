@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using SpieleMarmelade.Shared.UI;
 using SpieleMarmelade.Shared.UI.MenuFlow;
 using SpieleMarmelade.World;
 using UnityEngine;
@@ -43,6 +44,17 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
         [Tooltip("Delay between two bricks starting their flight - this is what makes them arrive one by one.")]
         [SerializeField] private float delayBetweenBricks = 0.08f;
         [SerializeField] private AnimationCurve flightEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
+        [Header("Character")]
+        [Tooltip("Player_Platformer-Prefab. Wird links angezeigt, in den Farben die im Character " +
+                 "Creator gewählt wurden. Leer lassen = kein Charakter auf dem Endscreen.")]
+        [SerializeField] private GameObject characterPrefab;
+        [SerializeField] private float characterScale = 25f;
+        [Tooltip("Abstand des Charakters vom linken Bildrand. Der Rand wird zur Laufzeit aus der " +
+                 "Menü-Kamera gelesen, gilt also bei jedem Seitenverhältnis.")]
+        [SerializeField] private float characterLeftMargin = 1.6f;
+        [Tooltip("Höhe der Charaktermitte auf dem Screen.")]
+        [SerializeField] private float characterY = 0.2f;
 
         [Header("Rating text")]
         [SerializeField] private GameObject brickPrefab;
@@ -97,8 +109,63 @@ namespace SpieleMarmelade.Minigames.JumpBrickScale
             _bricksAnchor = ResolveBricksAnchor(_runtimeContent.transform);
 
             int points = PointStack.Instance != null ? PointStack.Instance.Count : 0;
+            BuildCharacter();
             BuildRating(points);
             StartCoroutine(FlyCollectedBricksIn());
+        }
+
+        // Shows the player's own character on the left, in the colours picked in the Character Creator.
+        // Read straight from the saved settings rather than cloning the live player: by this point the
+        // run's assembly is a pile of physics bricks in some arbitrary pose, and what belongs on a
+        // results screen is the character the player built, not the state it happened to end in.
+        private void BuildCharacter()
+        {
+            if (characterPrefab == null) return;
+
+            GameObject character = Instantiate(characterPrefab, _runtimeContent.transform);
+            character.name = "Character";
+            character.transform.localScale = Vector3.one * characterScale;
+            character.transform.localPosition = Vector3.zero;
+
+            // Player_Platformer's root is tagged "Player". A second object answering to that tag is
+            // exactly what once sent the gameplay camera chasing a menu prop, so it goes.
+            foreach (Transform child in character.GetComponentsInChildren<Transform>(true))
+            {
+                child.gameObject.tag = "Untagged";
+            }
+
+            // Pure decoration on a screen with clickable brick buttons - it must never eat their raycasts.
+            foreach (Collider characterCollider in character.GetComponentsInChildren<Collider>(true))
+            {
+                characterCollider.enabled = false;
+            }
+
+            CharacterLook.ApplySaved(character.transform);
+
+            // Positioned by its Body part, so characterY means the middle of the character. Its pivot
+            // sits at the feet, and its overall bounds are dragged around by the googly eyes - neither
+            // makes for a predictable anchor.
+            Vector3 anchor = ResolveCharacterAnchor(_runtimeContent.transform);
+            Renderer body = CharacterLook.FindPart(character.transform, CharacterPart.Body);
+            Vector3 offset = body != null
+                ? _runtimeContent.transform.InverseTransformPoint(body.bounds.center)
+                : Vector3.zero;
+            character.transform.localPosition = anchor - offset;
+        }
+
+        // Left edge of the visible area, in the sign group's local space - same reasoning as
+        // ResolveBricksAnchor: MenuStageResizer changes the visible width with the aspect ratio.
+        private Vector3 ResolveCharacterAnchor(Transform parent)
+        {
+            Camera cam = menuFlow != null ? menuFlow.MenuCamera : null;
+            if (cam == null || !cam.orthographic)
+            {
+                return new Vector3(-3f, characterY, 0f);
+            }
+
+            float worldLeft = cam.transform.position.x - cam.orthographicSize * cam.aspect;
+            Vector3 local = parent.InverseTransformPoint(new Vector3(worldLeft, parent.position.y, parent.position.z));
+            return new Vector3(local.x + characterLeftMargin, characterY, 0f);
         }
 
         private void BuildRating(int points)
